@@ -41,7 +41,6 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
-
                 val rootRoutes = setOf(Screen.Home.route, Screen.EntryExit.route, Screen.Settings.route)
                 val showBottomBar = currentRoute in rootRoutes
 
