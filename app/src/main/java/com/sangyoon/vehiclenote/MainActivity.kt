@@ -36,7 +36,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         lifecycleScope.launch { purgeOldRecordsUseCase() }
-
         setContent {
             AppTheme {
                 val navController = rememberNavController()
