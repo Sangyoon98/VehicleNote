@@ -2,7 +2,7 @@ package com.sangyoon.vehiclenote.domain.model
 
 data class Vehicle(
     val id: Long = 0,
-    val licencePlate: String,
+    val licensePlate: String,
     val ownerName: String,
     val department: String,
     val phoneNumber: String? = null,
