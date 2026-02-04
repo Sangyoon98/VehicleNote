@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class VehicleEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val licencePlate: String,
+    val licensePlate: String,
     val ownerName: String,
     val department: String,
     val phoneNumber: String?,

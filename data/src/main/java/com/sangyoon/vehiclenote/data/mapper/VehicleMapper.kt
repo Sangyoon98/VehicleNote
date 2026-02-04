@@ -6,7 +6,7 @@ import com.sangyoon.vehiclenote.domain.model.Vehicle
 fun VehicleEntity.toDomain(): Vehicle {
     return Vehicle(
         id = id,
-        licensePlate = licencePlate,
+        licensePlate = licensePlate,
         ownerName = ownerName,
         department = department,
         phoneNumber = phoneNumber,
@@ -20,7 +20,7 @@ fun VehicleEntity.toDomain(): Vehicle {
 fun Vehicle.toEntity(): VehicleEntity {
     return VehicleEntity(
         id = id,
-        licencePlate = licensePlate,
+        licensePlate = licensePlate,
         ownerName = ownerName,
         department = department,
         phoneNumber = phoneNumber,
