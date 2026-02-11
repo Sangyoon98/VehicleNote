@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.sangyoon.vehiclenote.ui.add.AddVehicleScreen
 import com.sangyoon.vehiclenote.ui.home.HomeScreen
 
 @Composable
@@ -28,7 +29,9 @@ fun NavGraph(
         }
 
         composable(Screen.AddVehicle.route) {
-            // TODO: AddVehicleScreen 구현 예정
+            AddVehicleScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         composable(
