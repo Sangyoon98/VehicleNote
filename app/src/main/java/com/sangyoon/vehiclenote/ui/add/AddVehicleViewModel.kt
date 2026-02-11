@@ -78,7 +78,7 @@ class AddVehicleViewModel @Inject constructor(
         val validationErrors = validateInput()
         if (validationErrors) return
 
-        _state.update { it.copy(isLoading = true) }
+        _state.update { it.copy(isLoading = true, error = null) }
 
         viewModelScope.launch {
             val vehicle = Vehicle(
