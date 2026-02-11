@@ -31,6 +31,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.sangyoon.vehiclenote.ui.theme.VehicleNoteTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +48,20 @@ fun AddVehicleScreen(
         }
     }
 
+    AddVehicleScreenContent(
+        state = state,
+        onIntent = viewModel::onIntent,
+        onNavigateBack = onNavigateBack
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddVehicleScreenContent(
+    state: AddVehicleState,
+    onIntent: (AddVehicleIntent) -> Unit,
+    onNavigateBack: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,7 +84,7 @@ fun AddVehicleScreen(
             // 차량번호 (필수)
             OutlinedTextField(
                 value = state.licensePlate,
-                onValueChange = { viewModel.onIntent(AddVehicleIntent.LicensePlateChanged(it)) },
+                onValueChange = { onIntent(AddVehicleIntent.LicensePlateChanged(it)) },
                 label = { Text("차량번호 *") },
                 placeholder = { Text("예: 12가1234") },
                 modifier = Modifier.fillMaxWidth(),
@@ -81,7 +96,7 @@ fun AddVehicleScreen(
             // 차주명 (필수)
             OutlinedTextField(
                 value = state.ownerName,
-                onValueChange = { viewModel.onIntent(AddVehicleIntent.OwnerNameChanged(it)) },
+                onValueChange = { onIntent(AddVehicleIntent.OwnerNameChanged(it)) },
                 label = { Text("차주명 *") },
                 placeholder = { Text("예: 홍길동") },
                 modifier = Modifier.fillMaxWidth(),
@@ -93,7 +108,7 @@ fun AddVehicleScreen(
             // 소속부서 (필수)
             OutlinedTextField(
                 value = state.department,
-                onValueChange = { viewModel.onIntent(AddVehicleIntent.DepartmentChanged(it)) },
+                onValueChange = { onIntent(AddVehicleIntent.DepartmentChanged(it)) },
                 label = { Text("소속부서 *") },
                 placeholder = { Text("예: 총무부") },
                 modifier = Modifier.fillMaxWidth(),
@@ -105,7 +120,7 @@ fun AddVehicleScreen(
             // 연락처 (선택)
             OutlinedTextField(
                 value = state.phoneNumber,
-                onValueChange = { viewModel.onIntent(AddVehicleIntent.PhoneNumberChanged(it)) },
+                onValueChange = { onIntent(AddVehicleIntent.PhoneNumberChanged(it)) },
                 label = { Text("연락처") },
                 placeholder = { Text("예: 010-1234-5678") },
                 modifier = Modifier.fillMaxWidth(),
@@ -116,7 +131,7 @@ fun AddVehicleScreen(
             // 차종 (선택)
             OutlinedTextField(
                 value = state.carModel,
-                onValueChange = { viewModel.onIntent(AddVehicleIntent.CarModelChanged(it)) },
+                onValueChange = { onIntent(AddVehicleIntent.CarModelChanged(it)) },
                 label = { Text("차종") },
                 placeholder = { Text("예: 그랜저") },
                 modifier = Modifier.fillMaxWidth(),
@@ -126,7 +141,7 @@ fun AddVehicleScreen(
             // 메모 (선택)
             OutlinedTextField(
                 value = state.memo,
-                onValueChange = { viewModel.onIntent(AddVehicleIntent.MemoChanged(it)) },
+                onValueChange = { onIntent(AddVehicleIntent.MemoChanged(it)) },
                 label = { Text("메모") },
                 placeholder = { Text("추가 정보를 입력하세요") },
                 modifier = Modifier
@@ -139,7 +154,7 @@ fun AddVehicleScreen(
 
             // 저장 버튼
             Button(
-                onClick = { viewModel.onIntent(AddVehicleIntent.SaveClicked) },
+                onClick = { onIntent(AddVehicleIntent.SaveClicked) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -167,10 +182,57 @@ fun AddVehicleScreen(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun AddVehicleScreenPreview() {
-    AddVehicleScreen(
-        onNavigateBack = {}
-    )
+private fun AddVehicleScreenPreview() {
+    VehicleNoteTheme {
+        AddVehicleScreenContent(
+            state = AddVehicleState(
+                licensePlate = "12가1234",
+                ownerName = "홍길동",
+                department = "총무부",
+                phoneNumber = "010-1234-5678",
+                carModel = "그랜저",
+                memo = "VIP 차량"
+            ),
+            onIntent = {},
+            onNavigateBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "에러 상태")
+@Composable
+private fun AddVehicleScreenErrorPreview() {
+    VehicleNoteTheme {
+        AddVehicleScreenContent(
+            state = AddVehicleState(
+                licensePlate = "",
+                ownerName = "",
+                department = "",
+                licensePlateError = "차량번호를 입력해주세요",
+                ownerNameError = "차주명을 입력해주세요",
+                departmentError = "소속부서를 입력해주세요"
+            ),
+            onIntent = {},
+            onNavigateBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "로딩 상태")
+@Composable
+private fun AddVehicleScreenLoadingPreview() {
+    VehicleNoteTheme {
+        AddVehicleScreenContent(
+            state = AddVehicleState(
+                licensePlate = "12가1234",
+                ownerName = "홍길동",
+                department = "총무부",
+                isLoading = true
+            ),
+            onIntent = {},
+            onNavigateBack = {}
+        )
+    }
 }

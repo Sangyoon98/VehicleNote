@@ -36,6 +36,7 @@ import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.ui.home.components.RecentVehicleCard
 import com.sangyoon.vehiclenote.ui.home.components.StatisticsSection
 import com.sangyoon.vehiclenote.ui.home.components.VehicleListItem
+import com.sangyoon.vehiclenote.ui.theme.VehicleNoteTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -197,11 +198,97 @@ private fun HomeContent(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
-    HomeScreen(
-        onNavigateToAdd = {},
-        onNavigateToDetail = {}
-    )
+private fun HomeScreenPreview() {
+    VehicleNoteTheme {
+        // Mock 데이터로 HomeContent만 프리뷰
+        HomeContent(
+            state = HomeState(
+                vehicles = listOf(
+                    Vehicle(
+                        id = 1,
+                        licensePlate = "12가1234",
+                        ownerName = "홍길동",
+                        department = "총무부",
+                        phoneNumber = "010-1234-5678",
+                        carModel = "그랜저",
+                        memo = "VIP 차량"
+                    ),
+                    Vehicle(
+                        id = 2,
+                        licensePlate = "34나5678",
+                        ownerName = "김철수",
+                        department = "인사부",
+                        phoneNumber = null,
+                        carModel = "소나타",
+                        memo = null
+                    ),
+                    Vehicle(
+                        id = 3,
+                        licensePlate = "56다9012",
+                        ownerName = "이영희",
+                        department = "개발부",
+                        phoneNumber = "010-9999-9999",
+                        carModel = null,
+                        memo = "자주 방문"
+                    )
+                ),
+                recentVehicles = listOf(
+                    Vehicle(
+                        id = 1,
+                        licensePlate = "12가1234",
+                        ownerName = "홍길동",
+                        department = "총무부"
+                    ),
+                    Vehicle(
+                        id = 2,
+                        licensePlate = "34나5678",
+                        ownerName = "김철수",
+                        department = "인사부"
+                    )
+                ),
+                totalVehicleCount = 45,
+                todayRegisteredCount = 3,
+                departmentStats = mapOf(
+                    "총무부" to 12,
+                    "인사부" to 8,
+                    "개발부" to 15,
+                    "영업부" to 10
+                )
+            ),
+            onVehicleClick = {},
+            onDeleteVehicle = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "빈 상태")
+@Composable
+private fun HomeScreenEmptyPreview() {
+    VehicleNoteTheme {
+        HomeContent(
+            state = HomeState(
+                vehicles = emptyList(),
+                recentVehicles = emptyList(),
+                totalVehicleCount = 0,
+                todayRegisteredCount = 0,
+                departmentStats = emptyMap()
+            ),
+            onVehicleClick = {},
+            onDeleteVehicle = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "로딩 상태")
+@Composable
+private fun HomeScreenLoadingPreview() {
+    VehicleNoteTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+    }
 }
