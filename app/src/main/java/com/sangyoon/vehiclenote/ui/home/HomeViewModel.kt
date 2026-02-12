@@ -128,7 +128,7 @@ class HomeViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     _state.update {
-                        it.copy(error = "삭제 실패: ${error.message}")
+                        it.copy(userMessage = "차량 삭제에 실패하였습니다")
                     }
                 }
             )
