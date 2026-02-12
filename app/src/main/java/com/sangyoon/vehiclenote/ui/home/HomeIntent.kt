@@ -9,4 +9,5 @@ sealed interface HomeIntent {
     data object AddVehicleClicked : HomeIntent
     data class VehicleClicked(val vehicleId: Long) : HomeIntent
     data object Refresh : HomeIntent
+    data object MessageShown : HomeIntent
 }

@@ -2,6 +2,8 @@ package com.sangyoon.vehiclenote.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sangyoon.vehiclenote.domain.model.Vehicle
+import com.sangyoon.vehiclenote.domain.usecase.DeleteVehicleUseCase
 import com.sangyoon.vehiclenote.domain.usecase.GetAllVehiclesUseCase
 import com.sangyoon.vehiclenote.domain.usecase.SearchVehicleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,12 +14,14 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getAllVehiclesUseCase: GetAllVehiclesUseCase,
-    private val searchVehicleUseCase: SearchVehicleUseCase
+    private val searchVehicleUseCase: SearchVehicleUseCase,
+    private val deleteVehicleUseCase: DeleteVehicleUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -46,7 +50,7 @@ class HomeViewModel @Inject constructor(
                 }
             }
             is HomeIntent.DeleteVehicle -> {
-
+                deleteVehicle(intent.vehicle)
             }
             is HomeIntent.AddVehicleClicked -> {
 
@@ -56,6 +60,11 @@ class HomeViewModel @Inject constructor(
             }
             is HomeIntent.Refresh -> {
                 loadVehicles()
+            }
+            is HomeIntent.MessageShown -> {
+                _state.update {
+                    it.copy(userMessage = null)
+                }
             }
         }
     }
@@ -107,5 +116,22 @@ class HomeViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun deleteVehicle(vehicle: Vehicle) {
+        viewModelScope.launch {
+            deleteVehicleUseCase(vehicle).fold(
+                onSuccess = {
+                    _state.update {
+                        it.copy(userMessage = "${vehicle.licensePlate} 차량이 삭제되었습니다")
+                    }
+                },
+                onFailure = { error ->
+                    _state.update {
+                        it.copy(error = "삭제 실패: ${error.message}")
+                    }
+                }
+            )
+        }
     }
 }

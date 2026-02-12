@@ -9,7 +9,12 @@ data class HomeState(
     val isSearchActive: Boolean = false,
     val isLoading: Boolean = false,
     val error : String? = null,
+
+    // 통계
     val totalVehicleCount: Int = 0,
     val todayRegisteredCount: Int = 0,
-    val departmentStats: Map<String, Int> = emptyMap()
+    val departmentStats: Map<String, Int> = emptyMap(),
+
+    // 사용자 메시지
+    val userMessage: String? = null
 )

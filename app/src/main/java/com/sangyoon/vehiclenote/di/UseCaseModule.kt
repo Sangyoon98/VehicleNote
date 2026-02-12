@@ -2,6 +2,7 @@ package com.sangyoon.vehiclenote.di
 
 import com.sangyoon.vehiclenote.domain.repository.VehicleRepository
 import com.sangyoon.vehiclenote.domain.usecase.AddVehicleUseCase
+import com.sangyoon.vehiclenote.domain.usecase.DeleteVehicleUseCase
 import com.sangyoon.vehiclenote.domain.usecase.GetAllVehiclesUseCase
 import com.sangyoon.vehiclenote.domain.usecase.SearchVehicleUseCase
 import dagger.Module
@@ -36,5 +37,13 @@ object UseCaseModule {
         repository: VehicleRepository
     ): SearchVehicleUseCase {
         return SearchVehicleUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeleteVehicleUseCase(
+        repository: VehicleRepository
+    ): DeleteVehicleUseCase {
+        return DeleteVehicleUseCase(repository)
     }
 }
