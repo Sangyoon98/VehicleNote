@@ -6,6 +6,7 @@ import com.sangyoon.vehiclenote.domain.usecase.DeleteVehicleUseCase
 import com.sangyoon.vehiclenote.domain.usecase.GetAllVehiclesUseCase
 import com.sangyoon.vehiclenote.domain.usecase.GetVehicleByIdUseCase
 import com.sangyoon.vehiclenote.domain.usecase.SearchVehicleUseCase
+import com.sangyoon.vehiclenote.domain.usecase.UpdateVehicleUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,5 +55,13 @@ object UseCaseModule {
         repository: VehicleRepository
     ): GetVehicleByIdUseCase {
         return GetVehicleByIdUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUpdateVehicleUseCase(
+        repository: VehicleRepository
+    ): UpdateVehicleUseCase {
+        return UpdateVehicleUseCase(repository)
     }
 }
