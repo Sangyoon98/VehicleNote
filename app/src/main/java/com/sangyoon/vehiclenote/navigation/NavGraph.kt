@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.sangyoon.vehiclenote.ui.add.AddVehicleScreen
 import com.sangyoon.vehiclenote.ui.detail.VehicleDetailScreen
+import com.sangyoon.vehiclenote.ui.edit.EditVehicleScreen
 import com.sangyoon.vehiclenote.ui.home.HomeScreen
 
 @Composable
@@ -56,8 +57,21 @@ fun NavGraph(
                 vehicleId = vehicleId,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = { id ->
-                    // TODO: 수정 화면 구현 예정
+                    navController.navigate(Screen.EditVehicle.createRoute(id))
                 }
+            )
+        }
+
+        composable(
+            route = Screen.EditVehicle.route,
+            arguments = listOf(
+                navArgument("vehicleId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getLong("vehicleId") ?: return@composable
+            EditVehicleScreen(
+                vehicleId = vehicleId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

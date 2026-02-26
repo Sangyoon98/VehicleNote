@@ -163,7 +163,7 @@ fun VehicleDetailScreenContent(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = state.error ?: "오류 발생",
+                            text = state.error,
                             color = MaterialTheme.colorScheme.error
                         )
                         Button(onClick = onNavigateBack) {
