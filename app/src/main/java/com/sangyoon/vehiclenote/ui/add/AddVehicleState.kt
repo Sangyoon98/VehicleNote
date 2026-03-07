@@ -15,6 +15,5 @@ data class AddVehicleState(
 
     // 상태
     val isLoading: Boolean = false,
-    val isSaved: Boolean = false,
-    val error: String? = null
+    val error: String? = null  // isSaved 제거: NavigateBack SideEffect로 대체
 )
