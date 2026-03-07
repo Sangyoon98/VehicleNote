@@ -42,9 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -60,7 +58,6 @@ import java.util.Locale
 
 @Composable
 fun VehicleDetailScreen(
-    vehicleId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
     viewModel: VehicleDetailViewModel = hiltViewModel()
@@ -68,64 +65,49 @@ fun VehicleDetailScreen(
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // 삭제 성공 시 뒤로가기
-    LaunchedEffect(state.isDeleted) {
-        if (state.isDeleted) {
-            onNavigateBack()
-        }
-    }
-
-    // Snackbar 메시지 표시
-    LaunchedEffect(state.userMessage) {
-        state.userMessage?.let { message ->
-            snackbarHostState.showSnackbar(
-                message = message,
-                duration = SnackbarDuration.Short
-            )
-            viewModel.onIntent(VehicleDetailIntent.MessageShown)
+    // SideEffect 수집: 네비게이션과 스낵바는 일회성 이벤트
+    LaunchedEffect(Unit) {
+        viewModel.sideEffect.collect { effect ->
+            when (effect) {
+                is VehicleDetailSideEffect.NavigateBack -> onNavigateBack()
+                is VehicleDetailSideEffect.NavigateToEdit -> onNavigateToEdit(effect.vehicleId)
+                is VehicleDetailSideEffect.ShowSnackbar -> snackbarHostState.showSnackbar(
+                    message = effect.message,
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
     }
 
     VehicleDetailScreenContent(
-        vehicleId = vehicleId,
         state = state,
         snackbarHostState = snackbarHostState,
         onNavigateBack = onNavigateBack,
-        onNavigateToEdit = onNavigateToEdit,
-        onDeleteConfirm = { viewModel.onIntent(VehicleDetailIntent.DeleteClicked) }
+        onAction = viewModel::onAction
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VehicleDetailScreenContent(
-    vehicleId: Long,
-    state : VehicleDetailState,
+    state: VehicleDetailState,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onNavigateBack: () -> Unit = {},
-    onNavigateToEdit: (Long) -> Unit = {},
-    onDeleteConfirm: () -> Unit = {}
+    onAction: (VehicleDetailAction) -> Unit = {}
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    // 삭제 확인 다이얼로그
-    if (showDeleteDialog) {
+    // 삭제 확인 다이얼로그 (State로 제어: ViewModel이 단일 진실 공급원)
+    if (state.showDeleteDialog) {
         AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
+            onDismissRequest = { onAction(VehicleDetailAction.DismissDeleteDialog) },
             title = { Text("차량 삭제") },
             text = { Text("${state.vehicle?.licensePlate} 차량을 삭제하시겠습니까?") },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDeleteConfirm()
-                        showDeleteDialog = false
-                    }
-                ) {
+                TextButton(onClick = { onAction(VehicleDetailAction.DeleteConfirmed) }) {
                     Text("삭제", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
+                TextButton(onClick = { onAction(VehicleDetailAction.DismissDeleteDialog) }) {
                     Text("취소")
                 }
             }
@@ -152,9 +134,7 @@ fun VehicleDetailScreenContent(
         ) {
             when {
                 state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 state.error != null -> {
                     Column(
@@ -162,20 +142,15 @@ fun VehicleDetailScreenContent(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = state.error,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Button(onClick = onNavigateBack) {
-                            Text("돌아가기")
-                        }
+                        Text(text = state.error, color = MaterialTheme.colorScheme.error)
+                        Button(onClick = onNavigateBack) { Text("돌아가기") }
                     }
                 }
                 state.vehicle != null -> {
                     VehicleDetailContent(
                         vehicle = state.vehicle,
-                        onEditClick = { onNavigateToEdit(vehicleId) },
-                        onDeleteClick = { showDeleteDialog = true }
+                        onEditClick = { onAction(VehicleDetailAction.EditClicked) },
+                        onDeleteClick = { onAction(VehicleDetailAction.ShowDeleteDialog) }
                     )
                 }
             }
@@ -195,12 +170,9 @@ private fun VehicleDetailContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 차량번호 카드 (강조)
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
         ) {
             Text(
                 text = vehicle.licensePlate,
@@ -211,57 +183,19 @@ private fun VehicleDetailContent(
             )
         }
 
-        // 정보 카드
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 차주 정보
-                InfoRow(
-                    icon = Icons.Default.Person,
-                    label = "차주",
-                    value = vehicle.ownerName
-                )
-
-                InfoRow(
-                    icon = Icons.Default.Business,
-                    label = "부서",
-                    value = vehicle.department
-                )
-
-                // 연락처
-                vehicle.phoneNumber?.let { phone ->
-                    InfoRow(
-                        icon = Icons.Default.Phone,
-                        label = "연락처",
-                        value = phone
-                    )
-                }
-
-                // 차종
-                vehicle.carModel?.let { model ->
-                    InfoRow(
-                        icon = Icons.Default.DirectionsCar,
-                        label = "차종",
-                        value = model
-                    )
-                }
-
-                // 메모
-                vehicle.memo?.let { memo ->
-                    InfoRow(
-                        icon = Icons.Default.Description,
-                        label = "메모",
-                        value = memo
-                    )
-                }
+                InfoRow(icon = Icons.Default.Person, label = "차주", value = vehicle.ownerName)
+                InfoRow(icon = Icons.Default.Business, label = "부서", value = vehicle.department)
+                vehicle.phoneNumber?.let { InfoRow(icon = Icons.Default.Phone, label = "연락처", value = it) }
+                vehicle.carModel?.let { InfoRow(icon = Icons.Default.DirectionsCar, label = "차종", value = it) }
+                vehicle.memo?.let { InfoRow(icon = Icons.Default.Description, label = "메모", value = it) }
             }
         }
 
-        // 등록 정보
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -283,13 +217,11 @@ private fun VehicleDetailContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
                 Text(
                     text = "등록: ${formatDate(vehicle.createdAt)}",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 28.dp)
                 )
-
                 Text(
                     text = "수정: ${formatDate(vehicle.updatedAt)}",
                     style = MaterialTheme.typography.bodyMedium,
@@ -300,26 +232,19 @@ private fun VehicleDetailContent(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // 액션 버튼
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedButton(
-                onClick = onEditClick,
-                modifier = Modifier.weight(1f)
-            ) {
+            OutlinedButton(onClick = onEditClick, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Default.Edit, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text("수정")
             }
-
             Button(
                 onClick = onDeleteClick,
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Icon(Icons.Default.Delete, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -330,14 +255,8 @@ private fun VehicleDetailContent(
 }
 
 @Composable
-private fun InfoRow(
-    icon: ImageVector,
-    label: String,
-    value: String
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
+private fun InfoRow(icon: ImageVector, label: String, value: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -372,22 +291,13 @@ private fun formatDate(timestamp: Long): String {
 fun VehicleDetailScreenPreview() {
     VehicleNoteTheme {
         VehicleDetailScreenContent(
-            vehicleId = 0,
             state = VehicleDetailState(
                 vehicle = Vehicle(
-                    id = 1,
-                    licensePlate = "47루4340",
-                    ownerName = "채상윤",
-                    department = "개발팀",
-                    phoneNumber = "010-4736-3559",
-                    carModel = "벨로스터",
-                    memo = "차량 메모"
+                    id = 1, licensePlate = "47루4340", ownerName = "채상윤",
+                    department = "개발팀", phoneNumber = "010-4736-3559",
+                    carModel = "벨로스터", memo = "차량 메모"
                 )
-            ),
-            snackbarHostState = SnackbarHostState(),
-            onNavigateBack = {},
-            onNavigateToEdit = {},
-            onDeleteConfirm = {}
+            )
         )
     }
 }
@@ -396,16 +306,7 @@ fun VehicleDetailScreenPreview() {
 @Composable
 fun VehicleDetailScreenLoadingPreview() {
     VehicleNoteTheme {
-        VehicleDetailScreenContent(
-            vehicleId = 0,
-            state = VehicleDetailState(
-                isLoading = true
-            ),
-            snackbarHostState = SnackbarHostState(),
-            onNavigateBack = {},
-            onNavigateToEdit = {},
-            onDeleteConfirm = {}
-        )
+        VehicleDetailScreenContent(state = VehicleDetailState(isLoading = true))
     }
 }
 
@@ -413,15 +314,19 @@ fun VehicleDetailScreenLoadingPreview() {
 @Composable
 fun VehicleDetailScreenErrorPreview() {
     VehicleNoteTheme {
+        VehicleDetailScreenContent(state = VehicleDetailState(error = "오류가 발생하였습니다"))
+    }
+}
+
+@Preview
+@Composable
+fun VehicleDetailScreenDeleteDialogPreview() {
+    VehicleNoteTheme {
         VehicleDetailScreenContent(
-            vehicleId = 0,
             state = VehicleDetailState(
-                error = "오류가 발생하였습니다"
-            ),
-            snackbarHostState = SnackbarHostState(),
-            onNavigateBack = {},
-            onNavigateToEdit = {},
-            onDeleteConfirm = {}
+                vehicle = Vehicle(id = 1, licensePlate = "47루4340", ownerName = "채상윤", department = "개발팀"),
+                showDeleteDialog = true
+            )
         )
     }
 }

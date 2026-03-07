@@ -37,22 +37,24 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditVehicleScreen(
-    vehicleId: Long,
     onNavigateBack: () -> Unit,
     viewModel: EditVehicleViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
-    // 저장 성공 시 뒤로가기
-    LaunchedEffect(state.isSaved) {
-        if (state.isSaved) {
-            onNavigateBack()
+    // SideEffect 수집: NavigateBack은 일회성 이벤트
+    LaunchedEffect(Unit) {
+        viewModel.sideEffect.collect { effect ->
+            when (effect) {
+                is EditVehicleSideEffect.NavigateBack -> onNavigateBack()
+                is EditVehicleSideEffect.ShowSnackbar -> { /* 필요 시 SnackbarHost 연결 */ }
+            }
         }
     }
 
     EditVehicleScreenContent(
         state = state,
-        onIntent = viewModel::onIntent,
+        onAction = viewModel::onAction,
         onNavigateBack = onNavigateBack
     )
 }
@@ -61,7 +63,7 @@ fun EditVehicleScreen(
 @Composable
 private fun EditVehicleScreenContent(
     state: EditVehicleState,
-    onIntent: (EditVehicleIntent) -> Unit = {},
+    onAction: (EditVehicleAction) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     Scaffold(
@@ -77,7 +79,7 @@ private fun EditVehicleScreenContent(
         }
     ) { paddingValues ->
         if (state.isLoading && state.licensePlate.isBlank()) {
-            // 초기 로딩
+            // 초기 로딩 (데이터 아직 미수신)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -95,10 +97,9 @@ private fun EditVehicleScreenContent(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 차량번호 (필수)
                 OutlinedTextField(
                     value = state.licensePlate,
-                    onValueChange = { onIntent(EditVehicleIntent.LicensePlateChanged(it)) },
+                    onValueChange = { onAction(EditVehicleAction.LicensePlateChanged(it)) },
                     label = { Text("차량번호 *") },
                     placeholder = { Text("예: 12가1234") },
                     modifier = Modifier.fillMaxWidth(),
@@ -107,10 +108,9 @@ private fun EditVehicleScreenContent(
                     singleLine = true
                 )
 
-                // 차주명 (필수)
                 OutlinedTextField(
                     value = state.ownerName,
-                    onValueChange = { onIntent(EditVehicleIntent.OwnerNameChanged(it)) },
+                    onValueChange = { onAction(EditVehicleAction.OwnerNameChanged(it)) },
                     label = { Text("차주명 *") },
                     placeholder = { Text("예: 홍길동") },
                     modifier = Modifier.fillMaxWidth(),
@@ -119,10 +119,9 @@ private fun EditVehicleScreenContent(
                     singleLine = true
                 )
 
-                // 소속부서 (필수)
                 OutlinedTextField(
                     value = state.department,
-                    onValueChange = { onIntent(EditVehicleIntent.DepartmentChanged(it)) },
+                    onValueChange = { onAction(EditVehicleAction.DepartmentChanged(it)) },
                     label = { Text("소속부서 *") },
                     placeholder = { Text("예: 총무부") },
                     modifier = Modifier.fillMaxWidth(),
@@ -131,10 +130,9 @@ private fun EditVehicleScreenContent(
                     singleLine = true
                 )
 
-                // 연락처 (선택)
                 OutlinedTextField(
                     value = state.phoneNumber,
-                    onValueChange = { onIntent(EditVehicleIntent.PhoneNumberChanged(it)) },
+                    onValueChange = { onAction(EditVehicleAction.PhoneNumberChanged(it)) },
                     label = { Text("연락처") },
                     placeholder = { Text("예: 010-1234-5678") },
                     modifier = Modifier.fillMaxWidth(),
@@ -142,20 +140,18 @@ private fun EditVehicleScreenContent(
                     singleLine = true
                 )
 
-                // 차종 (선택)
                 OutlinedTextField(
                     value = state.carModel,
-                    onValueChange = { onIntent(EditVehicleIntent.CarModelChanged(it)) },
+                    onValueChange = { onAction(EditVehicleAction.CarModelChanged(it)) },
                     label = { Text("차종") },
                     placeholder = { Text("예: 그랜저") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
 
-                // 메모 (선택)
                 OutlinedTextField(
                     value = state.memo,
-                    onValueChange = { onIntent(EditVehicleIntent.MemoChanged(it)) },
+                    onValueChange = { onAction(EditVehicleAction.MemoChanged(it)) },
                     label = { Text("메모") },
                     placeholder = { Text("추가 정보를 입력하세요") },
                     modifier = Modifier
@@ -166,9 +162,8 @@ private fun EditVehicleScreenContent(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 저장 버튼
                 Button(
-                    onClick = { onIntent(EditVehicleIntent.SaveClicked) },
+                    onClick = { onAction(EditVehicleAction.SaveClicked) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -184,7 +179,6 @@ private fun EditVehicleScreenContent(
                     }
                 }
 
-                // 에러 메시지
                 state.error?.let { error ->
                     Text(
                         text = error,

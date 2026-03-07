@@ -53,16 +53,20 @@ fun HomeScreen(
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Snackbar 메시지 표시
-    LaunchedEffect(state.userMessage) {
-        state.userMessage?.let { message ->
-            snackbarHostState.showSnackbar(
-                message = message,
-                duration = SnackbarDuration.Short
-            )
-            viewModel.onIntent(HomeIntent.MessageShown)
+    // SideEffect 수집: 네비게이션과 스낵바는 일회성 이벤트이므로 Channel로 처리
+    LaunchedEffect(Unit) {
+        viewModel.sideEffect.collect { effect ->
+            when (effect) {
+                is HomeSideEffect.NavigateToAdd -> onNavigateToAdd()
+                is HomeSideEffect.NavigateToDetail -> onNavigateToDetail(effect.vehicleId)
+                is HomeSideEffect.ShowSnackbar -> snackbarHostState.showSnackbar(
+                    message = effect.message,
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
     }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -70,15 +74,15 @@ fun HomeScreen(
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = state.searchQuery,
-                        onQueryChange = { viewModel.onIntent(HomeIntent.SearchQueryChanged(it)) },
-                        onSearch = { viewModel.onIntent(HomeIntent.SearchQueryChanged(it)) },
+                        onQueryChange = { viewModel.onAction(HomeAction.SearchQueryChanged(it)) },
+                        onSearch = { viewModel.onAction(HomeAction.SearchQueryChanged(it)) },
                         expanded = state.isSearchActive,
-                        onExpandedChange = { viewModel.onIntent(HomeIntent.SearchActiveChanged(it)) },
+                        onExpandedChange = { viewModel.onAction(HomeAction.SearchActiveChanged(it)) },
                         placeholder = { Text("차량번호 검색") },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = "검색") },
                         trailingIcon = {
                             if (state.searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { viewModel.onIntent(HomeIntent.SearchQueryChanged("")) }) {
+                                IconButton(onClick = { viewModel.onAction(HomeAction.SearchQueryChanged("")) }) {
                                     Icon(Icons.Default.Close, contentDescription = "지우기")
                                 }
                             }
@@ -86,12 +90,12 @@ fun HomeScreen(
                     )
                 },
                 expanded = state.isSearchActive,
-                onExpandedChange = { viewModel.onIntent(HomeIntent.SearchActiveChanged(it)) },
+                onExpandedChange = { viewModel.onAction(HomeAction.SearchActiveChanged(it)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(if (!state.isSearchActive) 16.dp else 0.dp),
             ) {
-                // 검색 활성화 시 검색 결과만 표시
+                // 검색 활성화 시 결과만 표시
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
@@ -101,8 +105,8 @@ fun HomeScreen(
                         VehicleListItem(
                             vehicle = vehicle,
                             onClick = {
-                                onNavigateToDetail(vehicle.id)
-                                viewModel.onIntent(HomeIntent.SearchActiveChanged(false))
+                                viewModel.onAction(HomeAction.SearchActiveChanged(false))
+                                viewModel.onAction(HomeAction.VehicleClicked(vehicle.id))
                             }
                         )
                     }
@@ -112,7 +116,7 @@ fun HomeScreen(
         floatingActionButton = {
             if (!state.isSearchActive) {
                 ExtendedFloatingActionButton(
-                    onClick = onNavigateToAdd,
+                    onClick = { viewModel.onAction(HomeAction.AddVehicleClicked) },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     text = { Text("차량 등록") }
                 )
@@ -126,9 +130,7 @@ fun HomeScreen(
         ) {
             when {
                 state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 state.error != null -> {
                     Text(
@@ -140,8 +142,8 @@ fun HomeScreen(
                 else -> {
                     HomeContent(
                         state = state,
-                        onVehicleClick = onNavigateToDetail,
-                        onDeleteVehicle = { viewModel.onIntent(HomeIntent.DeleteVehicle(it)) }
+                        onVehicleClick = { viewModel.onAction(HomeAction.VehicleClicked(it)) },
+                        onDeleteVehicle = { viewModel.onAction(HomeAction.DeleteVehicle(it)) }
                     )
                 }
             }
@@ -178,11 +180,8 @@ private fun HomeContent(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-
             item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(state.recentVehicles) { vehicle ->
                         RecentVehicleCard(
                             vehicle = vehicle,
@@ -196,16 +195,13 @@ private fun HomeContent(
         // 전체 차량 목록
         item {
             Text(
-                text = "전체 챠량 (${state.vehicles.size})",
+                text = "전체 차량 (${state.vehicles.size})",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
 
-        items(
-            items = state.vehicles,
-            key = { it.id }
-        ) { vehicle ->
+        items(items = state.vehicles, key = { it.id }) { vehicle ->
             VehicleListItem(
                 vehicle = vehicle,
                 onClick = { onVehicleClick(vehicle.id) },
@@ -219,60 +215,23 @@ private fun HomeContent(
 @Composable
 private fun HomeScreenPreview() {
     VehicleNoteTheme {
-        // Mock 데이터로 HomeContent만 프리뷰
         HomeContent(
             state = HomeState(
                 vehicles = listOf(
-                    Vehicle(
-                        id = 1,
-                        licensePlate = "12가1234",
-                        ownerName = "홍길동",
-                        department = "총무부",
-                        phoneNumber = "010-1234-5678",
-                        carModel = "그랜저",
-                        memo = "VIP 차량"
-                    ),
-                    Vehicle(
-                        id = 2,
-                        licensePlate = "34나5678",
-                        ownerName = "김철수",
-                        department = "인사부",
-                        phoneNumber = null,
-                        carModel = "소나타",
-                        memo = null
-                    ),
-                    Vehicle(
-                        id = 3,
-                        licensePlate = "56다9012",
-                        ownerName = "이영희",
-                        department = "개발부",
-                        phoneNumber = "010-9999-9999",
-                        carModel = null,
-                        memo = "자주 방문"
-                    )
+                    Vehicle(id = 1, licensePlate = "12가1234", ownerName = "홍길동", department = "총무부",
+                        phoneNumber = "010-1234-5678", carModel = "그랜저", memo = "VIP 차량"),
+                    Vehicle(id = 2, licensePlate = "34나5678", ownerName = "김철수", department = "인사부",
+                        carModel = "소나타"),
+                    Vehicle(id = 3, licensePlate = "56다9012", ownerName = "이영희", department = "개발부",
+                        phoneNumber = "010-9999-9999", memo = "자주 방문")
                 ),
                 recentVehicles = listOf(
-                    Vehicle(
-                        id = 1,
-                        licensePlate = "12가1234",
-                        ownerName = "홍길동",
-                        department = "총무부"
-                    ),
-                    Vehicle(
-                        id = 2,
-                        licensePlate = "34나5678",
-                        ownerName = "김철수",
-                        department = "인사부"
-                    )
+                    Vehicle(id = 1, licensePlate = "12가1234", ownerName = "홍길동", department = "총무부"),
+                    Vehicle(id = 2, licensePlate = "34나5678", ownerName = "김철수", department = "인사부")
                 ),
                 totalVehicleCount = 45,
                 todayRegisteredCount = 3,
-                departmentStats = mapOf(
-                    "총무부" to 12,
-                    "인사부" to 8,
-                    "개발부" to 15,
-                    "영업부" to 10
-                )
+                departmentStats = mapOf("총무부" to 12, "인사부" to 8, "개발부" to 15, "영업부" to 10)
             ),
             onVehicleClick = {},
             onDeleteVehicle = {}
@@ -285,13 +244,7 @@ private fun HomeScreenPreview() {
 private fun HomeScreenEmptyPreview() {
     VehicleNoteTheme {
         HomeContent(
-            state = HomeState(
-                vehicles = emptyList(),
-                recentVehicles = emptyList(),
-                totalVehicleCount = 0,
-                todayRegisteredCount = 0,
-                departmentStats = emptyMap()
-            ),
+            state = HomeState(),
             onVehicleClick = {},
             onDeleteVehicle = {}
         )
@@ -303,9 +256,7 @@ private fun HomeScreenEmptyPreview() {
 private fun HomeScreenLoadingPreview() {
     VehicleNoteTheme {
         Box(modifier = Modifier.fillMaxSize()) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     }
 }
