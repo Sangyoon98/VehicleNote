@@ -7,12 +7,14 @@ import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.domain.usecase.GetVehicleByIdUseCase
 import com.sangyoon.vehiclenote.domain.usecase.UpdateVehicleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class EditVehicleViewModel @Inject constructor(
@@ -26,58 +28,36 @@ class EditVehicleViewModel @Inject constructor(
     private val _state = MutableStateFlow(EditVehicleState())
     val state: StateFlow<EditVehicleState> = _state.asStateFlow()
 
+    private val _sideEffect = Channel<EditVehicleSideEffect>(Channel.BUFFERED)
+    val sideEffect = _sideEffect.receiveAsFlow()
+
     init {
         loadVehicle()
     }
 
-    fun onIntent(intent: EditVehicleIntent) {
-        when (intent) {
-            is EditVehicleIntent.LicensePlateChanged -> {
-                _state.update {
-                    it.copy(
-                        licensePlate = intent.value,
-                        licensePlateError = null
-                    )
-                }
-            }
-            is EditVehicleIntent.OwnerNameChanged -> {
-                _state.update {
-                    it.copy(
-                        ownerName = intent.value,
-                        ownerNameError = null
-                    )
-                }
-            }
-            is EditVehicleIntent.DepartmentChanged -> {
-                _state.update {
-                    it.copy(
-                        department = intent.value,
-                        departmentError = null
-                    )
-                }
-            }
-            is EditVehicleIntent.PhoneNumberChanged -> {
-                _state.update { it.copy(phoneNumber = intent.value) }
-            }
-            is EditVehicleIntent.CarModelChanged -> {
-                _state.update { it.copy(carModel = intent.value) }
-            }
-            is EditVehicleIntent.MemoChanged -> {
-                _state.update { it.copy(memo = intent.value) }
-            }
-            is EditVehicleIntent.SaveClicked -> {
-                updateVehicle()
-            }
+    fun onAction(action: EditVehicleAction) {
+        when (action) {
+            is EditVehicleAction.LicensePlateChanged ->
+                _state.update { it.copy(licensePlate = action.value, licensePlateError = null) }
+            is EditVehicleAction.OwnerNameChanged ->
+                _state.update { it.copy(ownerName = action.value, ownerNameError = null) }
+            is EditVehicleAction.DepartmentChanged ->
+                _state.update { it.copy(department = action.value, departmentError = null) }
+            is EditVehicleAction.PhoneNumberChanged ->
+                _state.update { it.copy(phoneNumber = action.value) }
+            is EditVehicleAction.CarModelChanged ->
+                _state.update { it.copy(carModel = action.value) }
+            is EditVehicleAction.MemoChanged ->
+                _state.update { it.copy(memo = action.value) }
+            EditVehicleAction.SaveClicked -> updateVehicle()
         }
     }
 
     private fun loadVehicle() {
         _state.update { it.copy(isLoading = true) }
-
         viewModelScope.launch {
             try {
                 val vehicle = getVehicleByIdUseCase(vehicleId)
-
                 if (vehicle != null) {
                     _state.update {
                         it.copy(
@@ -93,61 +73,38 @@ class EditVehicleViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = "차량을 찾을 수 없습니다"
-                        )
-                    }
+                    _state.update { it.copy(isLoading = false, error = "차량을 찾을 수 없습니다") }
                 }
             } catch (e: Exception) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message ?: "오류 발생"
-                    )
-                }
+                _state.update { it.copy(isLoading = false, error = e.message ?: "오류 발생") }
             }
         }
     }
 
     private fun updateVehicle() {
-        // 유효성 검사
-        val validationErrors = validateInput()
-        if (validationErrors) return
+        if (validateInput()) return
 
         _state.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
+            val current = _state.value
             val vehicle = Vehicle(
-                id = _state.value.vehicleId,
-                licensePlate = _state.value.licensePlate.trim(),
-                ownerName = _state.value.ownerName.trim(),
-                department = _state.value.department.trim(),
-                phoneNumber = _state.value.phoneNumber.trim().ifBlank { null },
-                carModel = _state.value.carModel.trim().ifBlank { null },
-                memo = _state.value.memo.trim().ifBlank { null }
+                id = current.vehicleId,
+                licensePlate = current.licensePlate.trim(),
+                ownerName = current.ownerName.trim(),
+                department = current.department.trim(),
+                phoneNumber = current.phoneNumber.trim().ifBlank { null },
+                carModel = current.carModel.trim().ifBlank { null },
+                memo = current.memo.trim().ifBlank { null }
             )
 
-            val result = updateVehicleUseCase(vehicle)
-
-            result.fold(
+            updateVehicleUseCase(vehicle).fold(
                 onSuccess = {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            isSaved = true,
-                            error = null
-                        )
-                    }
+                    _state.update { it.copy(isLoading = false) }
+                    _sideEffect.send(EditVehicleSideEffect.NavigateBack)
                 },
                 onFailure = { error ->
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = error.message ?: "수정 실패"
-                        )
-                    }
+                    _state.update { it.copy(isLoading = false, error = error.message ?: "수정 실패") }
                 }
             )
         }
@@ -155,18 +112,17 @@ class EditVehicleViewModel @Inject constructor(
 
     private fun validateInput(): Boolean {
         var hasError = false
+        val current = _state.value
 
-        if (_state.value.licensePlate.isBlank()) {
+        if (current.licensePlate.isBlank()) {
             _state.update { it.copy(licensePlateError = "차량번호를 입력해주세요") }
             hasError = true
         }
-
-        if (_state.value.ownerName.isBlank()) {
+        if (current.ownerName.isBlank()) {
             _state.update { it.copy(ownerNameError = "차주명을 입력해주세요") }
             hasError = true
         }
-
-        if (_state.value.department.isBlank()) {
+        if (current.department.isBlank()) {
             _state.update { it.copy(departmentError = "소속부서를 입력해주세요") }
             hasError = true
         }
