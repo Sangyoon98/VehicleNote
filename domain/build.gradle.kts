@@ -16,6 +16,7 @@ kotlin {
 
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.javax.inject)
 
     // 테스트 의존성
     testImplementation(libs.junit)
