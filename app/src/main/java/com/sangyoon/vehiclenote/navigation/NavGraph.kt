@@ -21,9 +21,7 @@ fun NavGraph(
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
-                onNavigateToAdd = {
-                    navController.navigate(Screen.AddVehicle.route)
-                },
+                onNavigateToAdd = { navController.navigate(Screen.AddVehicle.route) },
                 onNavigateToDetail = { vehicleId ->
                     navController.navigate(Screen.VehicleDetail.createRoute(vehicleId))
                 }
@@ -31,30 +29,14 @@ fun NavGraph(
         }
 
         composable(Screen.AddVehicle.route) {
-            AddVehicleScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
+            AddVehicleScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         composable(
             route = Screen.VehicleDetail.route,
-            arguments = listOf(
-                navArgument("vehicleId") { type = NavType.LongType }
-            )
-        ) { backStackEntry ->
-            val vehicleId = backStackEntry.arguments?.getLong("vehicleId") ?: return@composable
-            // TODO: VehicleDetailScreen 구현 예정
-        }
-
-        composable(
-            route = Screen.VehicleDetail.route,
-            arguments = listOf(
-                navArgument("vehicleId") { type = NavType.LongType }
-            )
-        ) { backstackEntry ->
-            val vehicleId = backstackEntry.arguments?.getLong("vehicleId") ?: return@composable
+            arguments = listOf(navArgument("vehicleId") { type = NavType.LongType })
+        ) {
             VehicleDetailScreen(
-                vehicleId = vehicleId,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = { id ->
                     navController.navigate(Screen.EditVehicle.createRoute(id))
@@ -64,15 +46,9 @@ fun NavGraph(
 
         composable(
             route = Screen.EditVehicle.route,
-            arguments = listOf(
-                navArgument("vehicleId") { type = NavType.LongType }
-            )
-        ) { backStackEntry ->
-            val vehicleId = backStackEntry.arguments?.getLong("vehicleId") ?: return@composable
-            EditVehicleScreen(
-                vehicleId = vehicleId,
-                onNavigateBack = { navController.popBackStack() }
-            )
+            arguments = listOf(navArgument("vehicleId") { type = NavType.LongType })
+        ) {
+            EditVehicleScreen(onNavigateBack = { navController.popBackStack() })
         }
     }
 }

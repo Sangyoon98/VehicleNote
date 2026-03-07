@@ -41,16 +41,19 @@ fun AddVehicleScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    // 저장 성공 시 뒤로가기
-    LaunchedEffect(state.isSaved) {
-        if (state.isSaved) {
-            onNavigateBack()
+    // SideEffect 수집: NavigateBack은 일회성 이벤트
+    LaunchedEffect(Unit) {
+        viewModel.sideEffect.collect { effect ->
+            when (effect) {
+                is AddVehicleSideEffect.NavigateBack -> onNavigateBack()
+                is AddVehicleSideEffect.ShowSnackbar -> { /* 필요 시 SnackbarHost 연결 */ }
+            }
         }
     }
 
     AddVehicleScreenContent(
         state = state,
-        onIntent = viewModel::onIntent,
+        onAction = viewModel::onAction,
         onNavigateBack = onNavigateBack
     )
 }
@@ -59,7 +62,7 @@ fun AddVehicleScreen(
 @Composable
 private fun AddVehicleScreenContent(
     state: AddVehicleState,
-    onIntent: (AddVehicleIntent) -> Unit,
+    onAction: (AddVehicleAction) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     Scaffold(
@@ -81,10 +84,9 @@ private fun AddVehicleScreenContent(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // 차량번호 (필수)
             OutlinedTextField(
                 value = state.licensePlate,
-                onValueChange = { onIntent(AddVehicleIntent.LicensePlateChanged(it)) },
+                onValueChange = { onAction(AddVehicleAction.LicensePlateChanged(it)) },
                 label = { Text("차량번호 *") },
                 placeholder = { Text("예: 12가1234") },
                 modifier = Modifier.fillMaxWidth(),
@@ -93,10 +95,9 @@ private fun AddVehicleScreenContent(
                 singleLine = true
             )
 
-            // 차주명 (필수)
             OutlinedTextField(
                 value = state.ownerName,
-                onValueChange = { onIntent(AddVehicleIntent.OwnerNameChanged(it)) },
+                onValueChange = { onAction(AddVehicleAction.OwnerNameChanged(it)) },
                 label = { Text("차주명 *") },
                 placeholder = { Text("예: 홍길동") },
                 modifier = Modifier.fillMaxWidth(),
@@ -105,10 +106,9 @@ private fun AddVehicleScreenContent(
                 singleLine = true
             )
 
-            // 소속부서 (필수)
             OutlinedTextField(
                 value = state.department,
-                onValueChange = { onIntent(AddVehicleIntent.DepartmentChanged(it)) },
+                onValueChange = { onAction(AddVehicleAction.DepartmentChanged(it)) },
                 label = { Text("소속부서 *") },
                 placeholder = { Text("예: 총무부") },
                 modifier = Modifier.fillMaxWidth(),
@@ -117,10 +117,9 @@ private fun AddVehicleScreenContent(
                 singleLine = true
             )
 
-            // 연락처 (선택)
             OutlinedTextField(
                 value = state.phoneNumber,
-                onValueChange = { onIntent(AddVehicleIntent.PhoneNumberChanged(it)) },
+                onValueChange = { onAction(AddVehicleAction.PhoneNumberChanged(it)) },
                 label = { Text("연락처") },
                 placeholder = { Text("예: 010-1234-5678") },
                 modifier = Modifier.fillMaxWidth(),
@@ -128,20 +127,18 @@ private fun AddVehicleScreenContent(
                 singleLine = true
             )
 
-            // 차종 (선택)
             OutlinedTextField(
                 value = state.carModel,
-                onValueChange = { onIntent(AddVehicleIntent.CarModelChanged(it)) },
+                onValueChange = { onAction(AddVehicleAction.CarModelChanged(it)) },
                 label = { Text("차종") },
                 placeholder = { Text("예: 그랜저") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
 
-            // 메모 (선택)
             OutlinedTextField(
                 value = state.memo,
-                onValueChange = { onIntent(AddVehicleIntent.MemoChanged(it)) },
+                onValueChange = { onAction(AddVehicleAction.MemoChanged(it)) },
                 label = { Text("메모") },
                 placeholder = { Text("추가 정보를 입력하세요") },
                 modifier = Modifier
@@ -152,9 +149,8 @@ private fun AddVehicleScreenContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 저장 버튼
             Button(
-                onClick = { onIntent(AddVehicleIntent.SaveClicked) },
+                onClick = { onAction(AddVehicleAction.SaveClicked) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -170,7 +166,6 @@ private fun AddVehicleScreenContent(
                 }
             }
 
-            // 에러 메시지
             state.error?.let { error ->
                 Text(
                     text = error,
@@ -188,14 +183,11 @@ private fun AddVehicleScreenPreview() {
     VehicleNoteTheme {
         AddVehicleScreenContent(
             state = AddVehicleState(
-                licensePlate = "12가1234",
-                ownerName = "홍길동",
-                department = "총무부",
-                phoneNumber = "010-1234-5678",
-                carModel = "그랜저",
-                memo = "VIP 차량"
+                licensePlate = "12가1234", ownerName = "홍길동",
+                department = "총무부", phoneNumber = "010-1234-5678",
+                carModel = "그랜저", memo = "VIP 차량"
             ),
-            onIntent = {},
+            onAction = {},
             onNavigateBack = {}
         )
     }
@@ -207,14 +199,11 @@ private fun AddVehicleScreenErrorPreview() {
     VehicleNoteTheme {
         AddVehicleScreenContent(
             state = AddVehicleState(
-                licensePlate = "",
-                ownerName = "",
-                department = "",
                 licensePlateError = "차량번호를 입력해주세요",
                 ownerNameError = "차주명을 입력해주세요",
                 departmentError = "소속부서를 입력해주세요"
             ),
-            onIntent = {},
+            onAction = {},
             onNavigateBack = {}
         )
     }
@@ -226,12 +215,10 @@ private fun AddVehicleScreenLoadingPreview() {
     VehicleNoteTheme {
         AddVehicleScreenContent(
             state = AddVehicleState(
-                licensePlate = "12가1234",
-                ownerName = "홍길동",
-                department = "총무부",
-                isLoading = true
+                licensePlate = "12가1234", ownerName = "홍길동",
+                department = "총무부", isLoading = true
             ),
-            onIntent = {},
+            onAction = {},
             onNavigateBack = {}
         )
     }

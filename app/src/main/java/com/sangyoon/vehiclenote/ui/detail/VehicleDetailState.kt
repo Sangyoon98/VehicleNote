@@ -6,6 +6,5 @@ data class VehicleDetailState(
     val vehicle: Vehicle? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isDeleted: Boolean = false,
-    val userMessage: String? = null
+    val showDeleteDialog: Boolean = false  // isDeleted/userMessage 제거: SideEffect로 대체
 )
