@@ -43,6 +43,13 @@ dependencies {
     // 모듈 의존성
     implementation(project(":domain"))
     implementation(project(":data"))
+    implementation(project(":ocr"))
+
+    // CameraX (EntryPoint 접근용)
+    implementation(libs.camerax.core)
+    implementation(libs.camerax.camera2)
+    implementation(libs.camerax.lifecycle)
+    implementation(libs.camerax.view)
 
     // Hilt
     implementation(libs.hilt.android)

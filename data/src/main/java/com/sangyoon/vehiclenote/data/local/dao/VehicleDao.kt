@@ -28,4 +28,7 @@ interface VehicleDao {
 
     @Delete
     suspend fun deleteVehicle(vehicle: VehicleEntity)
+
+    @Query("SELECT * FROM vehicles WHERE licensePlate = :plate LIMIT 1")
+    suspend fun getByLicensePlate(plate: String): VehicleEntity?
 }
