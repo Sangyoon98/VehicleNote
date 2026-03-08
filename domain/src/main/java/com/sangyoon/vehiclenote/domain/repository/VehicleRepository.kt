@@ -21,4 +21,7 @@ interface VehicleRepository {
 
     // 차량 삭제
     suspend fun deleteVehicle(vehicle: Vehicle)
+
+    // 번호판으로 차량 조회 (입출차 기록 시 vehicleId 연결용)
+    suspend fun getByLicensePlate(plate: String): Vehicle?
 }
