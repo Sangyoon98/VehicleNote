@@ -1,5 +1,7 @@
 package com.sangyoon.vehiclenote.ui.add
 
+import com.sangyoon.vehiclenote.domain.model.CustomField
+
 data class AddVehicleState(
     val licensePlate: String = "",
     val ownerName: String = "",
@@ -7,13 +9,13 @@ data class AddVehicleState(
     val phoneNumber: String = "",
     val carModel: String = "",
     val memo: String = "",
-
-    // 유효성 검사 에러
+    val photoPath: String? = null,
+    val pendingCameraFilePath: String? = null,
+    val previousPhotoPath: String? = null,
+    val customFields: List<CustomField> = emptyList(),
+    val showPhotoSourceDialog: Boolean = false,
     val licensePlateError: String? = null,
     val ownerNameError: String? = null,
-    val departmentError: String? = null,
-
-    // 상태
     val isLoading: Boolean = false,
-    val error: String? = null  // isSaved 제거: NavigateBack SideEffect로 대체
+    val error: String? = null
 )

@@ -106,7 +106,8 @@ class HomeViewModel @Inject constructor(
         }.timeInMillis
 
         val deptStats = vehicles
-            .groupBy { it.department }
+            .filter { it.department != null }
+            .groupBy { it.department!! }
             .mapValues { it.value.size }
             .entries
             .sortedByDescending { it.value }

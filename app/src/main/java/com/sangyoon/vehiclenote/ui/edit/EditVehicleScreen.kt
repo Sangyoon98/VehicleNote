@@ -1,5 +1,11 @@
 package com.sangyoon.vehiclenote.ui.edit
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,17 +28,27 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.sangyoon.vehiclenote.ui.components.CustomFieldsSection
+import com.sangyoon.vehiclenote.ui.components.PhotoSection
+import com.sangyoon.vehiclenote.ui.components.PhotoSourceDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,31 +57,74 @@ fun EditVehicleScreen(
     viewModel: EditVehicleViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
-    // SideEffect 수집: NavigateBack은 일회성 이벤트
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        viewModel.onAction(EditVehicleAction.CameraResultReceived(success))
+    }
+
+    var pendingCameraUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            pendingCameraUri?.let { cameraLauncher.launch(it) }
+            pendingCameraUri = null
+        } else {
+            pendingCameraUri = null
+            viewModel.onAction(EditVehicleAction.CameraPermissionDenied)
+        }
+    }
+
+    val pickMediaLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        viewModel.onAction(EditVehicleAction.GalleryResultReceived(uri))
+    }
+    val getContentLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        viewModel.onAction(EditVehicleAction.GalleryResultReceived(uri))
+    }
+
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { effect ->
             when (effect) {
-                is EditVehicleSideEffect.NavigateBack -> onNavigateBack()
-                is EditVehicleSideEffect.ShowSnackbar -> { /* 필요 시 SnackbarHost 연결 */ }
+                EditVehicleSideEffect.NavigateBack -> onNavigateBack()
+                is EditVehicleSideEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
+                is EditVehicleSideEffect.LaunchCamera -> {
+                    val permission = Manifest.permission.CAMERA
+                    if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+                        cameraLauncher.launch(effect.outputUri)
+                    } else {
+                        pendingCameraUri = effect.outputUri
+                        cameraPermissionLauncher.launch(permission)
+                    }
+                }
+                EditVehicleSideEffect.LaunchGallery -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        pickMediaLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    } else {
+                        getContentLauncher.launch("image/*")
+                    }
+                }
             }
         }
     }
 
-    EditVehicleScreenContent(
-        state = state,
-        onAction = viewModel::onAction,
-        onNavigateBack = onNavigateBack
-    )
-}
+    if (state.showPhotoSourceDialog) {
+        PhotoSourceDialog(
+            onCameraSelected = { viewModel.onAction(EditVehicleAction.CameraSelected) },
+            onGallerySelected = { viewModel.onAction(EditVehicleAction.GallerySelected) },
+            onDismiss = { viewModel.onAction(EditVehicleAction.PhotoSourceDialogDismissed) }
+        )
+    }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun EditVehicleScreenContent(
-    state: EditVehicleState,
-    onAction: (EditVehicleAction) -> Unit = {},
-    onNavigateBack: () -> Unit = {}
-) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,10 +135,10 @@ private fun EditVehicleScreenContent(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         if (state.isLoading && state.licensePlate.isBlank()) {
-            // 초기 로딩 (데이터 아직 미수신)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -95,11 +154,17 @@ private fun EditVehicleScreenContent(
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                PhotoSection(
+                    photoPath = state.photoPath,
+                    onPhotoClicked = { viewModel.onAction(EditVehicleAction.PhotoClicked) },
+                    onPhotoRemoved = { viewModel.onAction(EditVehicleAction.PhotoRemoved) }
+                )
+
                 OutlinedTextField(
                     value = state.licensePlate,
-                    onValueChange = { onAction(EditVehicleAction.LicensePlateChanged(it)) },
+                    onValueChange = { viewModel.onAction(EditVehicleAction.LicensePlateChanged(it)) },
                     label = { Text("차량번호 *") },
                     placeholder = { Text("예: 12가1234") },
                     modifier = Modifier.fillMaxWidth(),
@@ -110,7 +175,7 @@ private fun EditVehicleScreenContent(
 
                 OutlinedTextField(
                     value = state.ownerName,
-                    onValueChange = { onAction(EditVehicleAction.OwnerNameChanged(it)) },
+                    onValueChange = { viewModel.onAction(EditVehicleAction.OwnerNameChanged(it)) },
                     label = { Text("차주명 *") },
                     placeholder = { Text("예: 홍길동") },
                     modifier = Modifier.fillMaxWidth(),
@@ -121,18 +186,16 @@ private fun EditVehicleScreenContent(
 
                 OutlinedTextField(
                     value = state.department,
-                    onValueChange = { onAction(EditVehicleAction.DepartmentChanged(it)) },
-                    label = { Text("소속부서 *") },
+                    onValueChange = { viewModel.onAction(EditVehicleAction.DepartmentChanged(it)) },
+                    label = { Text("소속부서") },
                     placeholder = { Text("예: 총무부") },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = state.departmentError != null,
-                    supportingText = state.departmentError?.let { { Text(it) } },
                     singleLine = true
                 )
 
                 OutlinedTextField(
                     value = state.phoneNumber,
-                    onValueChange = { onAction(EditVehicleAction.PhoneNumberChanged(it)) },
+                    onValueChange = { viewModel.onAction(EditVehicleAction.PhoneNumberChanged(it)) },
                     label = { Text("연락처") },
                     placeholder = { Text("예: 010-1234-5678") },
                     modifier = Modifier.fillMaxWidth(),
@@ -142,7 +205,7 @@ private fun EditVehicleScreenContent(
 
                 OutlinedTextField(
                     value = state.carModel,
-                    onValueChange = { onAction(EditVehicleAction.CarModelChanged(it)) },
+                    onValueChange = { viewModel.onAction(EditVehicleAction.CarModelChanged(it)) },
                     label = { Text("차종") },
                     placeholder = { Text("예: 그랜저") },
                     modifier = Modifier.fillMaxWidth(),
@@ -151,7 +214,7 @@ private fun EditVehicleScreenContent(
 
                 OutlinedTextField(
                     value = state.memo,
-                    onValueChange = { onAction(EditVehicleAction.MemoChanged(it)) },
+                    onValueChange = { viewModel.onAction(EditVehicleAction.MemoChanged(it)) },
                     label = { Text("메모") },
                     placeholder = { Text("추가 정보를 입력하세요") },
                     modifier = Modifier
@@ -160,10 +223,18 @@ private fun EditVehicleScreenContent(
                     maxLines = 5
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                CustomFieldsSection(
+                    customFields = state.customFields,
+                    onAddField = { viewModel.onAction(EditVehicleAction.AddCustomField) },
+                    onRemoveField = { viewModel.onAction(EditVehicleAction.RemoveCustomField(it)) },
+                    onKeyChanged = { index, key -> viewModel.onAction(EditVehicleAction.CustomFieldKeyChanged(index, key)) },
+                    onValueChanged = { index, value -> viewModel.onAction(EditVehicleAction.CustomFieldValueChanged(index, value)) }
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Button(
-                    onClick = { onAction(EditVehicleAction.SaveClicked) },
+                    onClick = { viewModel.onAction(EditVehicleAction.SaveClicked) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
