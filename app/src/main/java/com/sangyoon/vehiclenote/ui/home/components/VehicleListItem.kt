@@ -93,7 +93,7 @@ fun VehicleListItem(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = vehicle.department,
+                        text = vehicle.department ?: "",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
