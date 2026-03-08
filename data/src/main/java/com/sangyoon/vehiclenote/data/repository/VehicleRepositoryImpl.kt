@@ -7,8 +7,11 @@ import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.domain.repository.VehicleRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class VehicleRepositoryImpl(
+@Singleton
+class VehicleRepositoryImpl @Inject constructor(
     private val vehicleDao: VehicleDao
 ) : VehicleRepository {
     override fun getAllVehicles(): Flow<List<Vehicle>> {

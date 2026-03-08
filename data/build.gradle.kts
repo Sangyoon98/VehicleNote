@@ -34,6 +34,7 @@ android {
 dependencies {
     // Domain 모듈 의존
     implementation(project(":domain"))
+    implementation(libs.javax.inject)
 
     // Room
     implementation(libs.androidx.room.runtime)
