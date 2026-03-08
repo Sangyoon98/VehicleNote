@@ -1,5 +1,6 @@
 package com.sangyoon.vehiclenote.ui.add
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sangyoon.vehiclenote.domain.model.CustomField
@@ -19,10 +20,15 @@ import javax.inject.Inject
 @HiltViewModel
 class AddVehicleViewModel @Inject constructor(
     private val addVehicleUseCase: AddVehicleUseCase,
-    private val photoStorageManager: PhotoStorageManager
+    private val photoStorageManager: PhotoStorageManager,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(AddVehicleState())
+    private val _state = MutableStateFlow(
+        AddVehicleState(
+            licensePlate = savedStateHandle.get<String>("licensePlate") ?: ""
+        )
+    )
     val state: StateFlow<AddVehicleState> = _state.asStateFlow()
 
     private val _sideEffect = Channel<AddVehicleSideEffect>(Channel.BUFFERED)

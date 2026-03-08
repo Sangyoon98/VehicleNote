@@ -41,4 +41,8 @@ class VehicleRepositoryImpl @Inject constructor(
     override suspend fun deleteVehicle(vehicle: Vehicle) {
         vehicleDao.deleteVehicle(vehicle.toEntity())
     }
+
+    override suspend fun getByLicensePlate(plate: String): Vehicle? {
+        return vehicleDao.getByLicensePlate(plate)?.toDomain()
+    }
 }
