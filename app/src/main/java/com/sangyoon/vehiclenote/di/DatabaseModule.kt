@@ -2,6 +2,7 @@ package com.sangyoon.vehiclenote.di
 
 import android.content.Context
 import androidx.room.Room
+import com.sangyoon.vehiclenote.data.local.dao.EntryExitRecordDao
 import com.sangyoon.vehiclenote.data.local.dao.VehicleDao
 import com.sangyoon.vehiclenote.data.local.database.VehicleDatabase
 import dagger.Module
@@ -24,12 +25,22 @@ object DatabaseModule {
             context,
             VehicleDatabase::class.java,
             "vehicle_database"
-        ).addMigrations(VehicleDatabase.MIGRATION_1_2).build()
+        ).addMigrations(
+            VehicleDatabase.MIGRATION_1_2,
+            VehicleDatabase.MIGRATION_2_3,
+            VehicleDatabase.MIGRATION_3_4
+        ).build()
     }
 
     @Provides
     @Singleton
     fun provideVehicleDao(database: VehicleDatabase): VehicleDao {
         return database.vehicleDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideEntryExitRecordDao(database: VehicleDatabase): EntryExitRecordDao {
+        return database.entryExitRecordDao()
     }
 }
