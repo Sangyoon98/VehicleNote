@@ -55,4 +55,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)  // Flow 테스트용
+    // org.json은 Android SDK 스텁이라 JVM 단위 테스트에서 "not mocked" 오류 발생
+    // 실제 구현체를 테스트 classpath에 추가
+    testImplementation("org.json:json:20231013")
 }

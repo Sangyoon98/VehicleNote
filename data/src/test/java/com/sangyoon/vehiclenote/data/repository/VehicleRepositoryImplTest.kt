@@ -37,6 +37,8 @@ class VehicleRepositoryImplTest {
                 phoneNumber = null,
                 carModel = null,
                 memo = null,
+                photoUri = null,
+                customFields = "[]",
                 createdAt = 123456789,
                 updatedAt = 123456789
             ),
@@ -48,6 +50,8 @@ class VehicleRepositoryImplTest {
                 phoneNumber = "010-1234-5678",
                 carModel = "소나타",
                 memo = "VIP",
+                photoUri = null,
+                customFields = "[]",
                 createdAt = 123456789,
                 updatedAt = 123456789
             )
@@ -82,6 +86,8 @@ class VehicleRepositoryImplTest {
                 phoneNumber = null,
                 carModel = null,
                 memo = null,
+                photoUri = null,
+                customFields = "[]",
                 createdAt = 123456789,
                 updatedAt = 123456789
             )
@@ -111,6 +117,8 @@ class VehicleRepositoryImplTest {
             phoneNumber = null,
             carModel = null,
             memo = null,
+            photoUri = null,
+            customFields = "[]",
             createdAt = 123456789,
             updatedAt = 123456789
         )
