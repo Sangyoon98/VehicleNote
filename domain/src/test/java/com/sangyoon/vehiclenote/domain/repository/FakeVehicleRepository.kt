@@ -37,6 +37,10 @@ class FakeVehicleRepository : VehicleRepository {
         vehicles.removeIf { it.id == vehicle.id }
     }
 
+    override suspend fun getByLicensePlate(plate: String): Vehicle? {
+        return vehicles.find { it.licensePlate == plate }
+    }
+
     fun clear() {
         vehicles.clear()
         currentId = 1L
