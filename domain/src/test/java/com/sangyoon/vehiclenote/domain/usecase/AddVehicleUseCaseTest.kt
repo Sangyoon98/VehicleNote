@@ -62,6 +62,6 @@ class AddVehicleUseCaseTest {
 
         // Then
         assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrNull())
+        assertEquals(1L, result.getOrNull())
     }
 }

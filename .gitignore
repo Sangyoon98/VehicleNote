@@ -10,3 +10,8 @@
 .cxx
 local.properties
 keystore.properties
+/secrets/
+/app/release/
+fastlane/report.xml
+*.aab
+*.apk
