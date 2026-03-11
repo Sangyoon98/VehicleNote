@@ -12,6 +12,7 @@ local.properties
 keystore.properties
 /secrets/
 /app/release/
+/app/google-services.json
 fastlane/report.xml
 *.aab
 *.apk
