@@ -73,169 +73,139 @@ fun VehicleDetailContent(
             )
         }
 
-        // 번호판 카드
-        Card(
+        // 차량 번호 (카드 아님, 단순 섹션)
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            Text(
+                text = "차량번호",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Text(
                 text = vehicle.licensePlate,
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(24.dp)
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
         // 기본 정보 카드
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
+            shape = RoundedCornerShape(16.dp)
+        ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                InfoRow(icon = Icons.Default.Person, label = "차주", value = vehicle.ownerName)
-                vehicle.department?.let {
-                    InfoRow(icon = Icons.Default.Business, label = "부서", value = it)
-                }
+                InfoRow(label = "차주명", value = vehicle.ownerName)
                 vehicle.phoneNumber?.let {
-                    InfoRow(icon = Icons.Default.Phone, label = "연락처", value = it)
+                    InfoRow(label = "연락처", value = it)
+                }
+                vehicle.department?.let {
+                    InfoRow(label = "소속", value = it)
                 }
                 vehicle.carModel?.let {
-                    InfoRow(icon = Icons.Default.DirectionsCar, label = "차종", value = it)
+                    InfoRow(label = "차종", value = it)
                 }
                 vehicle.memo?.let {
-                    InfoRow(icon = Icons.Default.Description, label = "메모", value = it)
+                    InfoRow(label = "메모", value = it)
                 }
             }
         }
 
         // 커스텀 필드 카드
         if (vehicle.customFields.isNotEmpty()) {
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.TextFields,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "추가 필드",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Text(
+                        text = "추가 정보",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
                     HorizontalDivider()
                     vehicle.customFields.forEach { field ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = field.key,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                text = field.value,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(1.5f)
-                            )
-                        }
+                        InfoRow(label = field.key, value = field.value)
                     }
                 }
             }
         }
 
-        // 등록 정보 카드
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Schedule,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "등록 정보",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Text(
-                    text = "등록: ${formatDate(vehicle.createdAt)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 28.dp)
-                )
-                Text(
-                    text = "수정: ${formatDate(vehicle.updatedAt)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 28.dp)
-                )
-            }
+        // 등록 정보 (간소화)
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "등록일시: ${formatDate(vehicle.createdAt)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
-        // 수정 / 삭제 버튼
-        Row(
+        // 수정 / 삭제 버튼 (세로로 배치)
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedButton(onClick = onEditClick, modifier = Modifier.weight(1f)) {
+            Button(
+                onClick = onEditClick,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
                 Icon(Icons.Default.Edit, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("수정")
+                Text("편집하기")
             }
-            Button(
+            OutlinedButton(
                 onClick = onDeleteClick,
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
             ) {
                 Icon(Icons.Default.Delete, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("삭제")
+                Text("삭제하기")
             }
         }
     }
 }
 
 @Composable
-internal fun InfoRow(icon: ImageVector, label: String, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+internal fun InfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(start = 28.dp)
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Medium
         )
     }
 }
