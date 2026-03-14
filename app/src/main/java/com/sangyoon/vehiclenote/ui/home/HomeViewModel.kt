@@ -47,6 +47,7 @@ class HomeViewModel @Inject constructor(
                     loadVehicles()
                 }
             }
+
             is HomeAction.SearchActiveChanged -> {
                 _state.update {
                     it.copy(
@@ -56,6 +57,7 @@ class HomeViewModel @Inject constructor(
                 }
                 if (!action.isActive) loadVehicles()
             }
+
             is HomeAction.DeleteVehicle -> deleteVehicle(action.vehicle)
             is HomeAction.AddVehicleClicked -> sendSideEffect(HomeSideEffect.NavigateToAdd)
             is HomeAction.VehicleClicked -> sendSideEffect(HomeSideEffect.NavigateToDetail(action.vehicleId))

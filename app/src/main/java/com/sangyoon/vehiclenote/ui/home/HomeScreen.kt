@@ -2,8 +2,9 @@ package com.sangyoon.vehiclenote.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -41,7 +44,7 @@ import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.ui.home.components.RecentVehicleCard
 import com.sangyoon.vehiclenote.ui.home.components.StatisticsSection
 import com.sangyoon.vehiclenote.ui.home.components.VehicleListItem
-import com.sangyoon.vehiclenote.ui.theme.VehicleNoteTheme
+import com.sangyoon.vehiclenote.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +73,33 @@ fun HomeScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            SearchBar(
+            Column {
+                // Header with title and notification icon
+                if (!state.isSearchActive) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "차량 정보 관리",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        IconButton(onClick = { /* TODO: Handle notification */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "알림",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+
+                // Search bar
+                SearchBar(
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = state.searchQuery,
@@ -78,11 +107,17 @@ fun HomeScreen(
                         onSearch = { viewModel.onAction(HomeAction.SearchQueryChanged(it)) },
                         expanded = state.isSearchActive,
                         onExpandedChange = { viewModel.onAction(HomeAction.SearchActiveChanged(it)) },
-                        placeholder = { Text("차량번호 검색") },
+                        placeholder = { Text("차량 번호로 차량 검색") },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = "검색") },
                         trailingIcon = {
                             if (state.searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { viewModel.onAction(HomeAction.SearchQueryChanged("")) }) {
+                                IconButton(onClick = {
+                                    viewModel.onAction(
+                                        HomeAction.SearchQueryChanged(
+                                            ""
+                                        )
+                                    )
+                                }) {
                                     Icon(Icons.Default.Close, contentDescription = "지우기")
                                 }
                             }
@@ -112,6 +147,7 @@ fun HomeScreen(
                     }
                 }
             }
+            }
         },
         floatingActionButton = {
             if (!state.isSearchActive) {
@@ -132,6 +168,7 @@ fun HomeScreen(
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 state.error != null -> {
                     Text(
                         text = state.error ?: "오류 발생",
@@ -139,6 +176,7 @@ fun HomeScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+
                 else -> {
                     HomeContent(
                         state = state,
@@ -174,11 +212,23 @@ private fun HomeContent(
         // 최근 등록 차량
         if (state.recentVehicles.isNotEmpty()) {
             item {
-                Text(
-                    text = "최근 등록 차량",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "최근 등록 차량",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "전체보기",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -192,13 +242,27 @@ private fun HomeContent(
             }
         }
 
-        // 전체 차량 목록
+        // 전체 차량 목록 헤더
         item {
-            Text(
-                text = "전체 차량 (${state.vehicles.size})",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "차량 목록",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "총 ${state.vehicles.size}대",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
 
         items(items = state.vehicles, key = { it.id }) { vehicle ->
@@ -214,19 +278,30 @@ private fun HomeContent(
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
-    VehicleNoteTheme {
+    AppTheme {
         HomeContent(
             state = HomeState(
                 vehicles = listOf(
-                    Vehicle(id = 1, licensePlate = "12가1234", ownerName = "홍길동", department = "총무부",
-                        phoneNumber = "010-1234-5678", carModel = "그랜저", memo = "VIP 차량"),
-                    Vehicle(id = 2, licensePlate = "34나5678", ownerName = "김철수", department = "인사부",
-                        carModel = "소나타"),
-                    Vehicle(id = 3, licensePlate = "56다9012", ownerName = "이영희", department = "개발부",
-                        phoneNumber = "010-9999-9999", memo = "자주 방문")
+                    Vehicle(
+                        id = 1, licensePlate = "12가1234", ownerName = "홍길동", department = "총무부",
+                        phoneNumber = "010-1234-5678", carModel = "그랜저", memo = "VIP 차량"
+                    ),
+                    Vehicle(
+                        id = 2, licensePlate = "34나5678", ownerName = "김철수", department = "인사부",
+                        carModel = "소나타"
+                    ),
+                    Vehicle(
+                        id = 3, licensePlate = "56다9012", ownerName = "이영희", department = "개발부",
+                        phoneNumber = "010-9999-9999", memo = "자주 방문"
+                    )
                 ),
                 recentVehicles = listOf(
-                    Vehicle(id = 1, licensePlate = "12가1234", ownerName = "홍길동", department = "총무부"),
+                    Vehicle(
+                        id = 1,
+                        licensePlate = "12가1234",
+                        ownerName = "홍길동",
+                        department = "총무부"
+                    ),
                     Vehicle(id = 2, licensePlate = "34나5678", ownerName = "김철수", department = "인사부")
                 ),
                 totalVehicleCount = 45,
@@ -242,7 +317,7 @@ private fun HomeScreenPreview() {
 @Preview(showBackground = true, name = "빈 상태")
 @Composable
 private fun HomeScreenEmptyPreview() {
-    VehicleNoteTheme {
+    AppTheme {
         HomeContent(
             state = HomeState(),
             onVehicleClick = {},
@@ -254,7 +329,7 @@ private fun HomeScreenEmptyPreview() {
 @Preview(showBackground = true, name = "로딩 상태")
 @Composable
 private fun HomeScreenLoadingPreview() {
-    VehicleNoteTheme {
+    AppTheme {
         Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }

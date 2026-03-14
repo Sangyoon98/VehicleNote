@@ -41,10 +41,12 @@ class EntryExitViewModel @Inject constructor(
             EntryExitAction.SearchToggled -> {
                 _state.update { it.copy(isSearching = true, searchQuery = "") }
             }
+
             is EntryExitAction.SearchQueryChanged -> {
                 _state.update { it.copy(searchQuery = action.query) }
                 loadRecords(action.query)
             }
+
             EntryExitAction.SearchDismissed -> {
                 _state.update { it.copy(isSearching = false, searchQuery = "") }
                 loadAllRecords()
@@ -52,17 +54,25 @@ class EntryExitViewModel @Inject constructor(
 
             is EntryExitAction.PlateDetected -> {
                 if (!_state.value.showPlateConfirmDialog) {
-                    _state.update { it.copy(showPlateConfirmDialog = true, detectedPlate = action.plate) }
+                    _state.update {
+                        it.copy(
+                            showPlateConfirmDialog = true,
+                            detectedPlate = action.plate
+                        )
+                    }
                 }
             }
+
             is EntryExitAction.DetectedPlateEdited -> {
                 _state.update { it.copy(detectedPlate = action.plate) }
             }
+
             EntryExitAction.PlateConfirmed -> {
                 val plate = _state.value.detectedPlate.trim()
                 _state.update { it.copy(showPlateConfirmDialog = false, detectedPlate = "") }
                 if (plate.isNotBlank()) recordEntryExit(plate)
             }
+
             EntryExitAction.PlateConfirmDismissed -> {
                 _state.update { it.copy(showPlateConfirmDialog = false, detectedPlate = "") }
             }
@@ -70,14 +80,17 @@ class EntryExitViewModel @Inject constructor(
             EntryExitAction.ManualInputClicked -> {
                 _state.update { it.copy(showManualInputDialog = true, manualInputPlate = "") }
             }
+
             is EntryExitAction.ManualPlateChanged -> {
                 _state.update { it.copy(manualInputPlate = action.plate) }
             }
+
             EntryExitAction.ManualInputConfirmed -> {
                 val plate = _state.value.manualInputPlate.trim()
                 _state.update { it.copy(showManualInputDialog = false, manualInputPlate = "") }
                 if (plate.isNotBlank()) recordEntryExit(plate)
             }
+
             EntryExitAction.ManualInputDismissed -> {
                 _state.update { it.copy(showManualInputDialog = false, manualInputPlate = "") }
             }

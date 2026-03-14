@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,10 +32,11 @@ fun StatisticsSection(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Header
         Text(
-            text = "통계",
+            text = "통계 현황",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -45,19 +45,21 @@ fun StatisticsSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 총 차량 수
+            // Total vehicles card
             StatisticCard(
                 icon = Icons.Default.DirectionsCar,
-                label = "총 차량",
+                label = "전체",
                 value = totalCount.toString(),
+                unit = "대",
                 modifier = Modifier.weight(1f)
             )
 
-            // 오늘 등록
+            // Today's entries card
             StatisticCard(
                 icon = Icons.AutoMirrored.Filled.TrendingUp,
-                label = "오늘 등록",
+                label = "오늘입차",
                 value = todayCount.toString(),
+                unit = "건",
                 modifier = Modifier.weight(1f)
             )
         }
@@ -105,7 +107,8 @@ fun StatisticsSection(
                             Text(
                                 text = "${count}대",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         }
                     }
                 }
@@ -119,6 +122,7 @@ fun StatisticCard(
     icon: ImageVector,
     value: String,
     label: String,
+    unit: String = "",
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -130,25 +134,38 @@ fun StatisticCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(20.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(28.dp),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                if (unit.isNotEmpty()) {
+                    Text(
+                        text = unit,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+            }
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f)
             )
         }
     }
@@ -173,7 +190,8 @@ fun StatisticsSectionPreview() {
 fun StatisticsCardPreview() {
     StatisticCard(
         icon = Icons.Default.DirectionsCar,
-        value = "1234",
-        label = "테스트"
+        value = "1,240",
+        label = "전체",
+        unit = "대"
     )
 }
