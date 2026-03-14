@@ -110,6 +110,7 @@ fun VehicleDetailScreenContent(
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 state.error != null -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
@@ -120,6 +121,7 @@ fun VehicleDetailScreenContent(
                         Button(onClick = onNavigateBack) { Text("돌아가기") }
                     }
                 }
+
                 state.vehicle != null -> {
                     VehicleDetailContent(
                         vehicle = state.vehicle,

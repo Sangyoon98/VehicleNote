@@ -77,6 +77,7 @@ fun EntryExitDetailScreen(
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 state.error != null -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
@@ -87,6 +88,7 @@ fun EntryExitDetailScreen(
                         Button(onClick = onNavigateBack) { Text("돌아가기") }
                     }
                 }
+
                 state.record != null -> {
                     Column(
                         modifier = Modifier
@@ -125,7 +127,11 @@ fun EntryExitDetailScreen(
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    Text(typeLabel, color = typeColor, style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        typeLabel,
+                                        color = typeColor,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
                                 }
                                 InfoRow(
                                     label = "시각",

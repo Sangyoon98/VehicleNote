@@ -39,6 +39,7 @@ class EntryExitDetailViewModel @Inject constructor(
             EntryExitDetailAction.NavigateBackClicked -> {
                 sendSideEffect(EntryExitDetailSideEffect.NavigateBack)
             }
+
             EntryExitDetailAction.RegisterVehicleClicked -> {
                 val plate = _state.value.record?.licensePlate ?: return
                 sendSideEffect(EntryExitDetailSideEffect.NavigateToAddVehicle(plate))

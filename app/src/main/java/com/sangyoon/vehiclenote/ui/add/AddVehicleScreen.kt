@@ -98,7 +98,11 @@ fun AddVehicleScreen(
                 is AddVehicleSideEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
                 is AddVehicleSideEffect.LaunchCamera -> {
                     val permission = Manifest.permission.CAMERA
-                    if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            permission
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
                         // 권한 있음: 바로 카메라 실행
                         cameraLauncher.launch(effect.outputUri)
                     } else {
@@ -107,6 +111,7 @@ fun AddVehicleScreen(
                         cameraPermissionLauncher.launch(permission)
                     }
                 }
+
                 AddVehicleSideEffect.LaunchGallery -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         pickMediaLauncher.launch(
@@ -220,8 +225,22 @@ fun AddVehicleScreen(
                 customFields = state.customFields,
                 onAddField = { viewModel.onAction(AddVehicleAction.AddCustomField) },
                 onRemoveField = { viewModel.onAction(AddVehicleAction.RemoveCustomField(it)) },
-                onKeyChanged = { index, key -> viewModel.onAction(AddVehicleAction.CustomFieldKeyChanged(index, key)) },
-                onValueChanged = { index, value -> viewModel.onAction(AddVehicleAction.CustomFieldValueChanged(index, value)) }
+                onKeyChanged = { index, key ->
+                    viewModel.onAction(
+                        AddVehicleAction.CustomFieldKeyChanged(
+                            index,
+                            key
+                        )
+                    )
+                },
+                onValueChanged = { index, value ->
+                    viewModel.onAction(
+                        AddVehicleAction.CustomFieldValueChanged(
+                            index,
+                            value
+                        )
+                    )
+                }
             )
 
             Spacer(modifier = Modifier.height(4.dp))

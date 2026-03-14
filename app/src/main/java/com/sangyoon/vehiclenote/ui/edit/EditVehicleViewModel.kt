@@ -42,27 +42,36 @@ class EditVehicleViewModel @Inject constructor(
         when (action) {
             is EditVehicleAction.LicensePlateChanged ->
                 _state.update { it.copy(licensePlate = action.value, licensePlateError = null) }
+
             is EditVehicleAction.OwnerNameChanged ->
                 _state.update { it.copy(ownerName = action.value, ownerNameError = null) }
+
             is EditVehicleAction.DepartmentChanged ->
                 _state.update { it.copy(department = action.value) }
+
             is EditVehicleAction.PhoneNumberChanged ->
                 _state.update { it.copy(phoneNumber = action.value) }
+
             is EditVehicleAction.CarModelChanged ->
                 _state.update { it.copy(carModel = action.value) }
+
             is EditVehicleAction.MemoChanged ->
                 _state.update { it.copy(memo = action.value) }
+
             EditVehicleAction.SaveClicked -> updateVehicle()
 
             EditVehicleAction.PhotoClicked ->
                 _state.update { it.copy(showPhotoSourceDialog = true) }
+
             EditVehicleAction.PhotoSourceDialogDismissed ->
                 _state.update { it.copy(showPhotoSourceDialog = false) }
+
             EditVehicleAction.CameraSelected -> launchCamera()
             EditVehicleAction.GallerySelected -> {
                 _state.update { it.copy(showPhotoSourceDialog = false) }
                 sendSideEffect(EditVehicleSideEffect.LaunchGallery)
             }
+
             is EditVehicleAction.CameraResultReceived -> handleCameraResult(action.success)
             is EditVehicleAction.GalleryResultReceived -> handleGalleryResult(action.uri)
             EditVehicleAction.PhotoRemoved -> removePhoto()
@@ -70,14 +79,21 @@ class EditVehicleViewModel @Inject constructor(
 
             EditVehicleAction.AddCustomField ->
                 _state.update { it.copy(customFields = it.customFields + CustomField("", "")) }
+
             is EditVehicleAction.RemoveCustomField ->
-                _state.update { it.copy(customFields = it.customFields.toMutableList().also { list -> list.removeAt(action.index) }) }
+                _state.update {
+                    it.copy(
+                        customFields = it.customFields.toMutableList()
+                            .also { list -> list.removeAt(action.index) })
+                }
+
             is EditVehicleAction.CustomFieldKeyChanged ->
                 _state.update {
                     it.copy(customFields = it.customFields.toMutableList().also { list ->
                         list[action.index] = list[action.index].copy(key = action.key)
                     })
                 }
+
             is EditVehicleAction.CustomFieldValueChanged ->
                 _state.update {
                     it.copy(customFields = it.customFields.toMutableList().also { list ->
