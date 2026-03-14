@@ -17,7 +17,8 @@ class RecordEntryExitUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(licensePlate: String): EntryExitRecord {
         val lastRecord = entryExitRepository.getLastRecordByPlate(licensePlate)
-        val newType = if (lastRecord?.type == RecordType.ENTRY) RecordType.EXIT else RecordType.ENTRY
+        val newType =
+            if (lastRecord?.type == RecordType.ENTRY) RecordType.EXIT else RecordType.ENTRY
         val vehicle = vehicleRepository.getByLicensePlate(licensePlate)
 
         val record = EntryExitRecord(

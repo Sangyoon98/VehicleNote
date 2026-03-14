@@ -3,7 +3,6 @@ package com.sangyoon.vehiclenote.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -41,7 +40,7 @@ import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.ui.home.components.RecentVehicleCard
 import com.sangyoon.vehiclenote.ui.home.components.StatisticsSection
 import com.sangyoon.vehiclenote.ui.home.components.VehicleListItem
-import com.sangyoon.vehiclenote.ui.theme.VehicleNoteTheme
+import com.sangyoon.vehiclenote.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +81,13 @@ fun HomeScreen(
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = "검색") },
                         trailingIcon = {
                             if (state.searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { viewModel.onAction(HomeAction.SearchQueryChanged("")) }) {
+                                IconButton(onClick = {
+                                    viewModel.onAction(
+                                        HomeAction.SearchQueryChanged(
+                                            ""
+                                        )
+                                    )
+                                }) {
                                     Icon(Icons.Default.Close, contentDescription = "지우기")
                                 }
                             }
@@ -132,6 +137,7 @@ fun HomeScreen(
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 state.error != null -> {
                     Text(
                         text = state.error ?: "오류 발생",
@@ -139,6 +145,7 @@ fun HomeScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+
                 else -> {
                     HomeContent(
                         state = state,
@@ -214,19 +221,30 @@ private fun HomeContent(
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
-    VehicleNoteTheme {
+    AppTheme {
         HomeContent(
             state = HomeState(
                 vehicles = listOf(
-                    Vehicle(id = 1, licensePlate = "12가1234", ownerName = "홍길동", department = "총무부",
-                        phoneNumber = "010-1234-5678", carModel = "그랜저", memo = "VIP 차량"),
-                    Vehicle(id = 2, licensePlate = "34나5678", ownerName = "김철수", department = "인사부",
-                        carModel = "소나타"),
-                    Vehicle(id = 3, licensePlate = "56다9012", ownerName = "이영희", department = "개발부",
-                        phoneNumber = "010-9999-9999", memo = "자주 방문")
+                    Vehicle(
+                        id = 1, licensePlate = "12가1234", ownerName = "홍길동", department = "총무부",
+                        phoneNumber = "010-1234-5678", carModel = "그랜저", memo = "VIP 차량"
+                    ),
+                    Vehicle(
+                        id = 2, licensePlate = "34나5678", ownerName = "김철수", department = "인사부",
+                        carModel = "소나타"
+                    ),
+                    Vehicle(
+                        id = 3, licensePlate = "56다9012", ownerName = "이영희", department = "개발부",
+                        phoneNumber = "010-9999-9999", memo = "자주 방문"
+                    )
                 ),
                 recentVehicles = listOf(
-                    Vehicle(id = 1, licensePlate = "12가1234", ownerName = "홍길동", department = "총무부"),
+                    Vehicle(
+                        id = 1,
+                        licensePlate = "12가1234",
+                        ownerName = "홍길동",
+                        department = "총무부"
+                    ),
                     Vehicle(id = 2, licensePlate = "34나5678", ownerName = "김철수", department = "인사부")
                 ),
                 totalVehicleCount = 45,
@@ -242,7 +260,7 @@ private fun HomeScreenPreview() {
 @Preview(showBackground = true, name = "빈 상태")
 @Composable
 private fun HomeScreenEmptyPreview() {
-    VehicleNoteTheme {
+    AppTheme {
         HomeContent(
             state = HomeState(),
             onVehicleClick = {},
@@ -254,7 +272,7 @@ private fun HomeScreenEmptyPreview() {
 @Preview(showBackground = true, name = "로딩 상태")
 @Composable
 private fun HomeScreenLoadingPreview() {
-    VehicleNoteTheme {
+    AppTheme {
         Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }

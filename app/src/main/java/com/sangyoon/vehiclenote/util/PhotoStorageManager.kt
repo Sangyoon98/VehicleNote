@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PhotoStorageManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     fun createCameraOutputFile(): Pair<File, Uri> {
         val dir = File(context.filesDir, "photos").also { it.mkdirs() }

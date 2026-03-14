@@ -20,15 +20,15 @@ abstract class VehicleDatabase : RoomDatabase() {
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE vehicles ADD COLUMN photoUri TEXT")
-                database.execSQL("ALTER TABLE vehicles ADD COLUMN customFields TEXT NOT NULL DEFAULT '[]'")
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE vehicles ADD COLUMN photoUri TEXT")
+                db.execSQL("ALTER TABLE vehicles ADD COLUMN customFields TEXT NOT NULL DEFAULT '[]'")
             }
         }
 
         val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL(
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
                     """
                     CREATE TABLE IF NOT EXISTS entry_exit_records (
                         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -40,31 +40,31 @@ abstract class VehicleDatabase : RoomDatabase() {
                     )
                     """.trimIndent()
                 )
-                database.execSQL(
+                db.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_entry_exit_records_licensePlate ON entry_exit_records(licensePlate)"
                 )
-                database.execSQL(
+                db.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_entry_exit_records_vehicleId ON entry_exit_records(vehicleId)"
                 )
-                database.execSQL(
+                db.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_entry_exit_records_timestamp ON entry_exit_records(timestamp)"
                 )
             }
         }
 
         val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("DROP INDEX IF EXISTS idx_eer_plate")
-                database.execSQL("DROP INDEX IF EXISTS idx_eer_vehicleId")
-                database.execSQL("DROP INDEX IF EXISTS idx_eer_timestamp")
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP INDEX IF EXISTS idx_eer_plate")
+                db.execSQL("DROP INDEX IF EXISTS idx_eer_vehicleId")
+                db.execSQL("DROP INDEX IF EXISTS idx_eer_timestamp")
 
-                database.execSQL(
+                db.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_entry_exit_records_licensePlate ON entry_exit_records(licensePlate)"
                 )
-                database.execSQL(
+                db.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_entry_exit_records_vehicleId ON entry_exit_records(vehicleId)"
                 )
-                database.execSQL(
+                db.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_entry_exit_records_timestamp ON entry_exit_records(timestamp)"
                 )
             }
