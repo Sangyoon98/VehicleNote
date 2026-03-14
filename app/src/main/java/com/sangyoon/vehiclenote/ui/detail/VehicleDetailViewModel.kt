@@ -42,8 +42,15 @@ class VehicleDetailViewModel @Inject constructor(
                 _state.update { it.copy(showDeleteDialog = false) }
                 deleteVehicle()
             }
+
             VehicleDetailAction.EditClicked ->
-                viewModelScope.launch { _sideEffect.send(VehicleDetailSideEffect.NavigateToEdit(vehicleId)) }
+                viewModelScope.launch {
+                    _sideEffect.send(
+                        VehicleDetailSideEffect.NavigateToEdit(
+                            vehicleId
+                        )
+                    )
+                }
         }
     }
 

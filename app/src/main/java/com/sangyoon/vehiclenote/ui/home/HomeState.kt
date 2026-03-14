@@ -8,7 +8,7 @@ data class HomeState(
     val searchQuery: String = "",
     val isSearchActive: Boolean = false,
     val isLoading: Boolean = false,
-    val error : String? = null,
+    val error: String? = null,
 
     // 통계 (ViewModel에서 vehicles로부터 계산)
     val totalVehicleCount: Int = 0,

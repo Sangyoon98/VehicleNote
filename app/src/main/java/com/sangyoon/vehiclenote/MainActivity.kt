@@ -14,7 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sangyoon.vehiclenote.navigation.NavGraph
 import com.sangyoon.vehiclenote.navigation.Screen
 import com.sangyoon.vehiclenote.ui.components.BottomNavigationBar
-import com.sangyoon.vehiclenote.ui.theme.VehicleNoteTheme
+import com.sangyoon.vehiclenote.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            VehicleNoteTheme {
+            AppTheme {
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route

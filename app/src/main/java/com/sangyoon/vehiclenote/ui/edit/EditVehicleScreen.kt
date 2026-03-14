@@ -97,13 +97,18 @@ fun EditVehicleScreen(
                 is EditVehicleSideEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
                 is EditVehicleSideEffect.LaunchCamera -> {
                     val permission = Manifest.permission.CAMERA
-                    if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            permission
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
                         cameraLauncher.launch(effect.outputUri)
                     } else {
                         pendingCameraUri = effect.outputUri
                         cameraPermissionLauncher.launch(permission)
                     }
                 }
+
                 EditVehicleSideEffect.LaunchGallery -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         pickMediaLauncher.launch(
@@ -227,8 +232,22 @@ fun EditVehicleScreen(
                     customFields = state.customFields,
                     onAddField = { viewModel.onAction(EditVehicleAction.AddCustomField) },
                     onRemoveField = { viewModel.onAction(EditVehicleAction.RemoveCustomField(it)) },
-                    onKeyChanged = { index, key -> viewModel.onAction(EditVehicleAction.CustomFieldKeyChanged(index, key)) },
-                    onValueChanged = { index, value -> viewModel.onAction(EditVehicleAction.CustomFieldValueChanged(index, value)) }
+                    onKeyChanged = { index, key ->
+                        viewModel.onAction(
+                            EditVehicleAction.CustomFieldKeyChanged(
+                                index,
+                                key
+                            )
+                        )
+                    },
+                    onValueChanged = { index, value ->
+                        viewModel.onAction(
+                            EditVehicleAction.CustomFieldValueChanged(
+                                index,
+                                value
+                            )
+                        )
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))

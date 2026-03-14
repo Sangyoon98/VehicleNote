@@ -61,6 +61,7 @@ class PlateRecognizerImpl : PlateRecognizer {
                         consecutiveCount = 0
                         onResult(null)
                     }
+
                     plate == lastRecognizedPlate -> {
                         // 동일 번호판 연속 인식
                         consecutiveCount++
@@ -72,6 +73,7 @@ class PlateRecognizerImpl : PlateRecognizer {
                             onResult(null)
                         }
                     }
+
                     else -> {
                         // 새 번호판 → 카운터 초기화
                         lastRecognizedPlate = plate
