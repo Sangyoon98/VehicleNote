@@ -2,7 +2,9 @@ package com.sangyoon.vehiclenote.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -69,7 +72,33 @@ fun HomeScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            SearchBar(
+            Column {
+                // Header with title and notification icon
+                if (!state.isSearchActive) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "차량 정보 관리",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        IconButton(onClick = { /* TODO: Handle notification */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "알림",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+
+                // Search bar
+                SearchBar(
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = state.searchQuery,
@@ -77,7 +106,7 @@ fun HomeScreen(
                         onSearch = { viewModel.onAction(HomeAction.SearchQueryChanged(it)) },
                         expanded = state.isSearchActive,
                         onExpandedChange = { viewModel.onAction(HomeAction.SearchActiveChanged(it)) },
-                        placeholder = { Text("차량번호 검색") },
+                        placeholder = { Text("차량 번호로 차량 검색") },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = "검색") },
                         trailingIcon = {
                             if (state.searchQuery.isNotEmpty()) {
@@ -116,6 +145,7 @@ fun HomeScreen(
                         )
                     }
                 }
+            }
             }
         },
         floatingActionButton = {
