@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import com.sangyoon.vehiclenote.ui.components.VnButton
+import com.sangyoon.vehiclenote.ui.components.VnButtonSize
+import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,7 +21,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -76,14 +77,20 @@ fun VehicleDetailScreenContent(
             title = { Text("차량 삭제") },
             text = { Text("${state.vehicle?.licensePlate} 차량을 삭제하시겠습니까?") },
             confirmButton = {
-                TextButton(onClick = { onAction(VehicleDetailAction.DeleteConfirmed) }) {
-                    Text("삭제", color = MaterialTheme.colorScheme.error)
-                }
+                VnButton(
+                    "삭제",
+                    onClick = { onAction(VehicleDetailAction.DeleteConfirmed) },
+                    style = VnButtonStyle.Danger,
+                    size = VnButtonSize.Small,
+                )
             },
             dismissButton = {
-                TextButton(onClick = { onAction(VehicleDetailAction.DismissDeleteDialog) }) {
-                    Text("취소")
-                }
+                VnButton(
+                    "취소",
+                    onClick = { onAction(VehicleDetailAction.DismissDeleteDialog) },
+                    style = VnButtonStyle.Ghost,
+                    size = VnButtonSize.Small,
+                )
             }
         )
     }
@@ -118,7 +125,7 @@ fun VehicleDetailScreenContent(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(text = state.error, color = MaterialTheme.colorScheme.error)
-                        Button(onClick = onNavigateBack) { Text("돌아가기") }
+                        VnButton("돌아가기", onClick = onNavigateBack)
                     }
                 }
 

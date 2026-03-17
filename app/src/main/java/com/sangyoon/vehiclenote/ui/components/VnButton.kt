@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -102,6 +103,7 @@ enum class VnButtonSize {
  * @param trailingIcon 텍스트 뒤에 표시할 아이콘
  * @param enabled 활성화 여부
  * @param fullWidth true면 가로 최대 너비 (size=Cta는 항상 fullWidth)
+ * @param isLoading true면 텍스트/아이콘 대신 로딩 인디케이터 표시 (버튼 자동 비활성화)
  */
 @Composable
 fun VnButton(
@@ -114,13 +116,15 @@ fun VnButton(
     trailingIcon: ImageVector? = null,
     enabled: Boolean = true,
     fullWidth: Boolean = false,
+    isLoading: Boolean = false,
 ) {
     val isDark = isSystemInDarkTheme()
+    val isActuallyEnabled = enabled && !isLoading
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) 0.98f else 1f,
+        targetValue = if (isPressed && isActuallyEnabled) 0.98f else 1f,
         label = "vn_btn_scale",
     )
 
@@ -157,7 +161,7 @@ fun VnButton(
     val border: BorderStroke?
     val elevation: Dp
 
-    if (!enabled) {
+    if (!isActuallyEnabled) {
         containerColor = if (isDark) vnBtnDisabledBgDark else vnBtnDisabledBg
         contentColor = vnBtnDisabledText
         border = null
@@ -211,7 +215,7 @@ fun VnButton(
                 scaleX = scale
                 scaleY = scale
             },
-        enabled = enabled,
+        enabled = isActuallyEnabled,
         shape = RoundedCornerShape(cornerRadius),
         color = containerColor,
         contentColor = contentColor,
@@ -226,27 +230,35 @@ fun VnButton(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (leadingIcon != null) {
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = null,
+            if (isLoading) {
+                CircularProgressIndicator(
                     modifier = Modifier.size(iconSize),
+                    color = contentColor,
+                    strokeWidth = 2.dp,
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            Text(
-                text = text,
-                fontSize = fontSize.sp,
-                fontWeight = fontWeight,
-                lineHeight = (fontSize + 4).sp,
-            )
-            if (trailingIcon != null) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = trailingIcon,
-                    contentDescription = null,
-                    modifier = Modifier.size(iconSize),
+            } else {
+                if (leadingIcon != null) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        modifier = Modifier.size(iconSize),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text(
+                    text = text,
+                    fontSize = fontSize.sp,
+                    fontWeight = fontWeight,
+                    lineHeight = (fontSize + 4).sp,
                 )
+                if (trailingIcon != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = trailingIcon,
+                        contentDescription = null,
+                        modifier = Modifier.size(iconSize),
+                    )
+                }
             }
         }
     }

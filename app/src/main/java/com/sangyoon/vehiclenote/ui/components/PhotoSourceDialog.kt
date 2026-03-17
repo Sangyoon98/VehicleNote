@@ -11,12 +11,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Photo
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import com.sangyoon.vehiclenote.ui.components.VnButton
+import com.sangyoon.vehiclenote.ui.components.VnButtonSize
+import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -49,46 +49,31 @@ fun PhotoSourceDialog(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 // 카메라
-                Button(
+                VnButton(
+                    text = "카메라",
                     onClick = onCameraSelected,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                ) {
-                    Icon(
-                        Icons.Default.CameraAlt,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text("카메라", style = MaterialTheme.typography.titleSmall)
-                }
+                    leadingIcon = Icons.Default.CameraAlt,
+                    size = VnButtonSize.Large,
+                    fullWidth = true,
+                )
 
                 // 갤러리
-                Button(
+                VnButton(
+                    text = "갤러리",
                     onClick = onGallerySelected,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Photo,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text("갤러리", style = MaterialTheme.typography.titleSmall)
-                }
+                    leadingIcon = Icons.Default.Photo,
+                    size = VnButtonSize.Large,
+                    fullWidth = true,
+                )
 
                 // 취소
-                OutlinedButton(
+                VnButton(
+                    text = "취소",
                     onClick = onDismiss,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                ) {
-                    Text("취소", style = MaterialTheme.typography.titleSmall)
-                }
+                    style = VnButtonStyle.Outline,
+                    size = VnButtonSize.Large,
+                    fullWidth = true,
+                )
             }
         }
     }

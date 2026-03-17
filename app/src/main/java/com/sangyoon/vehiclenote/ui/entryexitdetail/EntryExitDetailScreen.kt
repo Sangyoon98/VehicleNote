@@ -15,18 +15,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import com.sangyoon.vehiclenote.ui.components.VnButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -92,7 +90,7 @@ fun EntryExitDetailScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(state.error!!, color = MaterialTheme.colorScheme.error)
-                        Button(onClick = onNavigateBack) { Text("돌아가기") }
+                        VnButton("돌아가기", onClick = onNavigateBack)
                     }
                 }
 
@@ -191,12 +189,11 @@ fun EntryExitDetailScreen(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             // 차량 등록 버튼
-                            Button(
+                            VnButton(
+                                text = "차량 등록하기",
                                 onClick = { viewModel.onAction(EntryExitDetailAction.RegisterVehicleClicked) },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("차량 등록하기")
-                            }
+                                fullWidth = true,
+                            )
                         }
 
                         // 입차 정보 카드

@@ -13,7 +13,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.sangyoon.vehiclenote.ui.components.VnButton
+import com.sangyoon.vehiclenote.ui.components.VnButtonSize
+import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,11 +77,12 @@ fun CustomFieldsSection(
             }
         }
 
-        TextButton(
+        VnButton(
+            text = "+ 필드 추가",
             onClick = onAddField,
-            modifier = Modifier.padding(top = 4.dp)
-        ) {
-            Text("+ 필드 추가")
-        }
+            style = VnButtonStyle.Ghost,
+            size = VnButtonSize.Small,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
