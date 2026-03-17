@@ -20,8 +20,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import com.sangyoon.vehiclenote.ui.components.VnButton
+import com.sangyoon.vehiclenote.ui.components.VnButtonSize
+import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -252,22 +254,15 @@ fun EditVehicleScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Button(
+                VnButton(
+                    text = "수정하기",
                     onClick = { viewModel.onAction(EditVehicleAction.SaveClicked) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = !state.isLoading
-                ) {
-                    if (state.isLoading && state.licensePlate.isNotBlank()) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Text("수정하기", style = MaterialTheme.typography.titleMedium)
-                    }
-                }
+                    style = VnButtonStyle.Primary,
+                    size = VnButtonSize.Large,
+                    fullWidth = true,
+                    enabled = !state.isLoading,
+                    isLoading = state.isLoading && state.licensePlate.isNotBlank(),
+                )
 
                 state.error?.let { error ->
                     Text(

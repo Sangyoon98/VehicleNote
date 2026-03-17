@@ -22,9 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,8 +32,10 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import com.sangyoon.vehiclenote.ui.components.VnButton
+import com.sangyoon.vehiclenote.ui.components.VnButtonSize
+import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -161,9 +161,12 @@ fun EntryExitScreen(
                 },
                 actions = {
                     if (state.isSearching) {
-                        TextButton(onClick = { viewModel.onAction(EntryExitAction.SearchDismissed) }) {
-                            Text("취소")
-                        }
+                        VnButton(
+                            "취소",
+                            onClick = { viewModel.onAction(EntryExitAction.SearchDismissed) },
+                            style = VnButtonStyle.Ghost,
+                            size = VnButtonSize.Small,
+                        )
                     } else {
                         IconButton(onClick = { /* TODO: 삭제 */ }) {
                             Icon(Icons.Filled.Delete, contentDescription = "삭제")
@@ -254,40 +257,30 @@ fun EntryExitScreen(
                                     text = "입출차 번호판 인식을 위해 카메라 권한이 필요합니다.",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
-                                Button(
+                                VnButton(
+                                    text = "카메라 권한 요청",
                                     onClick = { cameraPermissionLauncher.launch(cameraPermission) },
-                                    modifier = Modifier.padding(top = 12.dp)
-                                ) {
-                                    Text("카메라 권한 요청")
-                                }
-                                TextButton(
-                                    onClick = { viewModel.onAction(EntryExitAction.ManualInputClicked) }
-                                ) {
-                                    Text("수동 입력으로 진행")
-                                }
+                                    modifier = Modifier.padding(top = 12.dp),
+                                )
+                                VnButton(
+                                    text = "수동 입력으로 진행",
+                                    onClick = { viewModel.onAction(EntryExitAction.ManualInputClicked) },
+                                    style = VnButtonStyle.Ghost,
+                                )
                             }
                         }
                     }
 
                     // 수동 입력 버튼
-                    FilledTonalButton(
+                    VnButton(
+                        text = "번호판 직접 입력",
                         onClick = { viewModel.onAction(EntryExitAction.ManualInputClicked) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            Icons.Filled.Edit,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Text(
-                            text = "번호판 직접 입력",
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
+                        style = VnButtonStyle.Secondary,
+                        size = VnButtonSize.Large,
+                        leadingIcon = Icons.Filled.Edit,
+                        modifier = Modifier.padding(16.dp),
+                        fullWidth = true,
+                    )
                 }
             }
 

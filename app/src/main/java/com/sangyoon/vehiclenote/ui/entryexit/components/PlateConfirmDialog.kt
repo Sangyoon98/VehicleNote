@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.sangyoon.vehiclenote.ui.components.VnButton
+import com.sangyoon.vehiclenote.ui.components.VnButtonSize
+import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -28,17 +30,21 @@ fun PlateConfirmDialog(
             )
         },
         confirmButton = {
-            TextButton(
+            VnButton(
+                "확인",
                 onClick = onConfirm,
-                enabled = plate.isNotBlank()
-            ) {
-                Text("확인")
-            }
+                style = VnButtonStyle.Primary,
+                size = VnButtonSize.Small,
+                enabled = plate.isNotBlank(),
+            )
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("취소")
-            }
+            VnButton(
+                "취소",
+                onClick = onDismiss,
+                style = VnButtonStyle.Ghost,
+                size = VnButtonSize.Small,
+            )
         }
     )
 }
