@@ -9,33 +9,29 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,13 +42,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.sangyoon.ocr.CameraPreviewWithRecognition
 import com.sangyoon.vehiclenote.di.OcrEntryPoint
+import com.sangyoon.vehiclenote.ui.components.VnButton
+import com.sangyoon.vehiclenote.ui.components.VnButtonSize
+import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
 import com.sangyoon.vehiclenote.ui.entryexit.components.EntryExitLogList
 import com.sangyoon.vehiclenote.ui.entryexit.components.ManualInputDialog
 import com.sangyoon.vehiclenote.ui.entryexit.components.PlateConfirmDialog
@@ -83,7 +82,6 @@ fun EntryExitScreen(
         hasCameraPermission = isGranted
     }
 
-    // OcrEntryPoint를 통해 PlateRecognizer 주입
     val plateRecognizer = remember {
         EntryPointAccessors.fromApplication(
             context.applicationContext,
@@ -91,7 +89,6 @@ fun EntryExitScreen(
         ).plateRecognizer()
     }
 
-    // PlateRecognizer 리소스 해제
     DisposableEffect(plateRecognizer) {
         onDispose { plateRecognizer.close() }
     }
@@ -111,7 +108,6 @@ fun EntryExitScreen(
         }
     }
 
-    // 다이얼로그
     if (state.showPlateConfirmDialog) {
         PlateConfirmDialog(
             plate = state.detectedPlate,
@@ -130,7 +126,14 @@ fun EntryExitScreen(
         )
     }
 
-    Scaffold(
+    val sheetScaffoldState = rememberBottomSheetScaffoldState()
+    // 시트가 완전히 펼쳐진 경우에만 리스트 스크롤 허용.
+    // 그 외에는 스크롤 이벤트가 LazyColumn에서 소비되지 않고 M3 NestedScrollConnection으로
+    // 전달되어 시트가 손가락을 자연스럽게 따라 움직인다.
+    val listScrollEnabled = sheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
+
+    BottomSheetScaffold(
+        scaffoldState = sheetScaffoldState,
         topBar = {
             TopAppBar(
                 title = {
@@ -138,11 +141,7 @@ fun EntryExitScreen(
                         OutlinedTextField(
                             value = state.searchQuery,
                             onValueChange = {
-                                viewModel.onAction(
-                                    EntryExitAction.SearchQueryChanged(
-                                        it
-                                    )
-                                )
+                                viewModel.onAction(EntryExitAction.SearchQueryChanged(it))
                             },
                             placeholder = { Text("번호판 또는 차주명 검색") },
                             singleLine = true,
@@ -161,9 +160,12 @@ fun EntryExitScreen(
                 },
                 actions = {
                     if (state.isSearching) {
-                        TextButton(onClick = { viewModel.onAction(EntryExitAction.SearchDismissed) }) {
-                            Text("취소")
-                        }
+                        VnButton(
+                            "취소",
+                            onClick = { viewModel.onAction(EntryExitAction.SearchDismissed) },
+                            style = VnButtonStyle.Ghost,
+                            size = VnButtonSize.Small,
+                        )
                     } else {
                         IconButton(onClick = { /* TODO: 삭제 */ }) {
                             Icon(Icons.Filled.Delete, contentDescription = "삭제")
@@ -172,133 +174,108 @@ fun EntryExitScreen(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            // 카메라 프리뷰 (검색 중이 아닐 때만 표시)
-            if (!state.isSearching) {
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        sheetPeekHeight = 280.dp,
+        sheetContent = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Column {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16f / 9f)
-                            .clipToBounds()
-                    ) {
-                        if (hasCameraPermission) {
-                            CameraPreviewWithRecognition(
-                                plateRecognizer = plateRecognizer,
-                                onPlateDetected = { plate ->
-                                    viewModel.onAction(EntryExitAction.PlateDetected(plate))
-                                },
-                                modifier = Modifier.fillMaxSize(),
-                                overlay = {
-                                    // 번호판 인식 영역 (파란색 테두리)
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                            .fillMaxWidth(0.7f)
-                                            .aspectRatio(3f)
-                                            .border(
-                                                width = 2.dp,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                shape = RoundedCornerShape(8.dp)
-                                            )
-                                    )
-
-                                    // 안내 메시지
-                                    Column(
-                                        modifier = Modifier
-                                            .align(Alignment.BottomCenter)
-                                            .padding(bottom = 32.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(
-                                            text = "번호판을 사각형 안에 맞추세요",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onPrimary,
-                                            modifier = Modifier
-                                                .background(
-                                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                                                    shape = RoundedCornerShape(8.dp)
-                                                )
-                                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = "자동으로 인식됩니다",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier
-                                                .background(
-                                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                                                    shape = RoundedCornerShape(8.dp)
-                                                )
-                                                .padding(horizontal = 16.dp, vertical = 4.dp)
-                                        )
-                                    }
-                                }
-                            )
-                        } else {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "입출차 번호판 인식을 위해 카메라 권한이 필요합니다.",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Button(
-                                    onClick = { cameraPermissionLauncher.launch(cameraPermission) },
-                                    modifier = Modifier.padding(top = 12.dp)
-                                ) {
-                                    Text("카메라 권한 요청")
-                                }
-                                TextButton(
-                                    onClick = { viewModel.onAction(EntryExitAction.ManualInputClicked) }
-                                ) {
-                                    Text("수동 입력으로 진행")
-                                }
-                            }
-                        }
-                    }
-
-                    // 수동 입력 버튼
-                    FilledTonalButton(
-                        onClick = { viewModel.onAction(EntryExitAction.ManualInputClicked) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            Icons.Filled.Edit,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = "입출차 기록",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    if (state.records.isNotEmpty()) {
                         Text(
-                            text = "번호판 직접 입력",
-                            style = MaterialTheme.typography.titleSmall
+                            text = "${state.records.size}건",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
+                VnButton(
+                    text = "직접 입력",
+                    onClick = { viewModel.onAction(EntryExitAction.ManualInputClicked) },
+                    style = VnButtonStyle.Secondary,
+                    size = VnButtonSize.Small,
+                    leadingIcon = Icons.Filled.Edit,
+                )
             }
-
-            // 입출차 기록 목록
+            HorizontalDivider()
             EntryExitLogList(
                 records = state.records,
                 onRecordClick = { recordId ->
                     viewModel.onAction(EntryExitAction.RecordClicked(recordId))
                 },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                userScrollEnabled = listScrollEnabled,
             )
+        },
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding()),
+        ) {
+            if (hasCameraPermission) {
+                CameraPreviewWithRecognition(
+                    plateRecognizer = plateRecognizer,
+                    onPlateDetected = { plate ->
+                        viewModel.onAction(EntryExitAction.PlateDetected(plate))
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {},
+                    overlay = {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxWidth(0.7f)
+                                .aspectRatio(3f)
+                                .border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                        )
+                        Text(
+                            text = "번호판을 사각형 안에 맞추세요",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 300.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                )
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = "입출차 번호판 인식을 위해\n카메라 권한이 필요합니다.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    VnButton(
+                        text = "카메라 권한 요청",
+                        onClick = { cameraPermissionLauncher.launch(cameraPermission) },
+                        modifier = Modifier.padding(top = 16.dp),
+                    )
+                }
+            }
         }
     }
 }

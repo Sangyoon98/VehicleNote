@@ -1,10 +1,10 @@
 package com.sangyoon.vehiclenote.ui.entryexit.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,29 +31,43 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * modifier를 LazyColumn에 직접 적용 — Column 래퍼 제거.
+ *
+ * BottomSheetScaffold의 sheetContent(ColumnScope)에서 Modifier.weight(1f)로 호출하면
+ * LazyColumn이 NestedScrollConnection 체인에 직접 연결되어
+ * 시트 확장/축소 ↔ 리스트 스크롤 우선순위가 자연스럽게 동작한다.
+ */
 @Composable
 fun EntryExitLogList(
     records: List<EntryExitRecord>,
     onRecordClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    userScrollEnabled: Boolean = true,
 ) {
-    Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Text(
-            text = "최근 인식 기록",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(records, key = { it.id }) { record ->
-                EntryExitLogItem(
-                    record = record,
-                    onClick = { onRecordClick(record.id) }
-                )
-            }
+    LazyColumn(
+        modifier = modifier,
+        userScrollEnabled = userScrollEnabled,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item(contentType = "section_header") {
+            Text(
+                text = "최근 인식 기록",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 4.dp),
+            )
+        }
+        items(
+            items = records,
+            key = { it.id },
+            contentType = { "record_item" },
+        ) { record ->
+            EntryExitLogItem(
+                record = record,
+                onClick = { onRecordClick(record.id) },
+            )
         }
     }
 }
@@ -62,7 +75,7 @@ fun EntryExitLogList(
 @Composable
 private fun EntryExitLogItem(
     record: EntryExitRecord,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         onClick = onClick,
@@ -79,7 +92,6 @@ private fun EntryExitLogItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 왼쪽: 원형 아이콘
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -97,7 +109,6 @@ private fun EntryExitLogItem(
                 )
             }
 
-            // 중앙: 차량 번호 + 시간
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = record.licensePlate,
@@ -111,7 +122,6 @@ private fun EntryExitLogItem(
                 )
             }
 
-            // 오른쪽: 입차/출차 배지
             val isEntry = record.type == RecordType.ENTRY
             Surface(
                 shape = RoundedCornerShape(6.dp),
