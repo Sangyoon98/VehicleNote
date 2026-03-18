@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -126,6 +127,10 @@ fun EntryExitScreen(
     }
 
     val sheetScaffoldState = rememberBottomSheetScaffoldState()
+    // 시트가 완전히 펼쳐진 경우에만 리스트 스크롤 허용.
+    // 그 외에는 스크롤 이벤트가 LazyColumn에서 소비되지 않고 M3 NestedScrollConnection으로
+    // 전달되어 시트가 손가락을 자연스럽게 따라 움직인다.
+    val listScrollEnabled = sheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
 
     BottomSheetScaffold(
         scaffoldState = sheetScaffoldState,
@@ -172,7 +177,6 @@ fun EntryExitScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         sheetPeekHeight = 280.dp,
         sheetContent = {
-            // 시트 헤더: 제목/건수 + 직접 입력 버튼
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -207,7 +211,8 @@ fun EntryExitScreen(
                 onRecordClick = { recordId ->
                     viewModel.onAction(EntryExitAction.RecordClicked(recordId))
                 },
-                modifier = Modifier.fillMaxHeight(),
+                modifier = Modifier.weight(1f),
+                userScrollEnabled = listScrollEnabled,
             )
         },
     ) { paddingValues ->
@@ -222,7 +227,9 @@ fun EntryExitScreen(
                     onPlateDetected = { plate ->
                         viewModel.onAction(EntryExitAction.PlateDetected(plate))
                     },
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {},
                     overlay = {
                         Box(
                             modifier = Modifier
