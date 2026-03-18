@@ -221,10 +221,37 @@ val surfaceContainerLowDarkHighContrast = Color(0xFF1D2117)
 val surfaceContainerDarkHighContrast = Color(0xFF2E3227)
 val surfaceContainerHighDarkHighContrast = Color(0xFF393D32)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF44483C)
+// =====================================================
+// VehicleNote Design System — Button Colors
+// Based on Stitch design (primary: #1241A1 / dark: #3B82F6)
+// =====================================================
 
+// Primary (filled blue)
+val vnBtnPrimaryBg        = Color(0xFF1241A1)
+val vnBtnPrimaryBgDark    = Color(0xFF3B82F6)
+val vnBtnPrimaryText      = Color(0xFFFFFFFF)
 
+// Secondary (soft tinted fill)
+val vnBtnSecondaryBg      = Color(0xFFE8EFF9)
+val vnBtnSecondaryBgDark  = Color(0xFF1E3A5F)
+val vnBtnSecondaryText    = Color(0xFF1241A1)
+val vnBtnSecondaryTextDark= Color(0xFF93C5FD)
 
+// Outline (border only)
+val vnBtnOutlineBorder    = Color(0xFF1241A1)
+val vnBtnOutlineBorderDark= Color(0xFF3B82F6)
+val vnBtnOutlineText      = Color(0xFF1241A1)
+val vnBtnOutlineTextDark  = Color(0xFF93C5FD)
 
+// Danger (destructive action)
+val vnBtnDangerBg         = Color(0xFFDC2626)
+val vnBtnDangerBgDark     = Color(0xFFEF4444)
+val vnBtnDangerText       = Color(0xFFFFFFFF)
+
+// Disabled
+val vnBtnDisabledBg       = Color(0xFFE2E8F0)
+val vnBtnDisabledBgDark   = Color(0xFF334155)
+val vnBtnDisabledText     = Color(0xFF94A3B8)
 
 
 
