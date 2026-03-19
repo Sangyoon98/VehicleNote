@@ -1,9 +1,7 @@
 package com.sangyoon.vehiclenote.navigation
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -24,10 +22,10 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
-        modifier = Modifier.padding(contentPadding)
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
+                parentContentPadding = contentPadding,
                 onNavigateToAdd = { navController.navigate(Screen.AddVehicle.createRoute()) },
                 onNavigateToDetail = { vehicleId ->
                     navController.navigate(Screen.VehicleDetail.createRoute(vehicleId))
