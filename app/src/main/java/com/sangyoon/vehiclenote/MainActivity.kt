@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
@@ -28,14 +32,17 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
 
-                // BottomBar는 루트 탭 화면에서만 표시
                 val rootRoutes = setOf(Screen.Home.route, Screen.EntryExit.route)
                 val showBottomBar = currentRoute in rootRoutes
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        if (showBottomBar) {
+                        AnimatedVisibility(
+                            visible = showBottomBar,
+                            enter = slideInVertically(tween(300)) { it },
+                            exit = slideOutVertically(tween(300)) { it },
+                        ) {
                             BottomNavigationBar(
                                 currentRoute = currentRoute,
                                 navController = navController
