@@ -1,9 +1,11 @@
 package com.sangyoon.vehiclenote.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,6 +18,8 @@ import com.sangyoon.vehiclenote.ui.entryexit.EntryExitScreen
 import com.sangyoon.vehiclenote.ui.entryexitdetail.EntryExitDetailScreen
 import com.sangyoon.vehiclenote.ui.home.HomeScreen
 
+private const val TRANSITION_DURATION = 300
+
 @Composable
 fun NavGraph(
     navController: NavHostController,
@@ -24,10 +28,38 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
-        modifier = Modifier.padding(contentPadding)
+        // 새 화면: 오른쪽에서 슬라이드 인
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(TRANSITION_DURATION)
+            ) + fadeIn(tween(TRANSITION_DURATION))
+        },
+        // 현재 화면: 왼쪽으로 슬라이드 아웃
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(TRANSITION_DURATION)
+            ) + fadeOut(tween(TRANSITION_DURATION))
+        },
+        // 뒤로가기 진입: 왼쪽에서 슬라이드 인
+        popEnterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(TRANSITION_DURATION)
+            ) + fadeIn(tween(TRANSITION_DURATION))
+        },
+        // 뒤로가기 퇴장: 오른쪽으로 슬라이드 아웃
+        popExitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(TRANSITION_DURATION)
+            ) + fadeOut(tween(TRANSITION_DURATION))
+        },
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
+                parentContentPadding = contentPadding,
                 onNavigateToAdd = { navController.navigate(Screen.AddVehicle.createRoute()) },
                 onNavigateToDetail = { vehicleId ->
                     navController.navigate(Screen.VehicleDetail.createRoute(vehicleId))
