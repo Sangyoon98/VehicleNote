@@ -48,7 +48,7 @@ fun CameraPreviewWithRecognition(
         AndroidView(
             factory = { ctx ->
                 val previewView = PreviewView(ctx).apply {
-                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                    implementationMode = PreviewView.ImplementationMode.PERFORMANCE
                     scaleType = PreviewView.ScaleType.FILL_CENTER
                 }
 
