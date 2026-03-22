@@ -2,11 +2,13 @@ package com.sangyoon.vehiclenote.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,9 +47,16 @@ import com.sangyoon.vehiclenote.ui.home.components.StatisticsSection
 import com.sangyoon.vehiclenote.ui.home.components.VehicleListItem
 import com.sangyoon.vehiclenote.ui.theme.AppTheme
 
+private val SearchBarHeight = 56.dp
+private val SearchBarSpacing = 16.dp  // 서치바 위아래 간격
+
+// 콘텐츠 상단 오프셋: 간격 + 서치바 높이 + 간격
+private val ContentTopOffset = SearchBarSpacing + SearchBarHeight + SearchBarSpacing
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    parentContentPadding: PaddingValues = PaddingValues(),
     onNavigateToAdd: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
@@ -56,7 +64,6 @@ fun HomeScreen(
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // SideEffect 수집: 네비게이션과 스낵바는 일회성 이벤트이므로 Channel로 처리
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { effect ->
             when (effect) {
@@ -72,97 +79,26 @@ fun HomeScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            Column {
-                // Header with title and notification icon
-                if (!state.isSearchActive) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "차량 정보 관리",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        IconButton(onClick = { /* TODO: Handle notification */ }) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "알림",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
-
-                // Search bar
-                SearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = state.searchQuery,
-                        onQueryChange = { viewModel.onAction(HomeAction.SearchQueryChanged(it)) },
-                        onSearch = { viewModel.onAction(HomeAction.SearchQueryChanged(it)) },
-                        expanded = state.isSearchActive,
-                        onExpandedChange = { viewModel.onAction(HomeAction.SearchActiveChanged(it)) },
-                        placeholder = { Text("차량 번호로 차량 검색") },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "검색") },
-                        trailingIcon = {
-                            if (state.searchQuery.isNotEmpty()) {
-                                IconButton(onClick = {
-                                    viewModel.onAction(
-                                        HomeAction.SearchQueryChanged(
-                                            ""
-                                        )
-                                    )
-                                }) {
-                                    Icon(Icons.Default.Close, contentDescription = "지우기")
-                                }
-                            }
-                        }
-                    )
-                },
-                expanded = state.isSearchActive,
-                onExpandedChange = { viewModel.onAction(HomeAction.SearchActiveChanged(it)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(if (!state.isSearchActive) 16.dp else 0.dp),
-            ) {
-                // 검색 활성화 시 결과만 표시
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(state.vehicles) { vehicle ->
-                        VehicleListItem(
-                            vehicle = vehicle,
-                            onClick = {
-                                viewModel.onAction(HomeAction.SearchActiveChanged(false))
-                                viewModel.onAction(HomeAction.VehicleClicked(vehicle.id))
-                            }
-                        )
-                    }
-                }
-            }
-            }
-        },
         floatingActionButton = {
             if (!state.isSearchActive) {
+                // 시스템 내비바는 Scaffold가 이미 처리하므로 BottomNavigationBar 높이만 추가
+                val systemNavBar =
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                val bottomNavBarHeight =
+                    (parentContentPadding.calculateBottomPadding() - systemNavBar).coerceAtLeast(0.dp)
                 ExtendedFloatingActionButton(
                     onClick = { viewModel.onAction(HomeAction.AddVehicleClicked) },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("차량 등록") }
+                    text = { Text("차량 등록") },
+                    modifier = Modifier.padding(bottom = bottomNavBarHeight)
                 )
             }
         }
     ) { paddingValues ->
+        // paddingValues를 Box에 적용해 시스템 인셋(상태바·내비바·FAB 여백)을 한 번에 처리
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
         ) {
             when {
                 state.isLoading -> {
@@ -180,9 +116,66 @@ fun HomeScreen(
                 else -> {
                     HomeContent(
                         state = state,
+                        contentPadding = PaddingValues(
+                            top = paddingValues.calculateTopPadding() + ContentTopOffset,
+                            bottom = maxOf(
+                                paddingValues.calculateBottomPadding(),
+                                parentContentPadding.calculateBottomPadding()
+                            ) + 16.dp,
+                        ),
                         onVehicleClick = { viewModel.onAction(HomeAction.VehicleClicked(it)) },
                         onDeleteVehicle = { viewModel.onAction(HomeAction.DeleteVehicle(it)) }
                     )
+                }
+            }
+
+            // 플로팅 서치바: 시스템 인셋은 Box에서 이미 처리됐으므로 16dp만
+            SearchBar(
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = state.searchQuery,
+                        onQueryChange = { viewModel.onAction(HomeAction.SearchQueryChanged(it)) },
+                        onSearch = { viewModel.onAction(HomeAction.SearchQueryChanged(it)) },
+                        expanded = state.isSearchActive,
+                        onExpandedChange = { viewModel.onAction(HomeAction.SearchActiveChanged(it)) },
+                        placeholder = { Text("차량 번호로 차량 검색") },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "검색") },
+                        trailingIcon = {
+                            if (state.searchQuery.isNotEmpty()) {
+                                IconButton(onClick = {
+                                    viewModel.onAction(HomeAction.SearchQueryChanged(""))
+                                }) {
+                                    Icon(Icons.Default.Close, contentDescription = "지우기")
+                                }
+                            }
+                        }
+                    )
+                },
+                expanded = state.isSearchActive,
+                onExpandedChange = { viewModel.onAction(HomeAction.SearchActiveChanged(it)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = if (state.isSearchActive) 0.dp else SearchBarSpacing,
+                        start = if (state.isSearchActive) 0.dp else SearchBarSpacing,
+                        end = if (state.isSearchActive) 0.dp else SearchBarSpacing,
+                    )
+                    .align(Alignment.TopCenter),
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(state.vehicles) { vehicle ->
+                        VehicleListItem(
+                            vehicle = vehicle,
+                            onClick = {
+                                viewModel.onAction(HomeAction.SearchActiveChanged(false))
+                                viewModel.onAction(HomeAction.VehicleClicked(vehicle.id))
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -192,12 +185,13 @@ fun HomeScreen(
 @Composable
 private fun HomeContent(
     state: HomeState,
+    contentPadding: PaddingValues,
     onVehicleClick: (Long) -> Unit,
     onDeleteVehicle: (Vehicle) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // 통계 섹션
@@ -205,7 +199,8 @@ private fun HomeContent(
             StatisticsSection(
                 totalCount = state.totalVehicleCount,
                 todayCount = state.todayRegisteredCount,
-                departmentStats = state.departmentStats
+                departmentStats = state.departmentStats,
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         }
 
@@ -213,7 +208,9 @@ private fun HomeContent(
         if (state.recentVehicles.isNotEmpty()) {
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -231,7 +228,11 @@ private fun HomeContent(
                 }
             }
             item {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                // LazyRow는 contentPadding으로 처리해야 끝까지 스크롤해도 여백 유지
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     items(state.recentVehicles) { vehicle ->
                         RecentVehicleCard(
                             vehicle = vehicle,
@@ -247,7 +248,7 @@ private fun HomeContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -269,7 +270,8 @@ private fun HomeContent(
             VehicleListItem(
                 vehicle = vehicle,
                 onClick = { onVehicleClick(vehicle.id) },
-                onDelete = { onDeleteVehicle(vehicle) }
+                onDelete = { onDeleteVehicle(vehicle) },
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         }
     }
@@ -308,6 +310,7 @@ private fun HomeScreenPreview() {
                 todayRegisteredCount = 3,
                 departmentStats = mapOf("총무부" to 12, "인사부" to 8, "개발부" to 15, "영업부" to 10)
             ),
+            contentPadding = PaddingValues(16.dp),
             onVehicleClick = {},
             onDeleteVehicle = {}
         )
@@ -320,6 +323,7 @@ private fun HomeScreenEmptyPreview() {
     AppTheme {
         HomeContent(
             state = HomeState(),
+            contentPadding = PaddingValues(16.dp),
             onVehicleClick = {},
             onDeleteVehicle = {}
         )
