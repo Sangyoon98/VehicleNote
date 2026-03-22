@@ -16,26 +16,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -130,50 +125,12 @@ fun EntryExitScreen(
     // 시트가 완전히 펼쳐진 경우에만 리스트 스크롤 허용.
     // 그 외에는 스크롤 이벤트가 LazyColumn에서 소비되지 않고 M3 NestedScrollConnection으로
     // 전달되어 시트가 손가락을 자연스럽게 따라 움직인다.
-    val listScrollEnabled = sheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
+    val listScrollEnabled by remember {
+        derivedStateOf { sheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded }
+    }
 
     BottomSheetScaffold(
         scaffoldState = sheetScaffoldState,
-        topBar = {
-            TopAppBar(
-                title = {
-                    if (state.isSearching) {
-                        OutlinedTextField(
-                            value = state.searchQuery,
-                            onValueChange = {
-                                viewModel.onAction(EntryExitAction.SearchQueryChanged(it))
-                            },
-                            placeholder = { Text("번호판 또는 차주명 검색") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        Text("입출차 스캔")
-                    }
-                },
-                navigationIcon = {
-                    if (!state.isSearching) {
-                        IconButton(onClick = { /* TODO: 뒤로가기 */ }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로가기")
-                        }
-                    }
-                },
-                actions = {
-                    if (state.isSearching) {
-                        VnButton(
-                            "취소",
-                            onClick = { viewModel.onAction(EntryExitAction.SearchDismissed) },
-                            style = VnButtonStyle.Ghost,
-                            size = VnButtonSize.Small,
-                        )
-                    } else {
-                        IconButton(onClick = { /* TODO: 삭제 */ }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "삭제")
-                        }
-                    }
-                }
-            )
-        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         sheetPeekHeight = 280.dp,
         sheetContent = {
@@ -215,11 +172,9 @@ fun EntryExitScreen(
                 userScrollEnabled = listScrollEnabled,
             )
         },
-    ) { paddingValues ->
+    ) { _ ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding()),
+            modifier = Modifier.fillMaxSize(),
         ) {
             if (hasCameraPermission) {
                 CameraPreviewWithRecognition(
