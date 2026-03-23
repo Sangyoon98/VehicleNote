@@ -1,5 +1,6 @@
 package com.sangyoon.ocr
 
+import android.graphics.Rect
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
@@ -28,20 +29,20 @@ class PlateRecognizerImpl : PlateRecognizer {
     private val COOLDOWN_MS = 3000L
 
     @OptIn(ExperimentalGetImage::class)
-    override fun recognize(imageProxy: ImageProxy, onResult: (String?) -> Unit) {
+    override fun recognize(imageProxy: ImageProxy, onResult: (plate: String?, boundingBox: Rect?) -> Unit) {
         val now = System.currentTimeMillis()
 
         // Cooldown 중이면 프레임 스킵
         if (now - lastDetectionTime < COOLDOWN_MS) {
             imageProxy.close()
-            onResult(null)
+            onResult(null, null)
             return
         }
 
         val mediaImage = imageProxy.image
         if (mediaImage == null) {
             imageProxy.close()
-            onResult(null)
+            onResult(null, null)
             return
         }
 
@@ -52,40 +53,39 @@ class PlateRecognizerImpl : PlateRecognizer {
 
         recognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
-                val plate = KoreanPlateFilter.extractPlate(visionText.text)
+                val detection = KoreanPlateFilter.findPlateBounds(visionText)
+                val plate = detection?.first
+                val boundingBox = detection?.second
 
                 when {
                     plate == null -> {
-                        // 번호판 없음 → 카운터 리셋
                         lastRecognizedPlate = null
                         consecutiveCount = 0
-                        onResult(null)
+                        onResult(null, null)
                     }
 
                     plate == lastRecognizedPlate -> {
-                        // 동일 번호판 연속 인식
                         consecutiveCount++
                         if (consecutiveCount >= REQUIRED_CONSECUTIVE) {
                             consecutiveCount = 0
                             lastDetectionTime = now
-                            onResult(plate)
+                            onResult(plate, boundingBox)
                         } else {
-                            onResult(null)
+                            onResult(null, null)
                         }
                     }
 
                     else -> {
-                        // 새 번호판 → 카운터 초기화
                         lastRecognizedPlate = plate
                         consecutiveCount = 1
-                        onResult(null)
+                        onResult(null, null)
                     }
                 }
             }
             .addOnFailureListener {
                 lastRecognizedPlate = null
                 consecutiveCount = 0
-                onResult(null)
+                onResult(null, null)
             }
             .addOnCompleteListener {
                 imageProxy.close()

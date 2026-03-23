@@ -4,17 +4,13 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.BottomSheetScaffold
@@ -185,32 +181,6 @@ fun EntryExitScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {},
-                    overlay = {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .fillMaxWidth(0.7f)
-                                .aspectRatio(3f)
-                                .border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                        )
-                        Text(
-                            text = "번호판을 사각형 안에 맞추세요",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 300.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
                 )
             } else {
                 Column(
