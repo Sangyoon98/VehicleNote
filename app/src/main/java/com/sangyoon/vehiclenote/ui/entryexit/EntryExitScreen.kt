@@ -4,54 +4,77 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.sangyoon.ocr.CameraPreviewWithRecognition
 import com.sangyoon.vehiclenote.di.OcrEntryPoint
+import com.sangyoon.vehiclenote.domain.model.EntryExitRecord
+import com.sangyoon.vehiclenote.domain.model.RecordType
 import com.sangyoon.vehiclenote.ui.components.VnButton
 import com.sangyoon.vehiclenote.ui.components.VnButtonSize
 import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
-import com.sangyoon.vehiclenote.ui.entryexit.components.EntryExitLogList
 import com.sangyoon.vehiclenote.ui.entryexit.components.ManualInputDialog
 import com.sangyoon.vehiclenote.ui.entryexit.components.PlateConfirmDialog
 import dagger.hilt.android.EntryPointAccessors
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EntryExitScreen(
+    parentContentPadding: PaddingValues = PaddingValues(),
     onNavigateToDetail: (Long) -> Unit,
+    onNavigateToLogList: () -> Unit,
     viewModel: EntryExitViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -60,18 +83,13 @@ fun EntryExitScreen(
     val cameraPermission = Manifest.permission.CAMERA
     var hasCameraPermission by remember {
         mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                cameraPermission
-            ) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(context, cameraPermission) == PackageManager.PERMISSION_GRANTED
         )
     }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        hasCameraPermission = isGranted
-    }
+    ) { isGranted -> hasCameraPermission = isGranted }
 
     val plateRecognizer = remember {
         EntryPointAccessors.fromApplication(
@@ -85,15 +103,14 @@ fun EntryExitScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (!hasCameraPermission) {
-            cameraPermissionLauncher.launch(cameraPermission)
-        }
+        if (!hasCameraPermission) cameraPermissionLauncher.launch(cameraPermission)
     }
 
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { effect ->
             when (effect) {
                 is EntryExitSideEffect.NavigateToDetail -> onNavigateToDetail(effect.recordId)
+                is EntryExitSideEffect.NavigateToLogList -> onNavigateToLogList()
                 is EntryExitSideEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
             }
         }
@@ -117,61 +134,11 @@ fun EntryExitScreen(
         )
     }
 
-    val sheetScaffoldState = rememberBottomSheetScaffoldState()
-    // 시트가 완전히 펼쳐진 경우에만 리스트 스크롤 허용.
-    // 그 외에는 스크롤 이벤트가 LazyColumn에서 소비되지 않고 M3 NestedScrollConnection으로
-    // 전달되어 시트가 손가락을 자연스럽게 따라 움직인다.
-    val listScrollEnabled by remember {
-        derivedStateOf { sheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded }
-    }
-
-    BottomSheetScaffold(
-        scaffoldState = sheetScaffoldState,
+    Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        sheetPeekHeight = 280.dp,
-        sheetContent = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column {
-                    Text(
-                        text = "입출차 기록",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    if (state.records.isNotEmpty()) {
-                        Text(
-                            text = "${state.records.size}건",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-                VnButton(
-                    text = "직접 입력",
-                    onClick = { viewModel.onAction(EntryExitAction.ManualInputClicked) },
-                    style = VnButtonStyle.Secondary,
-                    size = VnButtonSize.Small,
-                    leadingIcon = Icons.Filled.Edit,
-                )
-            }
-            HorizontalDivider()
-            EntryExitLogList(
-                records = state.records,
-                onRecordClick = { recordId ->
-                    viewModel.onAction(EntryExitAction.RecordClicked(recordId))
-                },
-                modifier = Modifier.weight(1f),
-                userScrollEnabled = listScrollEnabled,
-            )
-        },
+        contentWindowInsets = WindowInsets(0)
     ) { _ ->
-        Box(
-            modifier = Modifier.fillMaxSize(),
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             if (hasCameraPermission) {
                 CameraPreviewWithRecognition(
                     plateRecognizer = plateRecognizer,
@@ -186,6 +153,7 @@ fun EntryExitScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.Black)
                         .padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -193,6 +161,7 @@ fun EntryExitScreen(
                     Text(
                         text = "입출차 번호판 인식을 위해\n카메라 권한이 필요합니다.",
                         style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White,
                     )
                     VnButton(
                         text = "카메라 권한 요청",
@@ -201,6 +170,123 @@ fun EntryExitScreen(
                     )
                 }
             }
+
+            // 하단 오버레이
+            val systemNavBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            val appNavBar = (parentContentPadding.calculateBottomPadding() - systemNavBar).coerceAtLeast(0.dp)
+            val bottomPadding = systemNavBar + appNavBar + 16.dp
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .background(
+                        color = Color.Black.copy(alpha = 0.65f),
+                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                    )
+                    .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = bottomPadding),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // 최근 기록 (최대 2개)
+                AnimatedVisibility(
+                    visible = state.records.isNotEmpty(),
+                    enter = fadeIn(tween(300)),
+                    exit = fadeOut(tween(300)),
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        state.records.take(2).forEach { record ->
+                            RecentRecordRow(
+                                record = record,
+                                onClick = { viewModel.onAction(EntryExitAction.RecordClicked(record.id)) }
+                            )
+                        }
+                        HorizontalDivider(
+                            color = Color.White.copy(alpha = 0.15f),
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+
+                // 액션 버튼
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    VnButton(
+                        text = "직접 입력",
+                        onClick = { viewModel.onAction(EntryExitAction.ManualInputClicked) },
+                        style = VnButtonStyle.Secondary,
+                        size = VnButtonSize.Small,
+                        leadingIcon = Icons.Filled.Edit,
+                    )
+                    VnButton(
+                        text = "전체 기록 보기",
+                        onClick = { viewModel.onAction(EntryExitAction.LogListClicked) },
+                        style = VnButtonStyle.Ghost,
+                        size = VnButtonSize.Small,
+                    )
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun RecentRecordRow(
+    record: EntryExitRecord,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 6.dp, horizontal = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(Color.White.copy(alpha = 0.15f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Default.DirectionsCar,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = Color.White,
+            )
+        }
+        Text(
+            text = record.licensePlate,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = Color.White,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = formatTimestamp(record.timestamp),
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White.copy(alpha = 0.65f),
+        )
+        val isEntry = record.type == RecordType.ENTRY
+        Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = if (isEntry) Color(0xFF1976D2).copy(alpha = 0.8f) else Color(0xFF388E3C).copy(alpha = 0.8f),
+        ) {
+            Text(
+                text = if (isEntry) "입차" else "출차",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            )
+        }
+    }
+}
+
+private fun formatTimestamp(timestamp: Long): String {
+    val sdf = SimpleDateFormat("MM/dd HH:mm", Locale.getDefault())
+    return sdf.format(Date(timestamp))
 }
