@@ -1,11 +1,6 @@
 package com.sangyoon.vehiclenote.ui.entryexit
 
 sealed interface EntryExitAction {
-    // 검색
-    data object SearchToggled : EntryExitAction
-    data class SearchQueryChanged(val query: String) : EntryExitAction
-    data object SearchDismissed : EntryExitAction
-
     // 번호판 인식
     data class PlateDetected(val plate: String) : EntryExitAction
     data class DetectedPlateEdited(val plate: String) : EntryExitAction
@@ -20,4 +15,5 @@ sealed interface EntryExitAction {
 
     // 목록
     data class RecordClicked(val recordId: Long) : EntryExitAction
+    data object LogListClicked : EntryExitAction
 }
