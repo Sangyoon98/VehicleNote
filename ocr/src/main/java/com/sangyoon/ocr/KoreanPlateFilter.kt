@@ -1,6 +1,21 @@
 package com.sangyoon.ocr
 
 object KoreanPlateFilter {
+
+    /**
+     * ML Kit [visionText]에서 번호판과 해당 텍스트 블록/라인의 바운딩 박스를 함께 반환한다.
+     * 블록 단위로 먼저 시도해 정밀한 좌표를 찾고, 없으면 전체 텍스트로 폴백(박스 없음).
+     */
+    fun findPlateBounds(visionText: com.google.mlkit.vision.text.Text): Pair<String, android.graphics.Rect?>? {
+        for (block in visionText.textBlocks) {
+            val plate = extractPlate(block.text) ?: continue
+            // 더 정밀한 라인 단위 좌표 우선 탐색
+            val matchingLine = block.lines.firstOrNull { extractPlate(it.text) == plate }
+            return plate to (matchingLine?.boundingBox ?: block.boundingBox)
+        }
+        // 폴백: 블록 간 결합 텍스트에서 매칭 (바운딩 박스 없음)
+        return extractPlate(visionText.text)?.let { it to null }
+    }
     private val OCR_CHAR_REPLACEMENTS = mapOf(
         'O' to '0',
         'o' to '0',
