@@ -181,7 +181,7 @@ fun EntryExitScreen(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .background(
-                        color = Color.Black.copy(alpha = 0.65f),
+                        color = MaterialTheme.colorScheme.background,
                         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                     )
                     .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = bottomPadding),
@@ -201,7 +201,7 @@ fun EntryExitScreen(
                             )
                         }
                         HorizontalDivider(
-                            color = Color.White.copy(alpha = 0.15f),
+                            color = MaterialTheme.colorScheme.outlineVariant,
                             modifier = Modifier.padding(top = 4.dp)
                         )
                     }
@@ -249,32 +249,32 @@ private fun RecentRecordRow(
         Box(
             modifier = Modifier
                 .size(32.dp)
-                .background(Color.White.copy(alpha = 0.15f), CircleShape),
+                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Default.DirectionsCar,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Text(
             text = record.licensePlate,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f),
         )
         Text(
             text = formatTimestamp(record.timestamp),
             style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = 0.65f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         val isEntry = record.type == RecordType.ENTRY
         Surface(
             shape = RoundedCornerShape(4.dp),
-            color = if (isEntry) Color(0xFF1976D2).copy(alpha = 0.8f) else Color(0xFF388E3C).copy(alpha = 0.8f),
+            color = if (isEntry) Color(0xFF1976D2) else Color(0xFF388E3C),
         ) {
             Text(
                 text = if (isEntry) "입차" else "출차",
