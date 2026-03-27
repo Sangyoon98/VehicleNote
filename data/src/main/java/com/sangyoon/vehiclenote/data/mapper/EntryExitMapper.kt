@@ -2,6 +2,7 @@ package com.sangyoon.vehiclenote.data.mapper
 
 import com.sangyoon.vehiclenote.data.local.entity.EntryExitRecordEntity
 import com.sangyoon.vehiclenote.data.local.entity.EntryExitRecordWithVehicleEntity
+import com.sangyoon.vehiclenote.data.local.entity.SearchResultTuple
 import com.sangyoon.vehiclenote.domain.model.EntryExitRecord
 import com.sangyoon.vehiclenote.domain.model.RecordType
 
@@ -20,6 +21,15 @@ fun EntryExitRecordWithVehicleEntity.toDomain(): EntryExitRecord = EntryExitReco
     timestamp = record.timestamp,
     vehicleId = record.vehicleId,
     ownerName = vehicle?.ownerName
+)
+
+fun SearchResultTuple.toDomain(): EntryExitRecord = EntryExitRecord(
+    id = id,
+    licensePlate = licensePlate,
+    type = RecordType.valueOf(type),
+    timestamp = timestamp,
+    vehicleId = vehicleId,
+    ownerName = ownerName
 )
 
 fun EntryExitRecord.toEntity(): EntryExitRecordEntity = EntryExitRecordEntity(

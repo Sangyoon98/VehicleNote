@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.sangyoon.vehiclenote.data.local.entity.EntryExitRecordEntity
 import com.sangyoon.vehiclenote.data.local.entity.EntryExitRecordWithVehicleEntity
+import com.sangyoon.vehiclenote.data.local.entity.SearchResultTuple
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,18 +18,17 @@ interface EntryExitRecordDao {
 
     /**
      * 번호판 또는 차주명으로 검색 (LEFT JOIN).
-     * Room @Transaction + @Relation 대신 raw SQL 쿼리로 LEFT JOIN 처리.
-     * 단, 결과를 EntryExitRecordWithVehicleEntity로 받기 위해 @Transaction 사용.
+     * Room @Relation은 SQL WHERE를 무시하므로, 플랫 튜플로 결과를 받아 직접 매핑한다.
      */
-    @Transaction
     @Query("""
-        SELECT r.* FROM entry_exit_records r
+        SELECT r.id, r.licensePlate, r.type, r.timestamp, r.vehicleId, v.ownerName
+        FROM entry_exit_records r
         LEFT JOIN vehicles v ON r.vehicleId = v.id
         WHERE r.licensePlate LIKE '%' || :query || '%'
            OR v.ownerName LIKE '%' || :query || '%'
         ORDER BY r.timestamp DESC
     """)
-    fun searchRecords(query: String): Flow<List<EntryExitRecordWithVehicleEntity>>
+    fun searchRecords(query: String): Flow<List<SearchResultTuple>>
 
     @Query("SELECT * FROM entry_exit_records WHERE licensePlate = :plate ORDER BY timestamp DESC LIMIT 1")
     suspend fun getLastByPlate(plate: String): EntryExitRecordEntity?
