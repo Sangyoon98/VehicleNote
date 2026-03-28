@@ -11,20 +11,23 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -51,6 +54,9 @@ fun CameraPreviewWithRecognition(
     val lifecycleOwner = LocalLifecycleOwner.current
     val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
 
+    // 콜백을 rememberUpdatedState로 감싸 recomposition 시 재설정 방지
+    val currentOnPlateDetected by rememberUpdatedState(onPlateDetected)
+
     // 이미지 정보: 분석 스레드에서 쓰고 메인 스레드에서 읽음 (@Volatile로 가시성 보장)
     val imageInfo = remember {
         object {
@@ -59,6 +65,10 @@ fun CameraPreviewWithRecognition(
             @Volatile var rotation = 0
         }
     }
+
+    // 뷰 크기 — onSizeChanged로 업데이트 (BoxWithConstraints 대비 recomposition 절감)
+    var viewWidthPx by remember { mutableIntStateOf(0) }
+    var viewHeightPx by remember { mutableIntStateOf(0) }
 
     // 인식된 바운딩 박스 — ML Kit 콜백(메인 스레드)에서 업데이트
     var lastDetectedBounds by remember { mutableStateOf<android.graphics.Rect?>(null) }
@@ -78,10 +88,14 @@ fun CameraPreviewWithRecognition(
         onDispose { analysisExecutor.shutdown() }
     }
 
-    BoxWithConstraints(modifier = modifier.clipToBounds()) {
-        val viewWidthPx = constraints.maxWidth.toFloat()
-        val viewHeightPx = constraints.maxHeight.toFloat()
-
+    Box(
+        modifier = modifier
+            .clipToBounds()
+            .onSizeChanged { size ->
+                viewWidthPx = size.width
+                viewHeightPx = size.height
+            }
+    ) {
         AndroidView(
             factory = { ctx ->
                 val previewView = PreviewView(ctx).apply {
@@ -98,8 +112,9 @@ fun CameraPreviewWithRecognition(
                     }
 
                     val imageAnalysis = ImageAnalysis.Builder()
-                        .setTargetResolution(Size(1280, 720))
+                        .setTargetResolution(Size(640, 480))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .setOutputImageRotationEnabled(true)
                         .build()
                         .also { analysis ->
                             analysis.setAnalyzer(analysisExecutor) { imageProxy ->
@@ -110,7 +125,7 @@ fun CameraPreviewWithRecognition(
                                     if (plate != null) {
                                         lastDetectedBounds = boundingBox
                                         showBounds = true
-                                        onPlateDetected(plate)
+                                        currentOnPlateDetected(plate)
                                     }
                                 }
                             }
@@ -142,16 +157,18 @@ fun CameraPreviewWithRecognition(
             modifier = Modifier.fillMaxSize()
         ) {
             val bounds = lastDetectedBounds
-            if (bounds != null && viewWidthPx > 0 && imageInfo.width > 0) {
+            val vw = viewWidthPx.toFloat()
+            val vh = viewHeightPx.toFloat()
+            if (bounds != null && vw > 0 && imageInfo.width > 0) {
                 // ML Kit는 회전이 적용된 디스플레이 좌표계로 바운딩 박스를 반환
                 val rotated = imageInfo.rotation == 90 || imageInfo.rotation == 270
                 val imgDisplayW = if (rotated) imageInfo.height.toFloat() else imageInfo.width.toFloat()
                 val imgDisplayH = if (rotated) imageInfo.width.toFloat() else imageInfo.height.toFloat()
 
                 // FILL_CENTER(CENTER_CROP) 스케일 및 오프셋 계산
-                val scale = maxOf(viewWidthPx / imgDisplayW, viewHeightPx / imgDisplayH)
-                val offsetX = (viewWidthPx - imgDisplayW * scale) / 2f
-                val offsetY = (viewHeightPx - imgDisplayH * scale) / 2f
+                val scale = maxOf(vw / imgDisplayW, vh / imgDisplayH)
+                val offsetX = (vw - imgDisplayW * scale) / 2f
+                val offsetY = (vh - imgDisplayH * scale) / 2f
 
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     drawRect(
