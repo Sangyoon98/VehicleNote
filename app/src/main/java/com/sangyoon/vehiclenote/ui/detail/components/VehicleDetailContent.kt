@@ -68,7 +68,7 @@ fun VehicleDetailContent(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
+                    .aspectRatio(1f)
                     .clip(RoundedCornerShape(12.dp))
             )
         }
