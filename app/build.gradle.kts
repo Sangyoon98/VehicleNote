@@ -100,6 +100,7 @@ dependencies {
     // Icons
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.coil.compose)
+    implementation(libs.telephoto.zoomable.image.coil)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
