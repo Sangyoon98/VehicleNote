@@ -26,6 +26,7 @@ foundationLayout = "1.10.4"
 coil = "2.7.0"
 camerax = "1.4.2"
 mlkitTextRecognitionKorean = "16.0.1"
+telephoto = "0.14.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -67,6 +68,7 @@ camerax-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "ca
 camerax-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
 camerax-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 mlkit-text-recognition-korean = { module = "com.google.mlkit:text-recognition-korean", version.ref = "mlkitTextRecognitionKorean" }
+telephoto-zoomable-image-coil = { module = "me.saket.telephoto:zoomable-image-coil", version.ref = "telephoto" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
