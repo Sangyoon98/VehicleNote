@@ -17,7 +17,7 @@ interface EntryExitRecordDao {
     fun getAllRecords(): Flow<List<EntryExitRecordEntity>>
 
     /**
-     * 번호판 또는 차주명으로 검색 (LEFT JOIN).
+     * 번호판, 차주명, 전화번호로 검색 (LEFT JOIN).
      * Room @Relation은 SQL WHERE를 무시하므로, 플랫 튜플로 결과를 받아 직접 매핑한다.
      */
     @Query("""
@@ -26,6 +26,7 @@ interface EntryExitRecordDao {
         LEFT JOIN vehicles v ON r.vehicleId = v.id
         WHERE r.licensePlate LIKE '%' || :query || '%'
            OR v.ownerName LIKE '%' || :query || '%'
+           OR v.phoneNumber LIKE '%' || :query || '%'
         ORDER BY r.timestamp DESC
     """)
     fun searchRecords(query: String): Flow<List<SearchResultTuple>>
