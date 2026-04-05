@@ -15,3 +15,13 @@ data class HomeState(
     val todayRegisteredCount: Int = 0,
     val departmentStats: Map<String, Int> = emptyMap()
 )
+
+fun HomeState.reduce(action: HomeAction): HomeState = when (action) {
+    is HomeAction.SearchQueryChanged -> copy(searchQuery = action.query)
+    is HomeAction.SearchActiveChanged ->
+        copy(
+            isSearchActive = action.isActive,
+            searchQuery = if (!action.isActive) "" else searchQuery
+        )
+    else -> this
+}
