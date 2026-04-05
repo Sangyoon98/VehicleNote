@@ -3,7 +3,6 @@ package com.sangyoon.vehiclenote.ui.add
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sangyoon.vehiclenote.domain.model.CustomField
 import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.domain.usecase.AddVehicleUseCase
 import com.sangyoon.vehiclenote.util.PhotoStorageManager
@@ -35,67 +34,17 @@ class AddVehicleViewModel @Inject constructor(
     val sideEffect = _sideEffect.receiveAsFlow()
 
     fun onAction(action: AddVehicleAction) {
+        _state.update { it.reduce(action) }
+
         when (action) {
-            is AddVehicleAction.LicensePlateChanged ->
-                _state.update { it.copy(licensePlate = action.value, licensePlateError = null) }
-
-            is AddVehicleAction.OwnerNameChanged ->
-                _state.update { it.copy(ownerName = action.value, ownerNameError = null) }
-
-            is AddVehicleAction.DepartmentChanged ->
-                _state.update { it.copy(department = action.value) }
-
-            is AddVehicleAction.PhoneNumberChanged ->
-                _state.update { it.copy(phoneNumber = action.value) }
-
-            is AddVehicleAction.CarModelChanged ->
-                _state.update { it.copy(carModel = action.value) }
-
-            is AddVehicleAction.MemoChanged ->
-                _state.update { it.copy(memo = action.value) }
-
             AddVehicleAction.SaveClicked -> saveVehicle()
-
-            AddVehicleAction.PhotoClicked ->
-                _state.update { it.copy(showPhotoSourceDialog = true) }
-
-            AddVehicleAction.PhotoSourceDialogDismissed ->
-                _state.update { it.copy(showPhotoSourceDialog = false) }
-
             AddVehicleAction.CameraSelected -> launchCamera()
-            AddVehicleAction.GallerySelected -> {
-                _state.update { it.copy(showPhotoSourceDialog = false) }
-                sendSideEffect(AddVehicleSideEffect.LaunchGallery)
-            }
-
+            AddVehicleAction.GallerySelected -> sendSideEffect(AddVehicleSideEffect.LaunchGallery)
             is AddVehicleAction.CameraResultReceived -> handleCameraResult(action.success)
             is AddVehicleAction.GalleryResultReceived -> handleGalleryResult(action.uri)
             AddVehicleAction.PhotoRemoved -> removePhoto()
             AddVehicleAction.CameraPermissionDenied -> handleCameraPermissionDenied()
-
-            AddVehicleAction.AddCustomField ->
-                _state.update { it.copy(customFields = it.customFields + CustomField("", "")) }
-
-            is AddVehicleAction.RemoveCustomField ->
-                _state.update {
-                    it.copy(
-                        customFields = it.customFields.toMutableList()
-                            .also { list -> list.removeAt(action.index) })
-                }
-
-            is AddVehicleAction.CustomFieldKeyChanged ->
-                _state.update {
-                    it.copy(customFields = it.customFields.toMutableList().also { list ->
-                        list[action.index] = list[action.index].copy(key = action.key)
-                    })
-                }
-
-            is AddVehicleAction.CustomFieldValueChanged ->
-                _state.update {
-                    it.copy(customFields = it.customFields.toMutableList().also { list ->
-                        list[action.index] = list[action.index].copy(value = action.value)
-                    })
-                }
+            else -> Unit
         }
     }
 

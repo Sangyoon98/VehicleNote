@@ -36,52 +36,27 @@ class EntryExitViewModel @Inject constructor(
     }
 
     fun onAction(action: EntryExitAction) {
+        val currentState = _state.value
+        _state.update { it.reduce(action) }
+
         when (action) {
-            is EntryExitAction.PlateDetected -> {
-                if (!_state.value.showPlateConfirmDialog) {
-                    _state.update { it.copy(showPlateConfirmDialog = true, detectedPlate = action.plate) }
-                }
-            }
-
-            is EntryExitAction.DetectedPlateEdited -> {
-                _state.update { it.copy(detectedPlate = action.plate) }
-            }
-
             EntryExitAction.PlateConfirmed -> {
-                val plate = _state.value.detectedPlate.trim()
-                _state.update { it.copy(showPlateConfirmDialog = false, detectedPlate = "") }
+                val plate = currentState.detectedPlate.trim()
                 if (plate.isNotBlank()) recordEntryExit(plate)
-            }
-
-            EntryExitAction.PlateConfirmDismissed -> {
-                _state.update { it.copy(showPlateConfirmDialog = false, detectedPlate = "") }
-            }
-
-            EntryExitAction.ManualInputClicked -> {
-                _state.update { it.copy(showManualInputDialog = true, manualInputPlate = "") }
-            }
-
-            is EntryExitAction.ManualPlateChanged -> {
-                _state.update { it.copy(manualInputPlate = action.plate) }
             }
 
             EntryExitAction.ManualInputConfirmed -> {
-                val plate = _state.value.manualInputPlate.trim()
-                _state.update { it.copy(showManualInputDialog = false, manualInputPlate = "") }
+                val plate = currentState.manualInputPlate.trim()
                 if (plate.isNotBlank()) recordEntryExit(plate)
             }
 
-            EntryExitAction.ManualInputDismissed -> {
-                _state.update { it.copy(showManualInputDialog = false, manualInputPlate = "") }
-            }
-
-            is EntryExitAction.RecordClicked -> {
+            is EntryExitAction.RecordClicked ->
                 sendSideEffect(EntryExitSideEffect.NavigateToDetail(action.recordId))
-            }
 
-            EntryExitAction.LogListClicked -> {
+            EntryExitAction.LogListClicked ->
                 sendSideEffect(EntryExitSideEffect.NavigateToLogList)
-            }
+
+            else -> Unit
         }
     }
 

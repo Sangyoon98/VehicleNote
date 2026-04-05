@@ -38,25 +38,14 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onAction(action: HomeAction) {
-        when (action) {
-            is HomeAction.SearchQueryChanged -> {
-                _state.update { it.copy(searchQuery = action.query) }
-                if (action.query.isNotBlank()) {
-                    searchVehicles(action.query)
-                } else {
-                    loadVehicles()
-                }
-            }
+        _state.update { it.reduce(action) }
 
-            is HomeAction.SearchActiveChanged -> {
-                _state.update {
-                    it.copy(
-                        isSearchActive = action.isActive,
-                        searchQuery = if (!action.isActive) "" else it.searchQuery
-                    )
-                }
+        when (action) {
+            is HomeAction.SearchQueryChanged ->
+                if (action.query.isNotBlank()) searchVehicles(action.query) else loadVehicles()
+
+            is HomeAction.SearchActiveChanged ->
                 if (!action.isActive) loadVehicles()
-            }
 
             is HomeAction.DeleteVehicle -> deleteVehicle(action.vehicle)
             is HomeAction.AddVehicleClicked -> sendSideEffect(HomeSideEffect.NavigateToAdd)
