@@ -11,3 +11,30 @@ data class EntryExitState(
     val showManualInputDialog: Boolean = false,
     val manualInputPlate: String = ""
 )
+
+fun EntryExitState.reduce(action: EntryExitAction): EntryExitState = when (action) {
+    is EntryExitAction.PlateDetected ->
+        if (!showPlateConfirmDialog) copy(showPlateConfirmDialog = true, detectedPlate = action.plate)
+        else this
+
+    is EntryExitAction.DetectedPlateEdited -> copy(detectedPlate = action.plate)
+
+    EntryExitAction.PlateConfirmed ->
+        copy(showPlateConfirmDialog = false, detectedPlate = "")
+
+    EntryExitAction.PlateConfirmDismissed ->
+        copy(showPlateConfirmDialog = false, detectedPlate = "")
+
+    EntryExitAction.ManualInputClicked ->
+        copy(showManualInputDialog = true, manualInputPlate = "")
+
+    is EntryExitAction.ManualPlateChanged -> copy(manualInputPlate = action.plate)
+
+    EntryExitAction.ManualInputConfirmed ->
+        copy(showManualInputDialog = false, manualInputPlate = "")
+
+    EntryExitAction.ManualInputDismissed ->
+        copy(showManualInputDialog = false, manualInputPlate = "")
+
+    else -> this
+}
