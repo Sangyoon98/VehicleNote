@@ -7,8 +7,8 @@ interface VehicleRepository {
     // 전체 차량 목록 조회 (Flow로 실시간 업데이트)
     fun getAllVehicles(): Flow<List<Vehicle>>
 
-    // 차량 번호로 검색
-    fun searchByLicensePlate(query: String): Flow<List<Vehicle>>
+    // 차량번호 / 차주명 / 부서 / 전화번호 통합 검색
+    fun search(query: String): Flow<List<Vehicle>>
 
     // 특정 차량 조회
     suspend fun getVehicleById(id: Long): Vehicle?
