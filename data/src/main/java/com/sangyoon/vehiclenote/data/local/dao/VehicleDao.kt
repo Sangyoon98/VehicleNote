@@ -14,8 +14,15 @@ interface VehicleDao {
     @Query("SELECT * FROM vehicles ORDER BY createdAt DESC")
     fun getAllVehicles(): Flow<List<VehicleEntity>>
 
-    @Query("SELECT * FROM vehicles WHERE licensePlate LIKE '%' || :query || '%' ORDER BY createdAt DESC")
-    fun searchByLicensePlate(query: String): Flow<List<VehicleEntity>>
+    @Query("""
+        SELECT * FROM vehicles
+        WHERE licensePlate LIKE '%' || :query || '%'
+           OR ownerName   LIKE '%' || :query || '%'
+           OR department  LIKE '%' || :query || '%'
+           OR phoneNumber LIKE '%' || :query || '%'
+        ORDER BY createdAt DESC
+    """)
+    fun search(query: String): Flow<List<VehicleEntity>>
 
     @Query("SELECT * FROM vehicles WHERE id = :id")
     suspend fun getVehicleById(id: Long): VehicleEntity?

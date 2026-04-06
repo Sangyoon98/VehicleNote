@@ -9,6 +9,6 @@ class SearchVehicleUseCase @Inject constructor(
     private val repository: VehicleRepository
 ) {
     operator fun invoke(query: String): Flow<List<Vehicle>> {
-        return repository.searchByLicensePlate(query)
+        return repository.search(query)
     }
 }

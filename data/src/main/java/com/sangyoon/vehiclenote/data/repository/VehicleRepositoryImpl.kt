@@ -20,8 +20,8 @@ class VehicleRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun searchByLicensePlate(query: String): Flow<List<Vehicle>> {
-        return vehicleDao.searchByLicensePlate(query).map { entities ->
+    override fun search(query: String): Flow<List<Vehicle>> {
+        return vehicleDao.search(query).map { entities ->
             entities.map { it.toDomain() }
         }
     }
