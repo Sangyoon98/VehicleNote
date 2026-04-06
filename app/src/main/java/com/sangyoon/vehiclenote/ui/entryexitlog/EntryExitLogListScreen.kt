@@ -101,45 +101,62 @@ fun EntryExitLogListScreen(
                 onExpandedChange = { viewModel.onAction(EntryExitLogListAction.SearchActiveChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                // 검색 활성화 시 즉시 결과 표시 (별도 expanded content 없이 아래 LazyColumn이 처리)
+                // SearchBar가 expanded일 때 결과를 여기에 표시
+                EntryExitRecordList(
+                    records = state.records,
+                    searchQuery = state.searchQuery,
+                    onRecordClick = { viewModel.onAction(EntryExitLogListAction.RecordClicked(it)) },
+                )
             }
         }
     ) { paddingValues ->
-        if (state.records.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
+        // SearchBar가 collapsed일 때 전체 목록 표시
+        EntryExitRecordList(
+            records = state.records,
+            searchQuery = state.searchQuery,
+            onRecordClick = { viewModel.onAction(EntryExitLogListAction.RecordClicked(it)) },
+            modifier = Modifier.padding(paddingValues),
+        )
+    }
+}
+
+@Composable
+private fun EntryExitRecordList(
+    records: List<EntryExitRecord>,
+    searchQuery: String,
+    onRecordClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (records.isEmpty()) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = if (searchQuery.isNotEmpty()) "검색 결과가 없습니다" else "입출차 기록이 없습니다",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            item {
                 Text(
-                    text = if (state.searchQuery.isNotEmpty()) "검색 결과가 없습니다" else "입출차 기록이 없습니다",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "총 ${records.size}건",
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 4.dp),
                 )
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                item {
-                    Text(
-                        text = "총 ${state.records.size}건",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 4.dp),
-                    )
-                }
-                items(items = state.records, key = { it.id }) { record ->
-                    EntryExitLogItem(
-                        record = record,
-                        onClick = { viewModel.onAction(EntryExitLogListAction.RecordClicked(record.id)) },
-                    )
-                }
+            items(items = records, key = { it.id }) { record ->
+                EntryExitLogItem(
+                    record = record,
+                    onClick = { onRecordClick(record.id) },
+                )
             }
         }
     }
