@@ -1,5 +1,6 @@
 package com.sangyoon.vehiclenote.ui.home.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +29,8 @@ fun StatisticsSection(
     totalCount: Int,
     todayCount: Int,
     departmentStats: Map<String, Int>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDepartmentClick: ((String) -> Unit)? = null
 ) {
     Column(
         modifier = modifier,
@@ -95,7 +97,14 @@ fun StatisticsSection(
 
                     departmentStats.entries.take(5).forEach { (department, count) ->
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .then(
+                                    if (onDepartmentClick != null)
+                                        Modifier.clickable { onDepartmentClick(department) }
+                                    else Modifier
+                                )
+                                .padding(vertical = 2.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {

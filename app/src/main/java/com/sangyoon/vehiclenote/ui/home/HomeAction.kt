@@ -9,4 +9,5 @@ sealed interface HomeAction {
     data object AddVehicleClicked : HomeAction
     data class VehicleClicked(val vehicleId: Long) : HomeAction
     data object Refresh : HomeAction
+    data class DepartmentFilterSelected(val department: String?) : HomeAction
 }
