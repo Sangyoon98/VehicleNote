@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +50,7 @@ import com.sangyoon.vehiclenote.ui.home.components.RecentVehicleCard
 import com.sangyoon.vehiclenote.ui.home.components.StatisticsSection
 import com.sangyoon.vehiclenote.ui.home.components.VehicleListItem
 import com.sangyoon.vehiclenote.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
 private val SearchBarHeight = 56.dp
 private val SearchBarSpacing = 16.dp  // 서치바 위아래 간격
@@ -63,6 +68,8 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { effect ->
@@ -73,6 +80,14 @@ fun HomeScreen(
                     message = effect.message,
                     duration = SnackbarDuration.Short
                 )
+                is HomeSideEffect.ScrollToFilter -> {
+                    coroutineScope.launch {
+                        // 통계(0) + 최근차량 헤더(1) + 최근차량 행(2) + 목록 헤더(3) + 칩(4)
+                        // 최근차량 없을 경우: 통계(0) + 목록 헤더(1) + 칩(2)
+                        val chipsIndex = if (state.recentVehicles.isNotEmpty()) 4 else 2
+                        listState.animateScrollToItem(chipsIndex)
+                    }
+                }
             }
         }
     }
@@ -116,6 +131,7 @@ fun HomeScreen(
                 else -> {
                     HomeContent(
                         state = state,
+                        listState = listState,
                         contentPadding = PaddingValues(
                             top = paddingValues.calculateTopPadding() + ContentTopOffset,
                             bottom = maxOf(
@@ -124,7 +140,11 @@ fun HomeScreen(
                             ) + 16.dp,
                         ),
                         onVehicleClick = { viewModel.onAction(HomeAction.VehicleClicked(it)) },
-                        onDeleteVehicle = { viewModel.onAction(HomeAction.DeleteVehicle(it)) }
+                        onDeleteVehicle = { viewModel.onAction(HomeAction.DeleteVehicle(it)) },
+                        onDepartmentFilterSelected = {
+                            viewModel.onAction(HomeAction.DepartmentFilterSelected(it))
+                        },
+                        onDepartmentClickFromStats = { viewModel.selectDepartmentFromStats(it) }
                     )
                 }
             }
@@ -185,11 +205,15 @@ fun HomeScreen(
 @Composable
 private fun HomeContent(
     state: HomeState,
+    listState: LazyListState,
     contentPadding: PaddingValues,
     onVehicleClick: (Long) -> Unit,
-    onDeleteVehicle: (Vehicle) -> Unit
+    onDeleteVehicle: (Vehicle) -> Unit,
+    onDepartmentFilterSelected: (String?) -> Unit,
+    onDepartmentClickFromStats: (String) -> Unit
 ) {
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -201,6 +225,7 @@ private fun HomeContent(
                 todayCount = state.todayRegisteredCount,
                 departmentStats = state.departmentStats,
                 modifier = Modifier.padding(horizontal = 16.dp),
+                onDepartmentClick = onDepartmentClickFromStats
             )
         }
 
@@ -266,6 +291,31 @@ private fun HomeContent(
             }
         }
 
+        // 부서 필터 칩
+        if (state.departmentList.isNotEmpty()) {
+            item {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        FilterChip(
+                            selected = state.selectedDepartment == null,
+                            onClick = { onDepartmentFilterSelected(null) },
+                            label = { Text("전체") }
+                        )
+                    }
+                    items(state.departmentList) { department ->
+                        FilterChip(
+                            selected = state.selectedDepartment == department,
+                            onClick = { onDepartmentFilterSelected(department) },
+                            label = { Text(department) }
+                        )
+                    }
+                }
+            }
+        }
+
         items(items = state.vehicles, key = { it.id }) { vehicle ->
             VehicleListItem(
                 vehicle = vehicle,
@@ -308,11 +358,15 @@ private fun HomeScreenPreview() {
                 ),
                 totalVehicleCount = 45,
                 todayRegisteredCount = 3,
-                departmentStats = mapOf("총무부" to 12, "인사부" to 8, "개발부" to 15, "영업부" to 10)
+                departmentStats = mapOf("총무부" to 12, "인사부" to 8, "개발부" to 15, "영업부" to 10),
+                departmentList = listOf("개발부", "영업부", "인사부", "총무부")
             ),
+            listState = rememberLazyListState(),
             contentPadding = PaddingValues(16.dp),
             onVehicleClick = {},
-            onDeleteVehicle = {}
+            onDeleteVehicle = {},
+            onDepartmentFilterSelected = {},
+            onDepartmentClickFromStats = {}
         )
     }
 }
@@ -323,9 +377,12 @@ private fun HomeScreenEmptyPreview() {
     AppTheme {
         HomeContent(
             state = HomeState(),
+            listState = rememberLazyListState(),
             contentPadding = PaddingValues(16.dp),
             onVehicleClick = {},
-            onDeleteVehicle = {}
+            onDeleteVehicle = {},
+            onDepartmentFilterSelected = {},
+            onDepartmentClickFromStats = {}
         )
     }
 }

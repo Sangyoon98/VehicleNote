@@ -33,6 +33,8 @@ class HomeViewModel @Inject constructor(
     private val _sideEffect = Channel<HomeSideEffect>(Channel.BUFFERED)
     val sideEffect = _sideEffect.receiveAsFlow()
 
+    private var cachedAllVehicles: List<Vehicle> = emptyList()
+
     init {
         loadVehicles()
     }
@@ -51,13 +53,29 @@ class HomeViewModel @Inject constructor(
             is HomeAction.AddVehicleClicked -> sendSideEffect(HomeSideEffect.NavigateToAdd)
             is HomeAction.VehicleClicked -> sendSideEffect(HomeSideEffect.NavigateToDetail(action.vehicleId))
             is HomeAction.Refresh -> loadVehicles()
+            is HomeAction.DepartmentFilterSelected -> applyDepartmentFilter(action.department)
         }
+    }
+
+    fun selectDepartmentFromStats(department: String) {
+        _state.update { it.copy(selectedDepartment = department) }
+        applyDepartmentFilter(department)
+        sendSideEffect(HomeSideEffect.ScrollToFilter)
+    }
+
+    private fun applyDepartmentFilter(department: String?) {
+        val filtered = if (department == null) cachedAllVehicles
+        else cachedAllVehicles.filter { it.department == department }
+        _state.update { it.copy(vehicles = filtered) }
     }
 
     private fun loadVehicles() {
         _state.update { it.copy(isLoading = true) }
         getAllVehiclesUseCase()
-            .onEach { vehicles -> _state.update { it.withComputedStats(vehicles) } }
+            .onEach { vehicles ->
+                cachedAllVehicles = vehicles
+                _state.update { it.withComputedStats(vehicles) }
+            }
             .catch { error -> _state.update { it.copy(isLoading = false, error = error.message) } }
             .launchIn(viewModelScope)
     }
@@ -105,12 +123,21 @@ class HomeViewModel @Inject constructor(
             .take(5)
             .associate { it.key to it.value }
 
+        val deptList = vehicles
+            .mapNotNull { it.department }
+            .distinct()
+            .sorted()
+
+        val filteredVehicles = if (selectedDepartment == null) vehicles
+        else vehicles.filter { it.department == selectedDepartment }
+
         return copy(
-            vehicles = vehicles,
+            vehicles = filteredVehicles,
             recentVehicles = vehicles.take(5),
             totalVehicleCount = vehicles.size,
             todayRegisteredCount = vehicles.count { it.createdAt >= todayStart },
             departmentStats = deptStats,
+            departmentList = deptList,
             isLoading = false,
             error = null
         )
