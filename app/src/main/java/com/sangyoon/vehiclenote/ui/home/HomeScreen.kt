@@ -39,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -302,14 +303,16 @@ private fun HomeContent(
                         FilterChip(
                             selected = state.selectedDepartment == null,
                             onClick = { onDepartmentFilterSelected(null) },
-                            label = { Text("전체") }
+                            label = { Text("전체") },
+                            shape = CircleShape
                         )
                     }
                     items(state.departmentList) { department ->
                         FilterChip(
                             selected = state.selectedDepartment == department,
                             onClick = { onDepartmentFilterSelected(department) },
-                            label = { Text(department) }
+                            label = { Text(department) },
+                            shape = CircleShape
                         )
                     }
                 }
