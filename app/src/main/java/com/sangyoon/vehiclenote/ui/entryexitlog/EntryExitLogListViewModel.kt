@@ -1,5 +1,6 @@
 package com.sangyoon.vehiclenote.ui.entryexitlog
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sangyoon.vehiclenote.domain.usecase.GetEntryExitRecordsUseCase
@@ -14,15 +15,19 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
 class EntryExitLogListViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val getRecordsUseCase: GetEntryExitRecordsUseCase,
     private val searchRecordsUseCase: SearchEntryExitRecordsUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(EntryExitLogListState())
+    private val filterToday: Boolean = savedStateHandle.get<Boolean>("filterToday") ?: false
+
+    private val _state = MutableStateFlow(EntryExitLogListState(isFilteredToday = filterToday))
     val state: StateFlow<EntryExitLogListState> = _state.asStateFlow()
 
     private val _sideEffect = Channel<EntryExitLogListSideEffect>(Channel.BUFFERED)
@@ -61,10 +66,19 @@ class EntryExitLogListViewModel @Inject constructor(
         recordsJob?.cancel()
         recordsJob = viewModelScope.launch {
             val flow = if (query.isBlank()) getRecordsUseCase() else searchRecordsUseCase(query)
-            flow.catch { e ->
+            flow.catch {
                 _state.update { it.copy(isLoading = false) }
             }.collect { records ->
-                _state.update { it.copy(records = records, isLoading = false) }
+                val filtered = if (filterToday) {
+                    val todayStart = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+                    records.filter { it.timestamp >= todayStart }
+                } else records
+                _state.update { it.copy(records = filtered, isLoading = false) }
             }
         }
     }
