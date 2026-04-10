@@ -72,7 +72,12 @@ fun EntryExitLogListScreen(
                         onSearch = { viewModel.onAction(EntryExitLogListAction.SearchQueryChanged(it)) },
                         expanded = state.isSearchActive,
                         onExpandedChange = { viewModel.onAction(EntryExitLogListAction.SearchActiveChanged(it)) },
-                        placeholder = { Text("번호판 또는 차주명 검색") },
+                        placeholder = {
+                            Text(
+                                if (state.isFilteredToday) "오늘 입출차 기록 검색"
+                                else "번호판 또는 차주명 검색"
+                            )
+                        },
                         leadingIcon = {
                             if (state.isSearchActive) {
                                 IconButton(onClick = { viewModel.onAction(EntryExitLogListAction.SearchActiveChanged(false)) }) {
