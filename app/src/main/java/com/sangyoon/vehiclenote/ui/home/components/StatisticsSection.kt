@@ -30,7 +30,9 @@ fun StatisticsSection(
     todayCount: Int,
     departmentStats: Map<String, Int>,
     modifier: Modifier = Modifier,
-    onDepartmentClick: ((String) -> Unit)? = null
+    onDepartmentClick: ((String) -> Unit)? = null,
+    onTotalCountClick: (() -> Unit)? = null,
+    onTodayCountClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier,
@@ -53,7 +55,8 @@ fun StatisticsSection(
                 label = "전체",
                 value = totalCount.toString(),
                 unit = "대",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                onClick = onTotalCountClick
             )
 
             // Today's entries card
@@ -62,7 +65,8 @@ fun StatisticsSection(
                 label = "오늘입차",
                 value = todayCount.toString(),
                 unit = "건",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                onClick = onTodayCountClick
             )
         }
 
@@ -132,14 +136,11 @@ fun StatisticCard(
     value: String,
     label: String,
     unit: String = "",
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
+    val colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+    val content: @Composable () -> Unit = {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -178,7 +179,13 @@ fun StatisticCard(
             )
         }
     }
+    if (onClick != null) {
+        Card(onClick = onClick, modifier = modifier, colors = colors) { content() }
+    } else {
+        Card(modifier = modifier, colors = colors) { content() }
+    }
 }
+
 
 @Preview
 @Composable

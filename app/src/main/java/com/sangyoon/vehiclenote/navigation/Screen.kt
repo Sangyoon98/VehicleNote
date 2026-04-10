@@ -18,5 +18,7 @@ sealed class Screen(val route: String) {
     data object EntryExitDetail : Screen("entry_exit_detail/{recordId}") {
         fun createRoute(recordId: Long) = "entry_exit_detail/$recordId"
     }
-    data object EntryExitLogList : Screen("entry_exit_log_list")
+    data object EntryExitLogList : Screen("entry_exit_log_list?filterToday={filterToday}") {
+        fun createRoute(filterToday: Boolean = false) = "entry_exit_log_list?filterToday=$filterToday"
+    }
 }

@@ -65,6 +65,7 @@ fun HomeScreen(
     parentContentPadding: PaddingValues = PaddingValues(),
     onNavigateToAdd: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
+    onNavigateToTodayRecords: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -145,7 +146,16 @@ fun HomeScreen(
                         onDepartmentFilterSelected = {
                             viewModel.onAction(HomeAction.DepartmentFilterSelected(it))
                         },
-                        onDepartmentClickFromStats = { viewModel.selectDepartmentFromStats(it) }
+                        onDepartmentClickFromStats = { viewModel.selectDepartmentFromStats(it) },
+                        onTotalCountClick = {
+                            coroutineScope.launch {
+                                // 통계(0) + 최근차량 헤더(1) + 최근차량 행(2) + 목록 헤더(3)
+                                // 최근차량 없을 경우: 통계(0) + 목록 헤더(1)
+                                val listHeaderIndex = if (state.recentVehicles.isNotEmpty()) 3 else 1
+                                listState.animateScrollToItem(listHeaderIndex)
+                            }
+                        },
+                        onTodayCountClick = onNavigateToTodayRecords
                     )
                 }
             }
@@ -211,7 +221,9 @@ private fun HomeContent(
     onVehicleClick: (Long) -> Unit,
     onDeleteVehicle: (Vehicle) -> Unit,
     onDepartmentFilterSelected: (String?) -> Unit,
-    onDepartmentClickFromStats: (String) -> Unit
+    onDepartmentClickFromStats: (String) -> Unit,
+    onTotalCountClick: () -> Unit,
+    onTodayCountClick: () -> Unit
 ) {
     LazyColumn(
         state = listState,
@@ -226,7 +238,9 @@ private fun HomeContent(
                 todayCount = state.todayRegisteredCount,
                 departmentStats = state.departmentStats,
                 modifier = Modifier.padding(horizontal = 16.dp),
-                onDepartmentClick = onDepartmentClickFromStats
+                onDepartmentClick = onDepartmentClickFromStats,
+                onTotalCountClick = onTotalCountClick,
+                onTodayCountClick = onTodayCountClick
             )
         }
 
@@ -369,7 +383,9 @@ private fun HomeScreenPreview() {
             onVehicleClick = {},
             onDeleteVehicle = {},
             onDepartmentFilterSelected = {},
-            onDepartmentClickFromStats = {}
+            onDepartmentClickFromStats = {},
+            onTotalCountClick = {},
+            onTodayCountClick = {}
         )
     }
 }
@@ -385,7 +401,9 @@ private fun HomeScreenEmptyPreview() {
             onVehicleClick = {},
             onDeleteVehicle = {},
             onDepartmentFilterSelected = {},
-            onDepartmentClickFromStats = {}
+            onDepartmentClickFromStats = {},
+            onTotalCountClick = {},
+            onTodayCountClick = {}
         )
     }
 }
