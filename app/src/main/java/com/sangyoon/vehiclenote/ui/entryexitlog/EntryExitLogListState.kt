@@ -7,4 +7,5 @@ data class EntryExitLogListState(
     val searchQuery: String = "",
     val isSearchActive: Boolean = false,
     val isLoading: Boolean = false,
+    val isFilteredToday: Boolean = false,
 )

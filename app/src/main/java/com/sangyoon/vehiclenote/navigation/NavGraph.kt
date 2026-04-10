@@ -60,6 +60,9 @@ fun NavGraph(
                 onNavigateToAdd = { navController.navigate(Screen.AddVehicle.createRoute()) },
                 onNavigateToDetail = { vehicleId ->
                     navController.navigate(Screen.VehicleDetail.createRoute(vehicleId))
+                },
+                onNavigateToTodayRecords = {
+                    navController.navigate(Screen.EntryExitLogList.createRoute(filterToday = true))
                 }
             )
         }
@@ -102,12 +105,20 @@ fun NavGraph(
                     navController.navigate(Screen.EntryExitDetail.createRoute(recordId))
                 },
                 onNavigateToLogList = {
-                    navController.navigate(Screen.EntryExitLogList.route)
+                    navController.navigate(Screen.EntryExitLogList.createRoute())
                 }
             )
         }
 
-        composable(Screen.EntryExitLogList.route) {
+        composable(
+            route = Screen.EntryExitLogList.route,
+            arguments = listOf(
+                navArgument("filterToday") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) {
             EntryExitLogListScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToDetail = { recordId ->
