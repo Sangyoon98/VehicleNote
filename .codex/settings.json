@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/post_edit_lint.sh"
+            "command": "bash .codex/hooks/post_edit_lint.sh"
           }
         ]
       }
