@@ -16,3 +16,12 @@ keystore.properties
 fastlane/report.xml
 *.aab
 *.apk
+
+# AI 협업 파일 (글로벌 gitignore 예외)
+!CLAUDE.md
+!.claude/
+!.claude/settings.json
+!.claude/commands/
+!.claude/hooks/
+.claude/worktrees/
+.claude/settings.local.json
