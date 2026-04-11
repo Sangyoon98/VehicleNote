@@ -19,9 +19,25 @@ fastlane/report.xml
 
 # AI 협업 파일 (글로벌 gitignore 예외)
 !CLAUDE.md
+!AGENTS.md
+!.ai/
+!.ai/hooks/
+!.ai/hooks/post_edit_lint.sh
+!.ai/skills/
+!.ai/skills/harness-engineering/
+!.ai/skills/harness-engineering/SKILL.md
 !.claude/
 !.claude/settings.json
 !.claude/commands/
 !.claude/hooks/
+!.codex/
+!.codex/settings.json
+!.codex/commands/
+!.codex/hooks/
+!.codex/skills/
+!.codex/skills/harness-engineering/
+!.codex/skills/harness-engineering/SKILL.md
 .claude/worktrees/
 .claude/settings.local.json
+.codex/worktrees/
+.codex/settings.local.json
