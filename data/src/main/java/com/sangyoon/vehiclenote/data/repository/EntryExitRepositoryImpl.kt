@@ -38,4 +38,8 @@ class EntryExitRepositoryImpl @Inject constructor(
     override suspend fun insertRecord(record: EntryExitRecord): Long {
         return dao.insertRecord(record.toEntity())
     }
+
+    override suspend fun deleteRecordsBefore(timestamp: Long) {
+        dao.deleteRecordsBefore(timestamp)
+    }
 }
