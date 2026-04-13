@@ -9,4 +9,5 @@ interface EntryExitRepository {
     suspend fun getLastRecordByPlate(plate: String): EntryExitRecord?
     suspend fun getById(id: Long): EntryExitRecord?
     suspend fun insertRecord(record: EntryExitRecord): Long
+    suspend fun deleteRecordsBefore(timestamp: Long)
 }

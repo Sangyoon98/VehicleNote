@@ -18,6 +18,7 @@ import com.sangyoon.vehiclenote.ui.entryexit.EntryExitScreen
 import com.sangyoon.vehiclenote.ui.entryexitdetail.EntryExitDetailScreen
 import com.sangyoon.vehiclenote.ui.entryexitlog.EntryExitLogListScreen
 import com.sangyoon.vehiclenote.ui.home.HomeScreen
+import com.sangyoon.vehiclenote.ui.settings.SettingsScreen
 
 private const val TRANSITION_DURATION = 300
 
@@ -125,6 +126,10 @@ fun NavGraph(
                     navController.navigate(Screen.EntryExitDetail.createRoute(recordId))
                 }
             )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(parentContentPadding = contentPadding)
         }
 
         composable(

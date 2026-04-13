@@ -3,6 +3,7 @@ package com.sangyoon.vehiclenote.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -38,6 +39,20 @@ fun BottomNavigationBar(
             selected = currentRoute == Screen.EntryExit.route,
             onClick = {
                 navController.navigate(Screen.EntryExit.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Settings, contentDescription = "설정") },
+            label = { Text("설정") },
+            selected = currentRoute == Screen.Settings.route,
+            onClick = {
+                navController.navigate(Screen.Settings.route) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
                     }

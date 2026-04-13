@@ -13,26 +13,35 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.sangyoon.vehiclenote.domain.usecase.PurgeOldRecordsUseCase
 import com.sangyoon.vehiclenote.navigation.NavGraph
 import com.sangyoon.vehiclenote.navigation.Screen
 import com.sangyoon.vehiclenote.ui.components.BottomNavigationBar
 import com.sangyoon.vehiclenote.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var purgeOldRecordsUseCase: PurgeOldRecordsUseCase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        lifecycleScope.launch { purgeOldRecordsUseCase() }
         setContent {
             AppTheme {
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
 
-                val rootRoutes = setOf(Screen.Home.route, Screen.EntryExit.route)
+                val rootRoutes = setOf(Screen.Home.route, Screen.EntryExit.route, Screen.Settings.route)
                 val showBottomBar = currentRoute in rootRoutes
 
                 Scaffold(
