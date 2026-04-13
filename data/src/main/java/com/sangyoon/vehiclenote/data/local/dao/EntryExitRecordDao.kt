@@ -43,4 +43,7 @@ interface EntryExitRecordDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRecord(record: EntryExitRecordEntity): Long
+
+    @Query("DELETE FROM entry_exit_records WHERE timestamp < :beforeTimestamp")
+    suspend fun deleteRecordsBefore(beforeTimestamp: Long)
 }
