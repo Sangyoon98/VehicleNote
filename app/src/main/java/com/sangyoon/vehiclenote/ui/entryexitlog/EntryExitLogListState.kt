@@ -8,4 +8,5 @@ data class EntryExitLogListState(
     val isSearchActive: Boolean = false,
     val isLoading: Boolean = false,
     val isFilteredToday: Boolean = false,
+    val isExporting: Boolean = false,
 )

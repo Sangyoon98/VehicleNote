@@ -24,6 +24,7 @@
 | EL-04 | 총 건수 표시 | Should |
 | EL-05 | 기록 아이템 탭 → 상세 이동 | Must |
 | EL-06 | 빈 상태 처리 (기록 없음 / 검색 결과 없음) | Must |
+| EL-07 | 현재 목록을 CSV 파일로 내보내기 (Excel 공유) | Must |
 
 ---
 
@@ -32,7 +33,8 @@
 ```
 입출차 기록 목록 화면
 ├── TopAppBar = SearchBar (항상 펼쳐진 상태)
-│   ├── 검색 비활성: 뒤로가기 아이콘 + 플레이스홀더 + 검색 아이콘
+│   ├── 검색 비활성: 뒤로가기 아이콘 + 플레이스홀더 + [내보내기 아이콘] + 검색 아이콘
+│   │   └── 내보내기 아이콘: 기록 없으면 비활성 / 내보내는 중이면 ProgressIndicator
 │   └── 검색 활성: 뒤로가기(검색 종료) + 입력 + 지우기 아이콘
 │       └── 검색 결과 목록 (expanded 영역)
 └── 메인 콘텐츠 (검색 비활성 시)
@@ -68,12 +70,20 @@ entry_exit_log_list?filterToday={filterToday}  (filterToday: Boolean, 기본값 
 | `isFilteredToday` | `Boolean` | 오늘 필터 적용 여부 (플레이스홀더 텍스트 변경에 사용) |
 | `isLoading` | `Boolean` | 로딩 상태 |
 | `error` | `String?` | 에러 메시지 |
+| `isExporting` | `Boolean` | CSV 내보내기 진행 중 여부 |
+
+**Action: `EntryExitLogListAction`** (추가)
+
+| 이름 | 설명 |
+|------|------|
+| `OnExportClicked` | 내보내기 아이콘 탭 |
 
 **SideEffect: `EntryExitLogListSideEffect`**
 
 | 이름 | 설명 |
 |------|------|
 | `NavigateToDetail(recordId)` | 기록 상세 이동 |
+| `ShareFile(uri, fileName)` | Android 공유시트로 CSV 파일 전달 |
 
 ### 로드 전략
 - `filterToday = false`: `GetEntryExitRecordsUseCase()` → 전체 기록 Flow 구독
@@ -90,3 +100,14 @@ entry_exit_log_list?filterToday={filterToday}  (filterToday: Boolean, 기본값 
 ### UseCase
 - `GetEntryExitRecordsUseCase(): Flow<List<EntryExitRecord>>`
 - `SearchEntryExitRecordsUseCase(query: String): Flow<List<EntryExitRecord>>`
+
+### CSV 내보내기 (`CsvExporter`)
+- 위치: `app/.../util/CsvExporter.kt` (@Singleton, @Inject)
+- 컬럼: `번호판`, `유형(입차/출차)`, `일시(yyyy-MM-dd HH:mm:ss)`, `차주명`
+- 인코딩: UTF-8 BOM (`\uFEFF`) — Excel 한국어 깨짐 방지
+- 필드 포맷: RFC 4180 CSV (따옴표 감쌈, 내부 따옴표 두 번 반복)
+- 저장 위치: `cacheDir/exports/entry_exit_yyyyMMdd_HHmmss.csv`
+- FileProvider authority: `${applicationId}.fileprovider` (cache-path)
+- 공유: `Intent.ACTION_SEND` + `FLAG_GRANT_READ_URI_PERMISSION` → `createChooser()`
+- 내보내기 중 trailing icon → `CircularProgressIndicator` 표시
+- 기록 없을 때 내보내기 버튼 비활성화
