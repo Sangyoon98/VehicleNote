@@ -1,5 +1,6 @@
 package com.sangyoon.vehiclenote.ui.entryexitlog
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,9 +19,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -53,11 +57,21 @@ fun EntryExitLogListScreen(
     viewModel: EntryExitLogListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { effect ->
             when (effect) {
                 is EntryExitLogListSideEffect.NavigateToDetail -> onNavigateToDetail(effect.recordId)
+                is EntryExitLogListSideEffect.ShareFile -> {
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/csv"
+                        putExtra(Intent.EXTRA_STREAM, effect.uri)
+                        putExtra(Intent.EXTRA_SUBJECT, effect.fileName)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    context.startActivity(Intent.createChooser(intent, "엑셀 파일 내보내기"))
+                }
             }
         }
     }
@@ -95,8 +109,25 @@ fun EntryExitLogListScreen(
                                     Icon(Icons.Default.Close, contentDescription = "지우기")
                                 }
                             } else if (!state.isSearchActive) {
-                                IconButton(onClick = { viewModel.onAction(EntryExitLogListAction.SearchActiveChanged(true)) }) {
-                                    Icon(Icons.Default.Search, contentDescription = "검색")
+                                Row {
+                                    if (state.isExporting) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .align(Alignment.CenterVertically),
+                                            strokeWidth = 2.dp
+                                        )
+                                    } else {
+                                        IconButton(
+                                            onClick = { viewModel.onAction(EntryExitLogListAction.OnExportClicked) },
+                                            enabled = state.records.isNotEmpty()
+                                        ) {
+                                            Icon(Icons.Default.FileDownload, contentDescription = "엑셀 내보내기")
+                                        }
+                                    }
+                                    IconButton(onClick = { viewModel.onAction(EntryExitLogListAction.SearchActiveChanged(true)) }) {
+                                        Icon(Icons.Default.Search, contentDescription = "검색")
+                                    }
                                 }
                             }
                         }

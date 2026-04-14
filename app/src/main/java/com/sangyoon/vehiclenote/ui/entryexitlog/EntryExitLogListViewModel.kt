@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sangyoon.vehiclenote.domain.usecase.GetEntryExitRecordsUseCase
 import com.sangyoon.vehiclenote.domain.usecase.SearchEntryExitRecordsUseCase
+import com.sangyoon.vehiclenote.util.CsvExporter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +17,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,6 +29,7 @@ class EntryExitLogListViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getRecordsUseCase: GetEntryExitRecordsUseCase,
     private val searchRecordsUseCase: SearchEntryExitRecordsUseCase,
+    private val csvExporter: CsvExporter,
 ) : ViewModel() {
 
     private val filterToday: Boolean = savedStateHandle.get<Boolean>("filterToday") ?: false
@@ -59,8 +66,27 @@ class EntryExitLogListViewModel @Inject constructor(
                     _sideEffect.send(EntryExitLogListSideEffect.NavigateToDetail(action.recordId))
                 }
             }
+
+            EntryExitLogListAction.OnExportClicked -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(isExporting = true) }
+                    runCatching {
+                        withContext(Dispatchers.IO) {
+                            csvExporter.export(_state.value.records)
+                        }
+                    }.onSuccess { uri ->
+                        val fileName = "entry_exit_${fileTimestamp()}.csv"
+                        _sideEffect.send(EntryExitLogListSideEffect.ShareFile(uri, fileName))
+                    }.also {
+                        _state.update { it.copy(isExporting = false) }
+                    }
+                }
+            }
         }
     }
+
+    private fun fileTimestamp(): String =
+        SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
 
     private fun loadRecords(query: String) {
         recordsJob?.cancel()
