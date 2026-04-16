@@ -22,7 +22,7 @@
 |----|------|----------|
 | H-01 | 전체 차량 목록 표시 (실시간 Flow) | Must |
 | H-02 | 차량 번호 검색 (SearchBar, 실시간) | Must |
-| H-03 | 통계 섹션: 전체 등록 차량 수, 오늘 등록 수, 부서별 상위 5개 | Must |
+| H-03 | 통계 섹션: 전체 등록 차량 수, 오늘 등록 수, 부서별 전체 현황 | Must |
 | H-04 | 부서별 필터 칩 (전체 + 각 부서, pill 모양) | Must |
 | H-05 | 최근 등록 차량 가로 스크롤 카드 (최대 5대) | Should |
 | H-06 | 차량 목록 아이템 스와이프 삭제 | Should |
@@ -46,7 +46,7 @@
     ├── 통계 섹션 (StatisticsSection)
     │   ├── 전체 차량 수 카드 → 클릭 시 차량 목록으로 스크롤
     │   ├── 오늘 등록 수 카드 → 클릭 시 EntryExitLogList(filterToday=true)로 이동
-    │   └── 부서별 통계 바 차트 (상위 5개) → 클릭 시 해당 부서 필터 적용 + 필터 칩으로 스크롤
+    │   └── 부서별 통계 목록 (전체) → 클릭 시 해당 부서 필터 적용 + 필터 칩으로 스크롤
     ├── 최근 등록 차량 (LazyRow, 최대 5대) — 차량 있을 때만 표시
     ├── 차량 목록 헤더 ("차량 목록" + "총 N대")
     ├── 부서 필터 칩 (LazyRow) — 부서 있을 때만 표시
@@ -79,7 +79,7 @@
 | `error` | `String?` | 에러 메시지 |
 | `totalVehicleCount` | `Int` | 전체 차량 수 |
 | `todayRegisteredCount` | `Int` | 오늘 등록된 차량 수 |
-| `departmentStats` | `Map<String, Int>` | 부서별 차량 수 (상위 5개, 내림차순) |
+| `departmentStats` | `Map<String, Int>` | 부서별 차량 수 (전체, 내림차순) |
 | `departmentList` | `List<String>` | 필터 칩용 부서 목록 (오름차순) |
 | `selectedDepartment` | `String?` | 선택된 부서 필터 (null = 전체) |
 

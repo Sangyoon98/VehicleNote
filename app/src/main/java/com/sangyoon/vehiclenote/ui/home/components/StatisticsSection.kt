@@ -99,7 +99,7 @@ fun StatisticsSection(
 
                     HorizontalDivider()
 
-                    departmentStats.entries.take(5).forEach { (department, count) ->
+                    departmentStats.entries.forEach { (department, count) ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
