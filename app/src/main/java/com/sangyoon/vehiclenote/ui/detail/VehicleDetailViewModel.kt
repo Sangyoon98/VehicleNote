@@ -15,6 +15,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * 차량 상세 화면 ViewModel (MVI 패턴).
+ *
+ * 네비게이션 인수 `vehicleId`로 단건 차량을 로드하고,
+ * 삭제 확인 다이얼로그 상태 및 수정 화면 이동을 관리한다.
+ *
+ * 상태: [VehicleDetailState], 사이드이펙트: [VehicleDetailSideEffect]
+ */
 @HiltViewModel
 class VehicleDetailViewModel @Inject constructor(
     private val getVehicleByIdUseCase: GetVehicleByIdUseCase,

@@ -17,6 +17,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * 차량 수정 화면 ViewModel (MVI 패턴).
+ *
+ * [AddVehicleViewModel]과 거의 동일한 구조를 가지나, 초기 진입 시 기존 차량 정보를 로드한다.
+ * 네비게이션 인수 `vehicleId`로 차량을 로드하며, 사진 교체/삭제 로직도 동일하게 처리한다.
+ *
+ * 상태: [EditVehicleState], 사이드이펙트: [EditVehicleSideEffect]
+ */
 @HiltViewModel
 class EditVehicleViewModel @Inject constructor(
     private val getVehicleByIdUseCase: GetVehicleByIdUseCase,

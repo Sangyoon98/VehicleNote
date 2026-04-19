@@ -15,6 +15,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * 입출차 기록 화면 ViewModel (MVI 패턴).
+ *
+ * OCR로 인식된 번호판 또는 수동 입력 번호판에 대해 입출차 기록을 저장한다.
+ * 저장 시 [RecordEntryExitUseCase]가 마지막 상태를 보고 입차/출차를 자동 토글한다.
+ * 전체 기록 목록을 실시간 Flow로 구독해 UI를 자동 갱신한다.
+ *
+ * 상태: [EntryExitState], 사이드이펙트: [EntryExitSideEffect]
+ */
 @HiltViewModel
 class EntryExitViewModel @Inject constructor(
     private val getRecordsUseCase: GetEntryExitRecordsUseCase,

@@ -135,8 +135,8 @@ fun StatisticCard(
     icon: ImageVector,
     value: String,
     label: String,
-    unit: String = "",
     modifier: Modifier = Modifier,
+    unit: String = "",
     onClick: (() -> Unit)? = null
 ) {
     val colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
