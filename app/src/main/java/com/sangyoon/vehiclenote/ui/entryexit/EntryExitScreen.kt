@@ -137,8 +137,8 @@ fun EntryExitScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         contentWindowInsets = WindowInsets(0)
-    ) { _ ->
-        Box(modifier = Modifier.fillMaxSize()) {
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (hasCameraPermission) {
                 CameraPreviewWithRecognition(
                     plateRecognizer = plateRecognizer,
