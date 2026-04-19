@@ -2,6 +2,14 @@ package com.sangyoon.ocr
 
 import android.graphics.Rect
 
+/**
+ * 한국 차량번호판 텍스트 필터링 및 유사도 비교 유틸리티.
+ *
+ * Google ML Kit OCR 결과에서 번호판 패턴을 추출하며, 다음 전략을 사용한다:
+ * 1. 토큰 단위 정확 매칭 (exact match)
+ * 2. OCR 오류 보정 후 부분 매칭 (find)
+ * 3. 인접 블록 텍스트 병합 후 재시도 (가까이서 촬영 시 블록 분리 케이스 대응)
+ */
 object KoreanPlateFilter {
 
     // ML Kit 한국어 OCR에서 흔한 오인식 문자 보정

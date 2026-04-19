@@ -32,6 +32,9 @@ android {
 }
 
 dependencies {
+    // Core
+    implementation(libs.androidx.core.ktx)
+
     // CameraX
     implementation(libs.camerax.core)
     implementation(libs.camerax.camera2)

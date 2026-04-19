@@ -27,6 +27,17 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
+/**
+ * 설정 화면 ViewModel (MVI 패턴).
+ *
+ * 다음 기능을 담당한다:
+ * - 입출차 기록 보관 기간 조회·변경 (DataStore 연동)
+ * - 차량 데이터 CSV 내보내기 ([VehicleCsvExporter])
+ * - 차량 데이터 CSV 가져오기 ([VehicleCsvParser]) — 번호판 중복 시 건너뜀
+ * - [DataRetentionPeriod.UNLIMITED] 선택 시 경고 다이얼로그 표시 후 적용
+ *
+ * 상태: [SettingsState], 사이드이펙트: [SettingsSideEffect]
+ */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val getRetentionPeriod: GetRetentionPeriodUseCase,

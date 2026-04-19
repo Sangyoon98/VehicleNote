@@ -49,9 +49,53 @@ private fun sendSideEffect(effect: XxxSideEffect) {
 
 ---
 
-## 2. Kotlin 컨벤션
+## 2. KDoc 주석 컨벤션
 
-### 2.1 네이밍
+### 2.1 작성 대상
+모든 `class`, `interface`, `object`, `enum`, `fun`, `property`에 KDoc 주석을 작성한다.
+IDE 호버링 시 설명이 표시되는 것을 목표로 한다.
+
+### 2.2 형식 규칙
+```kotlin
+/**
+ * 한 줄 요약 (첫 줄, 마침표 없이).
+ *
+ * 필요하면 두 번째 문단에 상세 설명.
+ * 동작 규칙, 제약 사항, 주의사항 등을 기술한다.
+ *
+ * @property xxx 프로퍼티 설명 (data class / 클래스 수준)
+ * @param xxx 파라미터 설명
+ * @return 반환값 설명
+ */
+```
+
+### 2.3 레이어별 작성 기준
+
+| 레이어 | 클래스 | 함수/프로퍼티 |
+|--------|--------|--------------|
+| **domain/model** | 모델 역할 + 각 프로퍼티 `@property` | — |
+| **domain/repository** | 인터페이스 역할 + 구현체 위치 명시 | 각 메서드에 `@param`/`@return` |
+| **domain/usecase** | 동작 규칙(토글 로직 등) 상세 기술 | `invoke`에 `@param`/`@return` |
+| **data/entity** | 테이블명, 제약 조건, 특이사항 기술 | 각 프로퍼티 `@property` |
+| **data/dao** | — | 각 쿼리 메서드에 목적 + `@param`/`@return` |
+| **data/database** | 버전, 마이그레이션 이력 표 | 각 마이그레이션 상수에 변경 내용 |
+| **data/mapper** | — | 변환 방향, null 처리 규칙 기술 |
+| **data/repository** | 구현 전략, `@Singleton` 이유 | 오버라이드 메서드에 간략 설명 |
+| **app/util** | 클래스 목적, 저장 경로, 파일 형식 | 각 함수에 `@param`/`@return` |
+| **app/ViewModel** | 화면 역할, MVI 구조(상태·사이드이펙트 타입) | public 함수에 설명 |
+| **app/Screen** | — | 각 화면 객체에 화면 역할 + 인수 `@param` |
+| **ocr** | 알고리즘 전략(debounce, 패턴 등) | 핵심 로직 함수에 상세 설명 |
+
+### 2.4 금지 사항
+- 코드만 보면 자명한 내용 반복 금지 (`// id를 반환한다` 수준)
+- 구현 세부사항이 아닌 **WHY / 제약 / 규칙**에 집중
+- `/** @param vehicle 차량 */` 처럼 타입만 반복하는 빈 주석 금지
+
+---
+
+## 3. Kotlin 컨벤션
+
+### 3.1 네이밍
 | 대상 | 규칙 | 예시 |
 |------|------|------|
 | 클래스/인터페이스 | PascalCase | `VehicleRepository` |
@@ -60,15 +104,15 @@ private fun sendSideEffect(effect: XxxSideEffect) {
 | private backing field | 언더스코어 prefix | `_state`, `_sideEffect` |
 | 파라미터 | camelCase | `vehicleId` |
 
-### 2.2 함수 길이
+### 3.2 함수 길이
 - 단일 함수는 **40줄** 이내 권장
 - 복잡한 UI 빌드는 Composable 함수로 분리
 
-### 2.3 nullable 처리
+### 3.3 nullable 처리
 - `!!` 사용 금지 — `?.let`, `?: return`, `?: throw` 사용
 - 예외: 컴파일러가 null이 아님을 보장할 수 없지만 로직상 확실한 경우, `requireNotNull()` 또는 `checkNotNull()` 사용
 
-### 2.4 Flow
+### 3.4 Flow
 - Repository에서 반환하는 읽기 작업은 `Flow<T>` 사용
 - ViewModel에서 `collect` 시 `launchIn(viewModelScope)` + `onEach` 체이닝 패턴
 - 단건 읽기/쓰기/삭제는 `suspend fun` 반환
@@ -164,3 +208,4 @@ fun `loadVehicles 호출 시 Flow로 목록을 반환한다`() { ... }
 | 날짜 | 내용 | 결정 근거 |
 |------|------|-----------|
 | 2026-04-11 | 초기 문서 작성 | 기존 코드베이스 분석 기반 |
+| 2026-04-19 | 섹션 2 KDoc 주석 컨벤션 추가 | 전체 코드베이스 KDoc 작성 후 규칙 문서화 |
