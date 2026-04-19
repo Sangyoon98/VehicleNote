@@ -15,6 +15,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * 입출차 기록 상세 화면 ViewModel (MVI 패턴).
+ *
+ * 네비게이션 인수 `recordId`로 기록을 로드하고,
+ * 기록의 번호판으로 연결된 차량 정보도 함께 조회해 상태에 반영한다.
+ * 미등록 번호판이면 차량 등록 화면으로 이동하는 사이드이펙트를 제공한다.
+ *
+ * 상태: [EntryExitDetailState], 사이드이펙트: [EntryExitDetailSideEffect]
+ */
 @HiltViewModel
 class EntryExitDetailViewModel @Inject constructor(
     private val getRecordByIdUseCase: GetEntryExitRecordByIdUseCase,
