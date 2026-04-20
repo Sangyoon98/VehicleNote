@@ -20,6 +20,14 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
+/**
+ * 홈 화면 ViewModel (MVI 패턴).
+ *
+ * 차량 목록 조회·검색·삭제와 통계 계산(총 차량 수, 오늘 등록 수, 부서별 현황)을 담당한다.
+ * 부서 필터 선택 시 [cachedAllVehicles]에서 로컬 필터링하여 별도 DB 쿼리를 방지한다.
+ *
+ * 상태: [HomeState], 사이드이펙트: [HomeSideEffect]
+ */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getAllVehiclesUseCase: GetAllVehiclesUseCase,
@@ -33,12 +41,17 @@ class HomeViewModel @Inject constructor(
     private val _sideEffect = Channel<HomeSideEffect>(Channel.BUFFERED)
     val sideEffect = _sideEffect.receiveAsFlow()
 
+    /** 부서 필터링에 사용되는 전체 차량 캐시. DB Flow 갱신 시 함께 갱신된다. */
     private var cachedAllVehicles: List<Vehicle> = emptyList()
 
     init {
         loadVehicles()
     }
 
+    /**
+     * UI 액션을 처리한다. 상태 업데이트는 [HomeState.reduce]에 위임하고,
+     * 부수 작업(검색, 삭제, 네비게이션)만 직접 수행한다.
+     */
     fun onAction(action: HomeAction) {
         _state.update { it.reduce(action) }
 
@@ -57,6 +70,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 통계 대시보드에서 부서 항목을 탭했을 때 호출된다.
+     *
+     * 해당 부서로 필터를 적용하고, 필터 칩 영역으로 스크롤하는 사이드이펙트를 발생시킨다.
+     *
+     * @param department 선택한 부서명.
+     */
     fun selectDepartmentFromStats(department: String) {
         _state.update { it.copy(selectedDepartment = department) }
         applyDepartmentFilter(department)

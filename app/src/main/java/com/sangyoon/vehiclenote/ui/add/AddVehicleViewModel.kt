@@ -16,6 +16,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * 차량 등록 화면 ViewModel (MVI 패턴).
+ *
+ * 폼 입력, 사진 촬영/갤러리 선택, 유효성 검사, DB 저장을 담당한다.
+ * 카메라 촬영 시 [PhotoStorageManager.createCameraOutputFile]로 미리 파일을 생성하고,
+ * 취소되면 해당 파일을 삭제해 저장소 낭비를 방지한다.
+ *
+ * 네비게이션 인수 `licensePlate`를 [SavedStateHandle]에서 읽어 초기값으로 설정한다 (입출차 화면 연동).
+ *
+ * 상태: [AddVehicleState], 사이드이펙트: [AddVehicleSideEffect]
+ */
 @HiltViewModel
 class AddVehicleViewModel @Inject constructor(
     private val addVehicleUseCase: AddVehicleUseCase,

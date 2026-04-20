@@ -24,6 +24,15 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
+/**
+ * 입출차 기록 전체 목록 화면 ViewModel (MVI 패턴).
+ *
+ * 네비게이션 인수 `filterToday`가 true이면 오늘 기록만 표시한다.
+ * 검색어가 바뀔 때마다 기존 Flow 구독을 취소하고 새 쿼리로 재구독한다.
+ * 현재 표시 중인 기록을 CSV로 내보내는 기능도 제공한다.
+ *
+ * 상태: [EntryExitLogListState], 사이드이펙트: [EntryExitLogListSideEffect]
+ */
 @HiltViewModel
 class EntryExitLogListViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
