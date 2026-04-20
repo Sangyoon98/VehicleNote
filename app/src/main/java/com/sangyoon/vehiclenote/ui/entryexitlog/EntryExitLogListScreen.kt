@@ -135,7 +135,13 @@ fun EntryExitLogListScreen(
                 },
                 expanded = state.isSearchActive,
                 onExpandedChange = { viewModel.onAction(EntryExitLogListAction.SearchActiveChanged(it)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = if (state.isSearchActive) 0.dp else 16.dp,
+                        start = if (state.isSearchActive) 0.dp else 16.dp,
+                        end = if (state.isSearchActive) 0.dp else 16.dp,
+                    ),
             ) {
                 // SearchBar가 expanded일 때 결과를 여기에 표시
                 EntryExitRecordList(
