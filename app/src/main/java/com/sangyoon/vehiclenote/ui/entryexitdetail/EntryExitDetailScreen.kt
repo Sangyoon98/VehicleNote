@@ -24,7 +24,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import com.sangyoon.vehiclenote.ui.components.Plate
+import com.sangyoon.vehiclenote.ui.components.PlateSize
 import com.sangyoon.vehiclenote.ui.components.VnButton
+import com.sangyoon.vehiclenote.ui.components.VnStatusTag
+import com.sangyoon.vehiclenote.ui.components.toTagKind
+import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -140,21 +145,23 @@ fun EntryExitDetailScreen(
                             }
                         }
 
-                        // 차량 번호 섹션
+                        // 번호판 히어로
                         Column(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
                                 "차량 번호",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = VnTypeCaption,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            Text(
-                                text = record.licensePlate,
-                                style = MaterialTheme.typography.displaySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                            Plate(
+                                value = record.licensePlate,
+                                size = PlateSize.Xl,
+                                variant = if (isEntry)
+                                    com.sangyoon.vehiclenote.ui.components.PlateVariant.Entry
+                                else
+                                    com.sangyoon.vehiclenote.ui.components.PlateVariant.Exit,
                             )
                         }
 

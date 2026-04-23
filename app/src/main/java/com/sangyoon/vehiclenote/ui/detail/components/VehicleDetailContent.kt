@@ -48,6 +48,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.ui.components.ImageViewerDialog
+import com.sangyoon.vehiclenote.ui.components.Plate
+import com.sangyoon.vehiclenote.ui.components.PlateSize
+import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -89,22 +92,17 @@ fun VehicleDetailContent(
             )
         }
 
-        // 차량 번호 (카드 아님, 단순 섹션)
+        // 번호판 히어로
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "차량번호",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "차량 번호",
+                style = VnTypeCaption,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Text(
-                text = vehicle.licensePlate,
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Plate(value = vehicle.licensePlate, size = PlateSize.Xl)
         }
 
         // 기본 정보 카드
