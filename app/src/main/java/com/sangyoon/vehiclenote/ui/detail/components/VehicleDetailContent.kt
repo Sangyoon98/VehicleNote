@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.ui.components.ImageViewerDialog
+import com.sangyoon.vehiclenote.ui.components.InfoRow
 import com.sangyoon.vehiclenote.ui.components.Plate
 import com.sangyoon.vehiclenote.ui.components.PlateSize
 import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
@@ -119,7 +120,7 @@ fun VehicleDetailContent(
             ) {
                 InfoRow(label = "차주명", value = vehicle.ownerName)
                 vehicle.phoneNumber?.let {
-                    InfoRow(label = "연락처", value = it)
+                    InfoRow(label = "연락처", value = it, mono = true)
                 }
                 vehicle.department?.let {
                     InfoRow(label = "소속", value = it)
@@ -197,26 +198,6 @@ fun VehicleDetailContent(
     }
 }
 
-@Composable
-internal fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
 
 internal fun formatDate(timestamp: Long): String {
     val sdf = SimpleDateFormat("yyyy년 MM월 dd일 HH:mm", Locale.getDefault())

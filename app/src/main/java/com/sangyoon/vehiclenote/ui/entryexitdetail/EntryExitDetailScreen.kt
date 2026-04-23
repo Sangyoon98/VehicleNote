@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import com.sangyoon.vehiclenote.ui.components.InfoRow
 import com.sangyoon.vehiclenote.ui.components.Plate
 import com.sangyoon.vehiclenote.ui.components.PlateSize
 import com.sangyoon.vehiclenote.ui.components.VnButton
@@ -225,12 +226,12 @@ fun EntryExitDetailScreen(
 
                                 InfoRow(
                                     label = "입차 시각",
-                                    value = formatDate(record.timestamp)
+                                    value = formatDate(record.timestamp),
+                                    mono = true,
                                 )
-
                                 InfoRow(
                                     label = "입차 방법",
-                                    value = "자동 인식 (OCR)"
+                                    value = "자동 인식 (OCR)",
                                 )
                             }
                         }
@@ -258,7 +259,7 @@ fun EntryExitDetailScreen(
 
                                     InfoRow(label = "차주명", value = vehicle.ownerName)
                                     vehicle.department?.let { InfoRow(label = "소속", value = it) }
-                                    vehicle.phoneNumber?.let { InfoRow(label = "연락처", value = it) }
+                                    vehicle.phoneNumber?.let { InfoRow(label = "연락처", value = it, mono = true) }
                                     vehicle.carModel?.let { InfoRow(label = "차종", value = it) }
                                 }
                             }
@@ -270,20 +271,6 @@ fun EntryExitDetailScreen(
     }
 }
 
-@Composable
-private fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(value, style = MaterialTheme.typography.bodyMedium)
-    }
-}
 
 private fun formatTimestamp(timestamp: Long): String {
     val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
