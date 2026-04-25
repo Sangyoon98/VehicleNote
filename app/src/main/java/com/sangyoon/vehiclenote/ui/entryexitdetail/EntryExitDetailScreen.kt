@@ -33,7 +33,7 @@ import com.sangyoon.vehiclenote.ui.components.toTagKind
 import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.sangyoon.vehiclenote.ui.components.VnTopBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,13 +69,9 @@ fun EntryExitDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("입출차 상세") },
-                navigationIcon = {
-                    IconButton(onClick = { viewModel.onAction(EntryExitDetailAction.NavigateBackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로가기")
-                    }
-                }
+            VnTopBar(
+                title = "입출차 상세",
+                onNavigateBack = { viewModel.onAction(EntryExitDetailAction.NavigateBackClicked) },
             )
         }
     ) { paddingValues ->

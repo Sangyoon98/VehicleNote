@@ -31,7 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.sangyoon.vehiclenote.ui.components.VnTopBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -135,16 +135,7 @@ fun AddVehicleScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("차량 등록") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로가기")
-                    }
-                }
-            )
-        },
+        topBar = { VnTopBar(title = "차량 등록", onNavigateBack = onNavigateBack) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
