@@ -110,9 +110,10 @@ fun VehicleDetailContent(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                containerColor = com.sangyoon.vehiclenote.ui.theme.VnSurface
             ),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(14.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, com.sangyoon.vehiclenote.ui.theme.VnLine)
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),

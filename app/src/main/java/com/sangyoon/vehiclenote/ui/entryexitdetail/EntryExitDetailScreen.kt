@@ -30,7 +30,14 @@ import com.sangyoon.vehiclenote.ui.components.PlateSize
 import com.sangyoon.vehiclenote.ui.components.VnButton
 import com.sangyoon.vehiclenote.ui.components.VnStatusTag
 import com.sangyoon.vehiclenote.ui.components.toTagKind
+import com.sangyoon.vehiclenote.ui.theme.VnEntryBg
+import com.sangyoon.vehiclenote.ui.theme.VnEntryInk
+import com.sangyoon.vehiclenote.ui.theme.VnExitBg
+import com.sangyoon.vehiclenote.ui.theme.VnExitInk
+import com.sangyoon.vehiclenote.ui.theme.VnLine
+import com.sangyoon.vehiclenote.ui.theme.VnSurface
 import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
+import com.sangyoon.vehiclenote.ui.theme.VnTypeDisplay
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import com.sangyoon.vehiclenote.ui.components.VnTopBar
@@ -107,37 +114,26 @@ fun EntryExitDetailScreen(
                         val record = state.record!!
                         val isEntry = record.type == RecordType.ENTRY
 
-                        // 입차/출차 배지
+                        // 티켓 카드 — 입차(amber) / 출차(teal)
                         Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (isEntry)
-                                MaterialTheme.colorScheme.primaryContainer
-                            else
-                                MaterialTheme.colorScheme.tertiaryContainer,
-                            modifier = Modifier.fillMaxWidth()
+                            shape = RoundedCornerShape(14.dp),
+                            color = if (isEntry) VnEntryBg else VnExitBg,
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
                             Column(
                                 modifier = Modifier.padding(20.dp),
-                                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalAlignment = androidx.compose.ui.Alignment.Start,
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 Text(
                                     text = if (isEntry) "입차 등록" else "출차 등록",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = if (isEntry)
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    else
-                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                    style = VnTypeCaption,
+                                    color = if (isEntry) VnEntryInk else VnExitInk,
                                 )
-
-                                // 시간 표시 (큰 폰트)
                                 Text(
                                     text = formatTime(record.timestamp),
-                                    style = MaterialTheme.typography.headlineLarge,
-                                    color = if (isEntry)
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    else
-                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                    style = VnTypeDisplay,
+                                    color = if (isEntry) VnEntryInk else VnExitInk,
                                 )
                             }
                         }
@@ -203,10 +199,8 @@ fun EntryExitDetailScreen(
                         // 입차 정보 카드
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                            colors = CardDefaults.cardColors(containerColor = VnSurface),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, VnLine),
                         ) {
                             Column(
                                 modifier = Modifier.padding(20.dp),

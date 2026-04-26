@@ -27,7 +27,12 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import com.sangyoon.vehiclenote.ui.theme.VnInk
+import com.sangyoon.vehiclenote.ui.theme.VnInkMute
+import com.sangyoon.vehiclenote.ui.theme.VnTypeBody
+import com.sangyoon.vehiclenote.ui.theme.VnTypeBodySm
+import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
+import com.sangyoon.vehiclenote.ui.theme.VnTypeTitle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,16 +78,25 @@ fun SettingsScreen(
         }
     }
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("설정") }) }
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
-                .padding(bottom = parentContentPadding.calculateBottomPadding())
+                .padding(
+                    start = 20.dp,
+                    end = 20.dp,
+                    bottom = parentContentPadding.calculateBottomPadding() + 16.dp,
+                )
         ) {
+            // inline 타이틀 (top bar 대신)
+            Text(
+                text = "설정",
+                style = VnTypeTitle,
+                color = VnInk,
+                modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),
+            )
             // ── 기록 관리 섹션 ─────────────────────────────────────────────────
             SectionHeader("기록 관리")
             SettingsItem(
@@ -90,9 +104,9 @@ fun SettingsScreen(
                 subtitle = state.retentionPeriod.label(),
                 onClick = { viewModel.onAction(SettingsAction.OnRetentionPeriodClicked) }
             )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            HorizontalDivider()
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // ── 데이터 관리 섹션 ──────────────────────────────────────────────
             SectionHeader("데이터 관리")
@@ -104,7 +118,7 @@ fun SettingsScreen(
                     { CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp) }
                 } else null
             )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            HorizontalDivider()
             SettingsItem(
                 title = "차량 데이터 가져오기",
                 subtitle = "CSV 파일에서 차량을 가져옵니다 (사진 제외)",
@@ -113,7 +127,7 @@ fun SettingsScreen(
                     { CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp) }
                 } else null
             )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            HorizontalDivider()
         }
     }
 
@@ -156,9 +170,9 @@ fun SettingsScreen(
 private fun SectionHeader(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        style = VnTypeCaption,
+        color = VnInkMute,
+        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
     )
 }
 
@@ -167,24 +181,20 @@ private fun SettingsItem(
     title: String,
     subtitle: String,
     onClick: () -> Unit,
-    trailingContent: (@Composable () -> Unit)? = null
+    trailingContent: (@Composable () -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(text = title, style = VnTypeBody, color = VnInk)
             Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(text = subtitle, style = VnTypeBodySm, color = VnInkMute)
         }
         trailingContent?.let {
             Spacer(modifier = Modifier.width(8.dp))
