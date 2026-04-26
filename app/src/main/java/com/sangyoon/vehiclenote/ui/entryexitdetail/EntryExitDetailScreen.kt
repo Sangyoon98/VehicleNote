@@ -24,10 +24,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import com.sangyoon.vehiclenote.ui.components.InfoRow
+import com.sangyoon.vehiclenote.ui.components.Plate
+import com.sangyoon.vehiclenote.ui.components.PlateSize
 import com.sangyoon.vehiclenote.ui.components.VnButton
+import com.sangyoon.vehiclenote.ui.components.VnStatusTag
+import com.sangyoon.vehiclenote.ui.components.toTagKind
+import com.sangyoon.vehiclenote.ui.theme.VnEntryBg
+import com.sangyoon.vehiclenote.ui.theme.VnEntryInk
+import com.sangyoon.vehiclenote.ui.theme.VnExitBg
+import com.sangyoon.vehiclenote.ui.theme.VnExitInk
+import com.sangyoon.vehiclenote.ui.theme.VnLine
+import com.sangyoon.vehiclenote.ui.theme.VnSurface
+import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
+import com.sangyoon.vehiclenote.ui.theme.VnTypeDisplay
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.sangyoon.vehiclenote.ui.components.VnTopBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,13 +76,9 @@ fun EntryExitDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("입출차 상세") },
-                navigationIcon = {
-                    IconButton(onClick = { viewModel.onAction(EntryExitDetailAction.NavigateBackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로가기")
-                    }
-                }
+            VnTopBar(
+                title = "입출차 상세",
+                onNavigateBack = { viewModel.onAction(EntryExitDetailAction.NavigateBackClicked) },
             )
         }
     ) { paddingValues ->
@@ -105,56 +114,47 @@ fun EntryExitDetailScreen(
                         val record = state.record!!
                         val isEntry = record.type == RecordType.ENTRY
 
-                        // 입차/출차 배지
+                        // 티켓 카드 — 입차(amber) / 출차(teal)
                         Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (isEntry)
-                                MaterialTheme.colorScheme.primaryContainer
-                            else
-                                MaterialTheme.colorScheme.tertiaryContainer,
-                            modifier = Modifier.fillMaxWidth()
+                            shape = RoundedCornerShape(14.dp),
+                            color = if (isEntry) VnEntryBg else VnExitBg,
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
                             Column(
                                 modifier = Modifier.padding(20.dp),
-                                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalAlignment = androidx.compose.ui.Alignment.Start,
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 Text(
                                     text = if (isEntry) "입차 등록" else "출차 등록",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = if (isEntry)
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    else
-                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                    style = VnTypeCaption,
+                                    color = if (isEntry) VnEntryInk else VnExitInk,
                                 )
-
-                                // 시간 표시 (큰 폰트)
                                 Text(
                                     text = formatTime(record.timestamp),
-                                    style = MaterialTheme.typography.headlineLarge,
-                                    color = if (isEntry)
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    else
-                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                    style = VnTypeDisplay,
+                                    color = if (isEntry) VnEntryInk else VnExitInk,
                                 )
                             }
                         }
 
-                        // 차량 번호 섹션
+                        // 번호판 히어로
                         Column(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
                                 "차량 번호",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = VnTypeCaption,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            Text(
-                                text = record.licensePlate,
-                                style = MaterialTheme.typography.displaySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                            Plate(
+                                value = record.licensePlate,
+                                size = PlateSize.Xl,
+                                variant = if (isEntry)
+                                    com.sangyoon.vehiclenote.ui.components.PlateVariant.Entry
+                                else
+                                    com.sangyoon.vehiclenote.ui.components.PlateVariant.Exit,
                             )
                         }
 
@@ -199,10 +199,8 @@ fun EntryExitDetailScreen(
                         // 입차 정보 카드
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                            colors = CardDefaults.cardColors(containerColor = VnSurface),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, VnLine),
                         ) {
                             Column(
                                 modifier = Modifier.padding(20.dp),
@@ -218,12 +216,12 @@ fun EntryExitDetailScreen(
 
                                 InfoRow(
                                     label = "입차 시각",
-                                    value = formatDate(record.timestamp)
+                                    value = formatDate(record.timestamp),
+                                    mono = true,
                                 )
-
                                 InfoRow(
                                     label = "입차 방법",
-                                    value = "자동 인식 (OCR)"
+                                    value = "자동 인식 (OCR)",
                                 )
                             }
                         }
@@ -251,7 +249,7 @@ fun EntryExitDetailScreen(
 
                                     InfoRow(label = "차주명", value = vehicle.ownerName)
                                     vehicle.department?.let { InfoRow(label = "소속", value = it) }
-                                    vehicle.phoneNumber?.let { InfoRow(label = "연락처", value = it) }
+                                    vehicle.phoneNumber?.let { InfoRow(label = "연락처", value = it, mono = true) }
                                     vehicle.carModel?.let { InfoRow(label = "차종", value = it) }
                                 }
                             }
@@ -263,20 +261,6 @@ fun EntryExitDetailScreen(
     }
 }
 
-@Composable
-private fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(value, style = MaterialTheme.typography.bodyMedium)
-    }
-}
 
 private fun formatTimestamp(timestamp: Long): String {
     val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())

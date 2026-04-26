@@ -48,6 +48,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.ui.components.ImageViewerDialog
+import com.sangyoon.vehiclenote.ui.components.InfoRow
+import com.sangyoon.vehiclenote.ui.components.Plate
+import com.sangyoon.vehiclenote.ui.components.PlateSize
+import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -89,31 +93,27 @@ fun VehicleDetailContent(
             )
         }
 
-        // 차량 번호 (카드 아님, 단순 섹션)
+        // 번호판 히어로
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "차량번호",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "차량 번호",
+                style = VnTypeCaption,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Text(
-                text = vehicle.licensePlate,
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Plate(value = vehicle.licensePlate, size = PlateSize.Xl)
         }
 
         // 기본 정보 카드
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                containerColor = com.sangyoon.vehiclenote.ui.theme.VnSurface
             ),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(14.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, com.sangyoon.vehiclenote.ui.theme.VnLine)
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
@@ -121,7 +121,7 @@ fun VehicleDetailContent(
             ) {
                 InfoRow(label = "차주명", value = vehicle.ownerName)
                 vehicle.phoneNumber?.let {
-                    InfoRow(label = "연락처", value = it)
+                    InfoRow(label = "연락처", value = it, mono = true)
                 }
                 vehicle.department?.let {
                     InfoRow(label = "소속", value = it)
@@ -199,26 +199,6 @@ fun VehicleDetailContent(
     }
 }
 
-@Composable
-internal fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
 
 internal fun formatDate(timestamp: Long): String {
     val sdf = SimpleDateFormat("yyyy년 MM월 dd일 HH:mm", Locale.getDefault())

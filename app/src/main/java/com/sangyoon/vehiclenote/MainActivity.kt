@@ -19,7 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sangyoon.vehiclenote.domain.usecase.PurgeOldRecordsUseCase
 import com.sangyoon.vehiclenote.navigation.NavGraph
 import com.sangyoon.vehiclenote.navigation.Screen
-import com.sangyoon.vehiclenote.ui.components.BottomNavigationBar
+import com.sangyoon.vehiclenote.ui.components.VnBottomTabs
 import com.sangyoon.vehiclenote.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -52,9 +52,9 @@ class MainActivity : ComponentActivity() {
                             enter = slideInVertically(tween(300)) { it },
                             exit = slideOutVertically(tween(300)) { it },
                         ) {
-                            BottomNavigationBar(
+                            VnBottomTabs(
                                 currentRoute = currentRoute,
-                                navController = navController
+                                navController = navController,
                             )
                         }
                     }

@@ -8,6 +8,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,27 +19,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -51,7 +49,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -59,11 +56,18 @@ import com.sangyoon.ocr.CameraPreviewWithRecognition
 import com.sangyoon.vehiclenote.di.OcrEntryPoint
 import com.sangyoon.vehiclenote.domain.model.EntryExitRecord
 import com.sangyoon.vehiclenote.domain.model.RecordType
+import com.sangyoon.vehiclenote.ui.components.Plate
+import com.sangyoon.vehiclenote.ui.components.PlateSize
 import com.sangyoon.vehiclenote.ui.components.VnButton
 import com.sangyoon.vehiclenote.ui.components.VnButtonSize
 import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
+import com.sangyoon.vehiclenote.ui.components.VnStatusTag
+import com.sangyoon.vehiclenote.ui.components.toTagKind
 import com.sangyoon.vehiclenote.ui.entryexit.components.ManualInputDialog
 import com.sangyoon.vehiclenote.ui.entryexit.components.PlateConfirmDialog
+import com.sangyoon.vehiclenote.ui.theme.VnInkMute
+import com.sangyoon.vehiclenote.ui.theme.VnLineSoft
+import com.sangyoon.vehiclenote.ui.theme.VnTypeMonoTime
 import dagger.hilt.android.EntryPointAccessors
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -182,7 +186,7 @@ fun EntryExitScreen(
                     .fillMaxWidth()
                     .background(
                         color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                        shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)
                     )
                     .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = bottomPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -201,8 +205,8 @@ fun EntryExitScreen(
                             )
                         }
                         HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                            modifier = Modifier.padding(top = 4.dp)
+                            color = VnLineSoft,
+                            modifier = Modifier.padding(top = 4.dp),
                         )
                     }
                 }
@@ -246,43 +250,19 @@ private fun RecentRecordRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Default.DirectionsCar,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Text(
-            text = record.licensePlate,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f),
-        )
+        Plate(value = record.licensePlate, size = PlateSize.Sm)
+
         Text(
             text = formatTimestamp(record.timestamp),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = VnTypeMonoTime,
+            color = VnInkMute,
+            modifier = Modifier.weight(1f),
         )
-        val isEntry = record.type == RecordType.ENTRY
-        Surface(
-            shape = RoundedCornerShape(4.dp),
-            color = if (isEntry) Color(0xFF1976D2) else Color(0xFF388E3C),
-        ) {
-            Text(
-                text = if (isEntry) "입차" else "출차",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-            )
-        }
+
+        VnStatusTag(
+            kind = record.type.toTagKind(),
+            text = if (record.type == RecordType.ENTRY) "입차" else "출차",
+        )
     }
 }
 

@@ -21,8 +21,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +51,8 @@ import com.sangyoon.vehiclenote.ui.home.components.RecentVehicleCard
 import com.sangyoon.vehiclenote.ui.home.components.StatisticsSection
 import com.sangyoon.vehiclenote.ui.home.components.VehicleListItem
 import com.sangyoon.vehiclenote.ui.theme.AppTheme
+import com.sangyoon.vehiclenote.ui.theme.VnInk
+import com.sangyoon.vehiclenote.ui.theme.VnSurface
 import kotlinx.coroutines.launch
 
 private val SearchBarHeight = 56.dp
@@ -98,17 +100,19 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (!state.isSearchActive) {
-                // 시스템 내비바는 Scaffold가 이미 처리하므로 BottomNavigationBar 높이만 추가
                 val systemNavBar =
                     WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 val bottomNavBarHeight =
                     (parentContentPadding.calculateBottomPadding() - systemNavBar).coerceAtLeast(0.dp)
-                ExtendedFloatingActionButton(
+                FloatingActionButton(
                     onClick = { viewModel.onAction(HomeAction.AddVehicleClicked) },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("차량 등록") },
-                    modifier = Modifier.padding(bottom = bottomNavBarHeight)
-                )
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
+                    containerColor = VnInk,
+                    contentColor = VnSurface,
+                    modifier = Modifier.padding(bottom = bottomNavBarHeight),
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "차량 등록")
+                }
             }
         }
     ) { paddingValues ->
