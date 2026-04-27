@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Google Fonts provider certificate for com.google.android.gms.
+    To regenerate: Android Studio → res → New → Font Resource File, choose "More fonts",
+    pick any Google Font — the IDE will auto-create/update this file with the correct cert.
+    Until then, fonts fall back to system defaults (no crash).
+-->
+<resources>
+    <array name="com_google_android_gms_fonts_certs">
+        <item>@array/com_google_android_gms_fonts_certs_prod</item>
+    </array>
+    <!--
+        Replace the placeholder below with the real certificate from the Android Studio
+        font downloader. The value is the SHA-256 certificate of com.google.android.gms.
+    -->
+    <string-array name="com_google_android_gms_fonts_certs_prod">
+        <item>
+            MIIEQzCCAyugAwIBAgIJAMLgh0ZkSjCNMA0GCSqGSIb3DQEBBAUAMHQxCzAJBgNV
+            BAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFBYDVQQHEw1Nb3VudGFpbiBW
+            aWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEQMA4GA1UECxMHQW5kcm9pZDEQMA4G
+            A1UEAxMHQW5kcm9pZDAeFw0wODA4MjEyMzEzMzRaFw0zNjAxMDcyMzEzMzRaMHQx
+            CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFBYDVQQHEw1Nb3Vu
+            dGFpbiBWaWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEQMA4GA1UECxMHQW5kcm9p
+            ZDEQMA4GA1UEAxMHQW5kcm9pZDCCASAwDQYJKoZIhvcNAQEBBQADggENADCCAQgC
+            ggEBAKtWLgDYO6IIrgqWbxJOKdoR8qtW0I9Y4sypEwBrKcMllVkFEGP1Fck6JEqI
+            N1ik3bCFr0JiH6p3RBPEfzIX4LO9N5ZC7h6iMsTRJb/FNBbbC7DOc2Ug2BUWV3P
+            PYfBr+SBcfKnfxzh0eJGm+bY3L/uTHT9J1DJkGJ3VJF/+6lBhFHmw/SQoFfEFqN
+            9MHdyS+MoHWlBxhj1GJZH8AXHbH3CJvs3EJYoWiUHOZ5IQi5A9qhVDhkqOuNBP9
+            o2hI8rPM3X4k1T5e8EKdh2XD4hImjk7/u1iBnPDaFsquHfGYFqp/TKjG9l2TiNw
+            OzIoxPwTi3K+kSMCAwEAAaMvMC0wDAYDVR0TBAUwAwEB/zAdBgNVHQ4EFgQUVBRi
+            YDEVu8m2w0y0bN2MFaF9mTQwDQYJKoZIhvcNAQEEBQADggEBABkh0H4T6WPrdPvn
+            vLjkgiqpJ2N7x8PSiifaELt4kzJVVsYJlQnIgzNSMR0wFluX6OhvK9xKMlkdI0xw
+            vSDyS+OGUHkmj2TJlfgRIhVvOIZPmfPPZw==
+        </item>
+    </string-array>
+</resources>

@@ -2,17 +2,9 @@ package com.sangyoon.vehiclenote.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-
-// TODO: Replace FontFamily.Default with bundled Inter/Pretendard once font assets are added to
-//       app/src/main/res/font/ (inter_*.ttf, pretendard_*.ttf)
-// TODO: Replace FontFamily.Monospace with bundled JetBrains Mono (jetbrains_mono_*.ttf)
-//       Used for: plate numbers, timestamps, phone numbers, statistics
-private val SansFont  = FontFamily.Default
-private val MonoFont  = FontFamily.Monospace
 
 // ─── VN Semantic Type Scales ──────────────────────────────────────────────────
 // Maps directly to design tokens in design_handoff_visual_identity/README.md
