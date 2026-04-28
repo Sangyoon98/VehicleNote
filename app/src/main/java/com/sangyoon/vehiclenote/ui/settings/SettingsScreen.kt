@@ -27,6 +27,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.sangyoon.vehiclenote.ui.components.VnLogoMark
 import com.sangyoon.vehiclenote.ui.theme.VnInk
 import com.sangyoon.vehiclenote.ui.theme.VnInkMute
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBody
@@ -128,6 +129,23 @@ fun SettingsScreen(
                 } else null
             )
             HorizontalDivider()
+
+            // ── 푸터 ──────────────────────────────────────────────────────────
+            Spacer(modifier = Modifier.height(32.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                VnLogoMark(modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "VehicleNote · 차량 출입 관리",
+                    style = VnTypeCaption,
+                    color = VnInkMute,
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 
