@@ -13,6 +13,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -114,9 +124,9 @@ fun EntryExitDetailScreen(
                         val record = state.record!!
                         val isEntry = record.type == RecordType.ENTRY
 
-                        // 티켓 카드 — 입차(amber) / 출차(teal)
+                        // 티켓 카드 — 입차(amber) / 출차(teal) + 찢어낸 노치
                         Surface(
-                            shape = RoundedCornerShape(14.dp),
+                            shape = TicketShape(notchRadiusDp = 10f),
                             color = if (isEntry) VnEntryBg else VnExitBg,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
@@ -155,6 +165,7 @@ fun EntryExitDetailScreen(
                                     com.sangyoon.vehiclenote.ui.components.PlateVariant.Entry
                                 else
                                     com.sangyoon.vehiclenote.ui.components.PlateVariant.Exit,
+                                animated = true,
                             )
                         }
 
@@ -261,6 +272,31 @@ fun EntryExitDetailScreen(
     }
 }
 
+
+/**
+ * 찢어낸 티켓 모양. 좌우 중간에 반원 노치를 뺀 둥근 사각형.
+ */
+private class TicketShape(private val notchRadiusDp: Float) : Shape {
+    override fun createOutline(size: androidx.compose.ui.geometry.Size, layoutDirection: LayoutDirection, density: Density): Outline {
+        val notchR = with(density) { notchRadiusDp.dp.toPx() }
+        val cornerR = with(density) { 14.dp.toPx() }
+        val midY = size.height / 2f
+
+        val mainPath = Path().apply {
+            addRoundRect(RoundRect(Rect(Offset.Zero, size), CornerRadius(cornerR)))
+        }
+        val leftNotch = Path().apply {
+            addOval(Rect(left = -notchR, top = midY - notchR, right = notchR, bottom = midY + notchR))
+        }
+        val rightNotch = Path().apply {
+            addOval(Rect(left = size.width - notchR, top = midY - notchR, right = size.width + notchR, bottom = midY + notchR))
+        }
+
+        val step1 = Path().apply { op(mainPath, leftNotch, PathOperation.Difference) }
+        val result = Path().apply { op(step1, rightNotch, PathOperation.Difference) }
+        return Outline.Generic(result)
+    }
+}
 
 private fun formatTimestamp(timestamp: Long): String {
     val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())

@@ -1,19 +1,26 @@
 package com.sangyoon.vehiclenote.ui.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import com.sangyoon.vehiclenote.ui.theme.VnEntry
 import com.sangyoon.vehiclenote.ui.theme.VnEntryBg
 import com.sangyoon.vehiclenote.ui.theme.VnEntryInk
@@ -66,6 +73,9 @@ private fun colorsFor(variant: PlateVariant) = when (variant) {
 /**
  * 앱 전체의 번호판 렌더링 단일 진입점.
  * 번호판, 시각, 전화번호 등 모든 코드값은 반드시 이 컴포저블 또는 VnTypeMonoTime 스타일을 사용.
+ *
+ * @param animated true이면 첫 등장 시 fade + letter-spacing 0.06em→0.02em 300ms 애니메이션.
+ *                 detail 화면의 Xl 번호판 히어로 전용. 리스트 아이템에선 false.
  */
 @Composable
 fun Plate(
@@ -73,12 +83,25 @@ fun Plate(
     modifier: Modifier = Modifier,
     size: PlateSize = PlateSize.Md,
     variant: PlateVariant = PlateVariant.Default,
+    animated: Boolean = false,
 ) {
     val t = tokensFor(size)
     val c = colorsFor(variant)
     val shape = RoundedCornerShape(t.radius)
 
+    val letterSpacingEm = remember { Animatable(if (animated) 0.06f else 0.02f) }
+    val alpha = remember { Animatable(if (animated) 0f else 1f) }
+
+    LaunchedEffect(Unit) {
+        if (animated) {
+            val spec = tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
+            launch { letterSpacingEm.animateTo(0.02f, animationSpec = spec) }
+            launch { alpha.animateTo(1f, animationSpec = spec) }
+        }
+    }
+
     val baseModifier = modifier
+        .graphicsLayer { this.alpha = alpha.value }
         .background(c.bg, shape)
         .then(
             if (c.border != Color.Transparent) Modifier.border(1.dp, c.border, shape)
@@ -93,7 +116,7 @@ fun Plate(
             fontFamily = FontFamily.Monospace,
             fontWeight = if (size == PlateSize.Xl) FontWeight.Bold else FontWeight.SemiBold,
             fontSize = t.fontSize.sp,
-            letterSpacing = 0.02.em,
+            letterSpacing = letterSpacingEm.value.em,
         ),
         color = c.text,
         maxLines = 1,

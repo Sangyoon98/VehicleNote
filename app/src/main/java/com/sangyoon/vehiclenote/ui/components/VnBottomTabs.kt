@@ -1,10 +1,13 @@
 package com.sangyoon.vehiclenote.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.getValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.History
@@ -84,13 +87,23 @@ fun VnBottomTabs(
                     }
                 },
                 icon = {
+                    val pillAlpha by animateFloatAsState(
+                        targetValue = if (selected) 1f else 0f,
+                        animationSpec = tween(durationMillis = 200),
+                        label = "pill_alpha_${tab.route}",
+                    )
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = if (selected) Modifier
-                            .background(VnPaperDeep, RoundedCornerShape(999.dp))
-                            .border(1.dp, VnLine, RoundedCornerShape(999.dp))
-                            .padding(horizontal = 14.dp, vertical = 5.dp)
-                        else Modifier
+                        modifier = Modifier
+                            .background(
+                                VnPaperDeep.copy(alpha = pillAlpha),
+                                RoundedCornerShape(999.dp),
+                            )
+                            .border(
+                                1.dp,
+                                VnLine.copy(alpha = pillAlpha),
+                                RoundedCornerShape(999.dp),
+                            )
                             .padding(horizontal = 14.dp, vertical = 5.dp),
                     ) {
                         Icon(

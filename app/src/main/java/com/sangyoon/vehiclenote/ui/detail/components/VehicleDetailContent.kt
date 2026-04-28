@@ -103,7 +103,7 @@ fun VehicleDetailContent(
                 style = VnTypeCaption,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Plate(value = vehicle.licensePlate, size = PlateSize.Xl)
+            Plate(value = vehicle.licensePlate, size = PlateSize.Xl, animated = true)
         }
 
         // 기본 정보 카드
