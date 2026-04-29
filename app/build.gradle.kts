@@ -105,6 +105,9 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
+    // Google Fonts (Inter + JetBrains Mono)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
+
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)

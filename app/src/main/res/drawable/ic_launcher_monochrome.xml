@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrome version: system applies tint, so draw everything in white on transparent -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Amber accent dot — top center -->
+    <!-- Amber dot (same color as rest — tinted by system) -->
     <path
-        android:fillColor="#E0A343"
+        android:fillColor="#FFFFFF"
         android:pathData="M54,19m-5,0a5,5 0 1,0 10,0a5,5 0 1,0 -10,0" />
 
-    <!-- Plate outline — rounded rect, white stroke -->
+    <!-- Plate outline -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFF"
         android:strokeWidth="3"
         android:pathData="M22,28 Q22,24 26,24 L82,24 Q86,24 86,28 L86,82 Q86,86 82,86 L26,86 Q22,86 22,82 Z" />
 
-    <!-- Corner bolts (4×) -->
+    <!-- Corner bolts -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M26,28m-2.5,0a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0" />
@@ -31,7 +32,7 @@
         android:fillColor="#FFFFFF"
         android:pathData="M82,82m-2.5,0a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0" />
 
-    <!-- V — mono stroke glyph -->
+    <!-- V -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFF"
@@ -40,7 +41,7 @@
         android:strokeLineJoin="round"
         android:pathData="M28,36 L40,74 L52,36" />
 
-    <!-- N — mono stroke glyph -->
+    <!-- N -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFF"

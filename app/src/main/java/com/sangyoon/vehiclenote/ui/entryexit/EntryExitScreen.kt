@@ -63,6 +63,8 @@ import com.sangyoon.vehiclenote.ui.components.VnButtonSize
 import com.sangyoon.vehiclenote.ui.components.VnButtonStyle
 import com.sangyoon.vehiclenote.ui.components.VnStatusTag
 import com.sangyoon.vehiclenote.ui.components.toTagKind
+import com.sangyoon.vehiclenote.ui.entryexit.components.CameraReticle
+import com.sangyoon.vehiclenote.ui.entryexit.components.CameraStatusBar
 import com.sangyoon.vehiclenote.ui.entryexit.components.ManualInputDialog
 import com.sangyoon.vehiclenote.ui.entryexit.components.PlateConfirmDialog
 import com.sangyoon.vehiclenote.ui.theme.VnInkMute
@@ -152,6 +154,16 @@ fun EntryExitScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {},
+                )
+
+                // 상단 상태바 오버레이
+                CameraStatusBar(modifier = Modifier.align(Alignment.TopCenter))
+
+                // 번호판 인식 리티클 (화면 중앙보다 위쪽에 배치)
+                CameraReticle(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(bottom = 80.dp),
                 )
             } else {
                 Column(
