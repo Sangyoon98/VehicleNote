@@ -1,5 +1,6 @@
 package com.sangyoon.vehiclenote.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,9 +16,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,13 +35,18 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +59,7 @@ import com.sangyoon.vehiclenote.ui.home.components.RecentVehicleCard
 import com.sangyoon.vehiclenote.ui.home.components.StatisticsSection
 import com.sangyoon.vehiclenote.ui.home.components.VehicleListItem
 import com.sangyoon.vehiclenote.ui.theme.AppTheme
+import com.sangyoon.vehiclenote.ui.theme.VnDanger
 import com.sangyoon.vehiclenote.ui.theme.VnInk
 import com.sangyoon.vehiclenote.ui.theme.VnSurface
 import kotlinx.coroutines.launch
@@ -338,12 +347,45 @@ private fun HomeContent(
         }
 
         items(items = state.vehicles, key = { it.id }) { vehicle ->
-            VehicleListItem(
-                vehicle = vehicle,
-                onClick = { onVehicleClick(vehicle.id) },
-                onDelete = { onDeleteVehicle(vehicle) },
-                modifier = Modifier.padding(horizontal = 16.dp),
+            val dismissState = rememberSwipeToDismissBoxState(
+                confirmValueChange = { it == SwipeToDismissBoxValue.EndToStart }
             )
+
+            LaunchedEffect(dismissState.currentValue) {
+                if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+                    onDeleteVehicle(vehicle)
+                }
+            }
+
+            SwipeToDismissBox(
+                state = dismissState,
+                enableDismissFromStartToEnd = false,
+                backgroundContent = {
+                    val fraction = dismissState.progress.coerceIn(0f, 1f)
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(VnDanger.copy(alpha = (fraction * 2f).coerceIn(0f, 1f))),
+                        contentAlignment = Alignment.CenterEnd,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "삭제",
+                            tint = Color.White.copy(alpha = (fraction * 3f).coerceIn(0f, 1f)),
+                            modifier = Modifier.padding(end = 24.dp),
+                        )
+                    }
+                },
+                modifier = Modifier.animateItem(),
+            ) {
+                VehicleListItem(
+                    vehicle = vehicle,
+                    onClick = { onVehicleClick(vehicle.id) },
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
         }
     }
 }
