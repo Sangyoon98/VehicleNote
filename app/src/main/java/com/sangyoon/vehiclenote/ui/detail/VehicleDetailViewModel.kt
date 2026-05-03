@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sangyoon.vehiclenote.domain.usecase.DeleteVehicleUseCase
 import com.sangyoon.vehiclenote.domain.usecase.GetVehicleByIdUseCase
+import com.sangyoon.vehiclenote.util.AnalyticsLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,7 @@ import javax.inject.Inject
 class VehicleDetailViewModel @Inject constructor(
     private val getVehicleByIdUseCase: GetVehicleByIdUseCase,
     private val deleteVehicleUseCase: DeleteVehicleUseCase,
+    private val analyticsLogger: AnalyticsLogger,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -83,6 +85,7 @@ class VehicleDetailViewModel @Inject constructor(
         viewModelScope.launch {
             deleteVehicleUseCase(vehicle).fold(
                 onSuccess = {
+                    analyticsLogger.vehicleDeleted(vehicle.licensePlate)
                     _sideEffect.send(VehicleDetailSideEffect.ShowSnackbar("${vehicle.licensePlate} 차량이 삭제되었습니다"))
                     _sideEffect.send(VehicleDetailSideEffect.NavigateBack)
                 },

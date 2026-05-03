@@ -6,6 +6,7 @@ import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.domain.usecase.DeleteVehicleUseCase
 import com.sangyoon.vehiclenote.domain.usecase.GetAllVehiclesUseCase
 import com.sangyoon.vehiclenote.domain.usecase.SearchVehicleUseCase
+import com.sangyoon.vehiclenote.util.AnalyticsLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +33,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getAllVehiclesUseCase: GetAllVehiclesUseCase,
     private val searchVehicleUseCase: SearchVehicleUseCase,
-    private val deleteVehicleUseCase: DeleteVehicleUseCase
+    private val deleteVehicleUseCase: DeleteVehicleUseCase,
+    private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -113,6 +115,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             deleteVehicleUseCase(vehicle).fold(
                 onSuccess = {
+                    analyticsLogger.vehicleDeleted(vehicle.licensePlate)
                     sendSideEffect(HomeSideEffect.ShowSnackbar("${vehicle.licensePlate} 차량이 삭제되었습니다"))
                 },
                 onFailure = {

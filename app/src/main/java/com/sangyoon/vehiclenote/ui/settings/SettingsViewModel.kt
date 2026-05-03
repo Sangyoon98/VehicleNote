@@ -9,6 +9,7 @@ import com.sangyoon.vehiclenote.domain.usecase.GetRetentionPeriodUseCase
 import com.sangyoon.vehiclenote.domain.usecase.GetVehicleByLicensePlateUseCase
 import com.sangyoon.vehiclenote.domain.usecase.PurgeOldRecordsUseCase
 import com.sangyoon.vehiclenote.domain.usecase.SetRetentionPeriodUseCase
+import com.sangyoon.vehiclenote.util.AnalyticsLogger
 import com.sangyoon.vehiclenote.util.VehicleCsvExporter
 import com.sangyoon.vehiclenote.util.VehicleCsvParser
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,6 +49,7 @@ class SettingsViewModel @Inject constructor(
     private val getVehicleByLicensePlate: GetVehicleByLicensePlateUseCase,
     private val vehicleCsvExporter: VehicleCsvExporter,
     private val vehicleCsvParser: VehicleCsvParser,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsState())
@@ -101,10 +103,13 @@ class SettingsViewModel @Inject constructor(
             SettingsAction.OnExportVehiclesClicked -> {
                 viewModelScope.launch {
                     _state.update { it.copy(isExportingVehicles = true) }
+                    var exportedCount = 0
                     runCatching {
                         val vehicles = withContext(Dispatchers.IO) { getAllVehicles().first() }
+                        exportedCount = vehicles.size
                         withContext(Dispatchers.IO) { vehicleCsvExporter.export(vehicles) }
                     }.onSuccess { uri ->
+                        analyticsLogger.csvExported(exportedCount)
                         val fileName = "vehicles_${fileTimestamp()}.csv"
                         _sideEffect.send(SettingsSideEffect.ShareVehicleCsv(uri, fileName))
                     }.also {
@@ -153,6 +158,7 @@ class SettingsViewModel @Inject constructor(
                             }
                         }
                     }
+                    analyticsLogger.csvImported(added, skippedDuplicate)
                     _state.update {
                         it.copy(
                             isImportingVehicles = false,
@@ -182,6 +188,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             setRetentionPeriod(period)
             purgeOldRecords()
+            analyticsLogger.retentionPeriodChanged(period.name.lowercase())
         }
     }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.domain.usecase.GetVehicleByIdUseCase
 import com.sangyoon.vehiclenote.domain.usecase.UpdateVehicleUseCase
+import com.sangyoon.vehiclenote.util.AnalyticsLogger
 import com.sangyoon.vehiclenote.util.PhotoStorageManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -30,6 +31,7 @@ class EditVehicleViewModel @Inject constructor(
     private val getVehicleByIdUseCase: GetVehicleByIdUseCase,
     private val updateVehicleUseCase: UpdateVehicleUseCase,
     private val photoStorageManager: PhotoStorageManager,
+    private val analyticsLogger: AnalyticsLogger,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -171,6 +173,7 @@ class EditVehicleViewModel @Inject constructor(
 
             updateVehicleUseCase(vehicle).fold(
                 onSuccess = {
+                    analyticsLogger.vehicleUpdated(vehicle.licensePlate)
                     _state.update { it.copy(isLoading = false) }
                     _sideEffect.send(EditVehicleSideEffect.NavigateBack)
                 },
