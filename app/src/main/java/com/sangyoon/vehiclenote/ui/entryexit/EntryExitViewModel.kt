@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sangyoon.vehiclenote.domain.usecase.GetEntryExitRecordsUseCase
 import com.sangyoon.vehiclenote.domain.usecase.RecordEntryExitUseCase
+import com.sangyoon.vehiclenote.util.AnalyticsLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class EntryExitViewModel @Inject constructor(
     private val getRecordsUseCase: GetEntryExitRecordsUseCase,
-    private val recordEntryExitUseCase: RecordEntryExitUseCase
+    private val recordEntryExitUseCase: RecordEntryExitUseCase,
+    private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EntryExitState())
@@ -74,7 +76,9 @@ class EntryExitViewModel @Inject constructor(
             runCatching {
                 recordEntryExitUseCase(plate)
             }.onSuccess { record ->
-                val typeLabel = if (record.type.name == "ENTRY") "입차" else "출차"
+                val typeKey = if (record.type.name == "ENTRY") "entry" else "exit"
+                analyticsLogger.entryExitRecorded(record.licensePlate, typeKey)
+                val typeLabel = if (typeKey == "entry") "입차" else "출차"
                 sendSideEffect(EntryExitSideEffect.ShowSnackbar("${record.licensePlate} $typeLabel 처리됨"))
             }.onFailure { e ->
                 sendSideEffect(EntryExitSideEffect.ShowSnackbar("오류: ${e.message}"))
