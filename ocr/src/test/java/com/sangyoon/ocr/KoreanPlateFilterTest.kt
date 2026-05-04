@@ -57,6 +57,18 @@ class KoreanPlateFilterTest {
     }
 
     @Test
+    fun `번호판 라벨 없이 다른 글자와 붙은 텍스트는 제외한다`() {
+        assertNull(KoreanPlateFilter.extractPlate("방문차량123가4567입차"))
+    }
+
+    @Test
+    fun `대표 번호판 형태를 추출한다`() {
+        assertEquals("12가1234", KoreanPlateFilter.extractPlate("12가1234"))
+        assertEquals("123가1234", KoreanPlateFilter.extractPlate("123가1234"))
+        assertEquals("서울12가1234", KoreanPlateFilter.extractPlate("서울12가1234"))
+    }
+
+    @Test
     fun `여러 번호판이 있으면 가장 구체적인 패턴을 반환한다`() {
         // "서울12가1234"가 "가1234"보다 더 구체적인 패턴
         val plates = KoreanPlateFilter.extractAllPlates("서울12가1234 02나5678")
