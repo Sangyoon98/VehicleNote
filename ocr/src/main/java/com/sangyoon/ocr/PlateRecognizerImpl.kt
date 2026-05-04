@@ -48,7 +48,11 @@ class PlateRecognizerImpl : PlateRecognizer {
         recognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
                 val now = System.currentTimeMillis()
-                val detection = KoreanPlateFilter.findPlateBounds(visionText)
+                val detection = KoreanPlateFilter.findPlateBounds(
+                    visionText = visionText,
+                    preferredPlate = lastRecognizedPlate,
+                    ignoredPlates = activeCooldownPlates(now),
+                )
                 val plate = detection?.first
                 val boundingBox = detection?.second
 
@@ -59,14 +63,10 @@ class PlateRecognizerImpl : PlateRecognizer {
                         onResult(null, null)
                     }
 
-                    isInCooldown(plate, now) -> {
-                        // 동일 번호판 쿨다운 중 — 스킵
-                        onResult(null, null)
-                    }
-
                     isSameAsLast(plate) -> {
                         consecutiveCount++
                         if (consecutiveCount >= REQUIRED_CONSECUTIVE) {
+                            lastRecognizedPlate = null
                             consecutiveCount = 0
                             addCooldown(plate, now)
                             onResult(plate, boundingBox)
@@ -105,14 +105,10 @@ class PlateRecognizerImpl : PlateRecognizer {
         return KoreanPlateFilter.isSimilarPlate(last, plate)
     }
 
-    /**
-     * 해당 번호판이 쿨다운 중인지 확인.
-     * 유사 번호판(1글자 오차)도 쿨다운에 해당한다.
-     */
-    private fun isInCooldown(plate: String, now: Long): Boolean {
-        return cooldownMap.any { (cooledPlate, time) ->
-            now - time < COOLDOWN_MS && KoreanPlateFilter.isSimilarPlate(cooledPlate, plate)
-        }
+    private fun activeCooldownPlates(now: Long): Set<String> {
+        return cooldownMap
+            .filterValues { time -> now - time < COOLDOWN_MS }
+            .keys
     }
 
     private fun addCooldown(plate: String, now: Long) {
