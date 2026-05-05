@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -29,11 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.sangyoon.vehiclenote.navigation.Screen
-import com.sangyoon.vehiclenote.ui.theme.VnInk
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
-import com.sangyoon.vehiclenote.ui.theme.VnLine
-import com.sangyoon.vehiclenote.ui.theme.VnPaperDeep
-import com.sangyoon.vehiclenote.ui.theme.VnSurface
 import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
 
 private data class TabItem(
@@ -58,15 +54,17 @@ fun VnBottomTabs(
     currentRoute: String?,
     navController: NavController,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     NavigationBar(
-        containerColor = VnSurface,
-        contentColor = VnInk,
+        containerColor = colorScheme.surface,
+        contentColor = colorScheme.onSurface,
         tonalElevation = 0.dp,
         modifier = Modifier.drawBehind {
             // 상단 1dp 구분선 (elevation 대신 border)
             val stroke = 1.dp.toPx()
             drawLine(
-                color = VnLine,
+                color = colorScheme.outline,
                 start = Offset(0f, stroke / 2),
                 end = Offset(size.width, stroke / 2),
                 strokeWidth = stroke,
@@ -96,12 +94,12 @@ fun VnBottomTabs(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .background(
-                                VnPaperDeep.copy(alpha = pillAlpha),
+                                colorScheme.surfaceVariant.copy(alpha = pillAlpha),
                                 RoundedCornerShape(999.dp),
                             )
                             .border(
                                 1.dp,
-                                VnLine.copy(alpha = pillAlpha),
+                                colorScheme.outline.copy(alpha = pillAlpha),
                                 RoundedCornerShape(999.dp),
                             )
                             .padding(horizontal = 14.dp, vertical = 5.dp),
@@ -121,10 +119,10 @@ fun VnBottomTabs(
                 },
                 colors = NavigationBarItemDefaults.colors(
                     indicatorColor = Color.Transparent,  // M3 기본 oval 인디케이터 제거
-                    selectedIconColor = VnInk,
-                    unselectedIconColor = VnInkMute,
-                    selectedTextColor = VnInk,
-                    unselectedTextColor = VnInkMute,
+                    selectedIconColor = colorScheme.onSurface,
+                    unselectedIconColor = colorScheme.onSurfaceVariant,
+                    selectedTextColor = colorScheme.onSurface,
+                    unselectedTextColor = colorScheme.onSurfaceVariant,
                 ),
             )
         }

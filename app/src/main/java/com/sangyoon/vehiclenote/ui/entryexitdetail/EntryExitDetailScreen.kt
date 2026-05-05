@@ -44,8 +44,6 @@ import com.sangyoon.vehiclenote.ui.theme.VnEntryBg
 import com.sangyoon.vehiclenote.ui.theme.VnEntryInk
 import com.sangyoon.vehiclenote.ui.theme.VnExitBg
 import com.sangyoon.vehiclenote.ui.theme.VnExitInk
-import com.sangyoon.vehiclenote.ui.theme.VnLine
-import com.sangyoon.vehiclenote.ui.theme.VnSurface
 import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
 import com.sangyoon.vehiclenote.ui.theme.VnTypeDisplay
 import androidx.compose.material3.Surface
@@ -210,8 +208,13 @@ fun EntryExitDetailScreen(
                         // 입차 정보 카드
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = VnSurface),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, VnLine),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.outline,
+                            ),
                         ) {
                             Column(
                                 modifier = Modifier.padding(20.dp),

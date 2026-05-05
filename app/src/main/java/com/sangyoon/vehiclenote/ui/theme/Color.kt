@@ -71,15 +71,15 @@ val surfaceContainerHighLight       = Color(0xFFEAE8E0)
 val surfaceContainerHighestLight    = VnLine
 
 // ─── Material 3 Dark Scheme Roles ────────────────────────────────────────────
-// 다크 모드: ink 계열 반전, 따뜻한 표면 유지
-val primaryDark                     = Color(0xFFD4C9B8)  // warm off-white
-val onPrimaryDark                   = Color(0xFF1A1D23)
-val primaryContainerDark            = Color(0xFF2E3239)
-val onPrimaryContainerDark          = Color(0xFFD4C9B8)
-val secondaryDark                   = Color(0xFFADB1B8)
-val onSecondaryDark                 = Color(0xFF1A1D23)
-val secondaryContainerDark          = Color(0xFF2A2D33)
-val onSecondaryContainerDark        = Color(0xFFADB1B8)
+// 다크 모드: 배경과 표면은 검회색 톤, 텍스트는 뉴트럴 그레이로 유지
+val primaryDark                     = Color(0xFF3A3D43)
+val onPrimaryDark                   = Color(0xFFF1F3F4)
+val primaryContainerDark            = Color(0xFF24272C)
+val onPrimaryContainerDark          = Color(0xFFE7E9EC)
+val secondaryDark                   = Color(0xFFC3C7CD)
+val onSecondaryDark                 = Color(0xFF17191D)
+val secondaryContainerDark          = Color(0xFF2B2F36)
+val onSecondaryContainerDark        = Color(0xFFC3C7CD)
 val tertiaryDark                    = VnEntry
 val onTertiaryDark                  = VnEntryInk
 val tertiaryContainerDark           = Color(0xFF3D2E10)
@@ -88,25 +88,25 @@ val errorDark                       = Color(0xFFFF8A7A)
 val onErrorDark                     = Color(0xFF3A0E08)
 val errorContainerDark              = Color(0xFF5C1A12)
 val onErrorContainerDark            = Color(0xFFFF8A7A)
-val backgroundDark                  = Color(0xFF14161A)
-val onBackgroundDark                = Color(0xFFE2DDD5)
-val surfaceDark                     = Color(0xFF1C1F24)
-val onSurfaceDark                   = Color(0xFFE2DDD5)
+val backgroundDark                  = Color(0xFF111316)
+val onBackgroundDark                = Color(0xFFE7E9EC)
+val surfaceDark                     = Color(0xFF1A1D21)
+val onSurfaceDark                   = Color(0xFFE7E9EC)
 val surfaceVariantDark              = Color(0xFF262A30)
-val onSurfaceVariantDark            = Color(0xFFADB1B8)
-val outlineDark                     = Color(0xFF3D4148)
-val outlineVariantDark              = Color(0xFF2E3239)
+val onSurfaceVariantDark            = Color(0xFFAEB4BC)
+val outlineDark                     = Color(0xFF42464E)
+val outlineVariantDark              = Color(0xFF30343B)
 val scrimDark                       = Color(0xFF000000)
 val inverseSurfaceDark              = VnPaper
 val inverseOnSurfaceDark            = VnInk
 val inversePrimaryDark              = VnInk
-val surfaceDimDark                  = Color(0xFF0E1014)
-val surfaceBrightDark               = Color(0xFF2A2D33)
-val surfaceContainerLowestDark      = Color(0xFF0A0C10)
-val surfaceContainerLowDark         = Color(0xFF1A1D22)
-val surfaceContainerDark            = Color(0xFF20242A)
-val surfaceContainerHighDark        = Color(0xFF272B31)
-val surfaceContainerHighestDark     = Color(0xFF2E3239)
+val surfaceDimDark                  = Color(0xFF0D0F12)
+val surfaceBrightDark               = Color(0xFF2B2F36)
+val surfaceContainerLowestDark      = Color(0xFF090B0E)
+val surfaceContainerLowDark         = Color(0xFF171A1E)
+val surfaceContainerDark            = Color(0xFF1F2328)
+val surfaceContainerHighDark        = Color(0xFF282C32)
+val surfaceContainerHighestDark     = Color(0xFF32363D)
 
 // ─── VN Button Colors ─────────────────────────────────────────────────────────
 val vnBtnPrimaryBg        = VnInk
@@ -116,12 +116,12 @@ val vnBtnPrimaryText      = VnSurface
 val vnBtnSecondaryBg      = VnPaperDeep
 val vnBtnSecondaryBgDark  = Color(0xFF262A30)
 val vnBtnSecondaryText    = VnInk
-val vnBtnSecondaryTextDark= Color(0xFFD4C9B8)
+val vnBtnSecondaryTextDark= Color(0xFFE7E9EC)
 
 val vnBtnOutlineBorder    = VnLine
 val vnBtnOutlineBorderDark= Color(0xFF3D4148)
 val vnBtnOutlineText      = VnInk
-val vnBtnOutlineTextDark  = Color(0xFFD4C9B8)
+val vnBtnOutlineTextDark  = Color(0xFFE7E9EC)
 
 val vnBtnDangerBg         = VnDanger
 val vnBtnDangerBgDark     = Color(0xFF8C2E22)

@@ -6,13 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.sangyoon.vehiclenote.ui.theme.VnInk
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBody
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBodySm
 import com.sangyoon.vehiclenote.ui.theme.VnTypeMonoTime
@@ -30,6 +29,8 @@ fun InfoRow(
     modifier: Modifier = Modifier,
     mono: Boolean = false,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -37,13 +38,13 @@ fun InfoRow(
         Text(
             text = label,
             style = VnTypeBodySm,
-            color = VnInkMute,
+            color = colorScheme.onSurfaceVariant,
             modifier = Modifier.width(LabelWidth),
         )
         Text(
             text = value,
             style = if (mono) VnTypeMonoTime else VnTypeBody,
-            color = VnInk,
+            color = colorScheme.onSurface,
             modifier = Modifier.weight(1f),
         )
     }

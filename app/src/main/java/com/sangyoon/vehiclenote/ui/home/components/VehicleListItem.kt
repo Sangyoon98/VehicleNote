@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.ui.components.Plate
 import com.sangyoon.vehiclenote.ui.components.PlateSize
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBodySm
 
 @Composable
@@ -60,7 +59,7 @@ fun VehicleListItem(
                     Text(
                         text = sub,
                         style = VnTypeBodySm,
-                        color = VnInkMute,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

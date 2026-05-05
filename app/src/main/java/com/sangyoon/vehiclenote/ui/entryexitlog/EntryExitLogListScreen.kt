@@ -63,11 +63,6 @@ import com.sangyoon.vehiclenote.ui.theme.VnEntryInk
 import com.sangyoon.vehiclenote.ui.theme.VnExit
 import com.sangyoon.vehiclenote.ui.theme.VnExitBg
 import com.sangyoon.vehiclenote.ui.theme.VnExitInk
-import com.sangyoon.vehiclenote.ui.theme.VnInk
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
-import com.sangyoon.vehiclenote.ui.theme.VnLine
-import com.sangyoon.vehiclenote.ui.theme.VnPaper
-import com.sangyoon.vehiclenote.ui.theme.VnPaperDeep
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBody
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBodySm
 import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
@@ -123,7 +118,7 @@ fun EntryExitLogListScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(VnPaper)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues),
         ) {
             // ── 검색 필 ────────────────────────────────────────────────────────
@@ -161,7 +156,7 @@ fun EntryExitLogListScreen(
                         text = if (state.searchQuery.isNotEmpty()) "검색 결과가 없습니다"
                                else "입출차 기록이 없습니다",
                         style = VnTypeBody,
-                        color = VnInkMute,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             } else {
@@ -213,8 +208,8 @@ private fun SearchPill(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(VnPaperDeep)
-            .border(1.dp, VnLine, RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
             .padding(horizontal = 4.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -222,7 +217,7 @@ private fun SearchPill(
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = if (isActive) "검색 닫기" else "뒤로",
-                tint = VnInk,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(20.dp),
             )
         }
@@ -230,7 +225,7 @@ private fun SearchPill(
         Icon(
             Icons.Default.Search,
             contentDescription = null,
-            tint = VnInkMute,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp),
         )
 
@@ -244,8 +239,8 @@ private fun SearchPill(
             BasicTextField(
                 value = query,
                 onValueChange = onQueryChange,
-                textStyle = VnTypeBody.copy(color = VnInk),
-                cursorBrush = SolidColor(VnInk),
+                textStyle = VnTypeBody.copy(color = MaterialTheme.colorScheme.onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
@@ -258,7 +253,7 @@ private fun SearchPill(
                             text = if (isActive) "번호판 검색..."
                                    else "번호판 또는 차주명 검색",
                             style = VnTypeBody,
-                            color = VnInkMute,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     inner()
@@ -273,7 +268,7 @@ private fun SearchPill(
                 Icon(
                     Icons.Default.Close,
                     contentDescription = "지우기",
-                    tint = VnInkMute,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp),
                 )
             }
@@ -290,7 +285,8 @@ private fun SearchPill(
                     Icon(
                         Icons.Default.FileDownload,
                         contentDescription = "내보내기",
-                        tint = if (hasRecords) VnInk else VnInkMute,
+                        tint = if (hasRecords) MaterialTheme.colorScheme.onSurface
+                               else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp),
                     )
                 }
@@ -319,11 +315,15 @@ private fun SummaryStrip(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(text = dateLabel, style = VnTypeCaption, color = VnInkMute)
+            Text(
+                text = dateLabel,
+                style = VnTypeCaption,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Text(
                 text = "총 ${totalCount}건",
                 style = VnTypeHeadline,
-                color = VnInk,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
@@ -355,10 +355,14 @@ private fun TimelineHeader(label: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(VnPaper)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 20.dp, vertical = 6.dp),
     ) {
-        Text(text = label, style = VnTypeCaption, color = VnInkMute)
+        Text(
+            text = label,
+            style = VnTypeCaption,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -385,7 +389,7 @@ private fun TimelineRow(
         Text(
             text = timeText.substring(0, 5), // HH:mm
             style = VnTypeMonoTime,
-            color = VnInkMute,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.width(44.dp),
         )
 

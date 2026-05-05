@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,11 +21,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.sangyoon.vehiclenote.ui.theme.VnInk
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
-import com.sangyoon.vehiclenote.ui.theme.VnLine
-import com.sangyoon.vehiclenote.ui.theme.VnPaperDeep
-import com.sangyoon.vehiclenote.ui.theme.VnSurface
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBodySm
 
 // 통계 수치 전용: 32sp mono/700
@@ -49,10 +45,12 @@ fun StatCard(
     emphasized: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
-    val bgColor   = if (emphasized) VnInk        else VnSurface
-    val textColor = if (emphasized) VnSurface     else VnInk
-    val subColor  = if (emphasized) VnSurface.copy(alpha = 0.65f) else VnInkMute
-    val border    = if (emphasized) null          else BorderStroke(1.dp, VnLine)
+    val colorScheme = MaterialTheme.colorScheme
+    val bgColor   = if (emphasized) colorScheme.primary else colorScheme.surface
+    val textColor = if (emphasized) colorScheme.onPrimary else colorScheme.onSurface
+    val subColor  = if (emphasized) colorScheme.onPrimary.copy(alpha = 0.65f)
+                    else colorScheme.onSurfaceVariant
+    val border    = if (emphasized) null else BorderStroke(1.dp, colorScheme.outline)
     val shape     = RoundedCornerShape(14.dp)
 
     val cardColors = CardDefaults.cardColors(containerColor = bgColor)
