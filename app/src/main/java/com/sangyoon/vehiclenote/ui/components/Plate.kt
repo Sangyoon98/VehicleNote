@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,9 +28,6 @@ import com.sangyoon.vehiclenote.ui.theme.VnEntryInk
 import com.sangyoon.vehiclenote.ui.theme.VnExit
 import com.sangyoon.vehiclenote.ui.theme.VnExitBg
 import com.sangyoon.vehiclenote.ui.theme.VnExitInk
-import com.sangyoon.vehiclenote.ui.theme.VnInk
-import com.sangyoon.vehiclenote.ui.theme.VnLine
-import com.sangyoon.vehiclenote.ui.theme.VnSurface
 import com.sangyoon.vehiclenote.ui.theme.VnTypeMonoTime
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -63,11 +61,19 @@ private data class PlateColors(
     val border: Color = Color.Transparent,
 )
 
-private fun colorsFor(variant: PlateVariant) = when (variant) {
-    PlateVariant.Default -> PlateColors(bg = VnInk,     text = VnSurface)
-    PlateVariant.Entry   -> PlateColors(bg = VnEntryBg, text = VnEntryInk)
-    PlateVariant.Exit    -> PlateColors(bg = VnExitBg,  text = VnExitInk)
-    PlateVariant.Neutral -> PlateColors(bg = VnSurface, text = VnInk, border = VnLine)
+@Composable
+private fun colorsFor(variant: PlateVariant): PlateColors {
+    val colorScheme = MaterialTheme.colorScheme
+    return when (variant) {
+        PlateVariant.Default -> PlateColors(bg = colorScheme.primary, text = colorScheme.onPrimary)
+        PlateVariant.Entry   -> PlateColors(bg = VnEntryBg, text = VnEntryInk)
+        PlateVariant.Exit    -> PlateColors(bg = VnExitBg,  text = VnExitInk)
+        PlateVariant.Neutral -> PlateColors(
+            bg = colorScheme.surface,
+            text = colorScheme.onSurface,
+            border = colorScheme.outline,
+        )
+    }
 }
 
 /**

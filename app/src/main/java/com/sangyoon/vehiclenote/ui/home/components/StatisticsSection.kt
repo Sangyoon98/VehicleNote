@@ -20,9 +20,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sangyoon.vehiclenote.ui.components.StatCard
-import com.sangyoon.vehiclenote.ui.theme.VnInk
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
-import com.sangyoon.vehiclenote.ui.theme.VnPaperDeep
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBodySm
 import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
 import com.sangyoon.vehiclenote.ui.theme.VnTypeMonoTime
@@ -70,7 +67,7 @@ fun StatisticsSection(
                 Text(
                     text = "부서별 현황",
                     style = VnTypeCaption,
-                    color = VnInkMute,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 val maxVal = departmentStats.values.maxOrNull()?.coerceAtLeast(1) ?: 1
                 departmentStats.entries.forEach { (dept, count) ->
@@ -115,14 +112,14 @@ private fun DeptBarRow(
                 .weight(1f)
                 .height(6.dp)
                 .clip(RoundedCornerShape(999.dp))
-                .background(VnPaperDeep),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(fraction.coerceIn(0f, 1f))
                     .height(6.dp)
                     .clip(RoundedCornerShape(999.dp))
-                    .background(VnInk),
+                    .background(MaterialTheme.colorScheme.primary),
             )
         }
 
@@ -130,7 +127,7 @@ private fun DeptBarRow(
         Text(
             text = count.toString(),
             style = VnTypeMonoTime,
-            color = VnInkMute,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.width(28.dp),
         )
     }

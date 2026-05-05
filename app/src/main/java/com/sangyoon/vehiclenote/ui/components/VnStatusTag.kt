@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,18 +17,20 @@ import com.sangyoon.vehiclenote.ui.theme.VnEntryBg
 import com.sangyoon.vehiclenote.ui.theme.VnEntryInk
 import com.sangyoon.vehiclenote.ui.theme.VnExitBg
 import com.sangyoon.vehiclenote.ui.theme.VnExitInk
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
-import com.sangyoon.vehiclenote.ui.theme.VnLineSoft
 import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
 
 enum class TagKind { Entry, Exit, Neutral }
 
 private data class TagColors(val bg: Color, val text: Color)
 
-private fun colorsFor(kind: TagKind) = when (kind) {
-    TagKind.Entry   -> TagColors(bg = VnEntryBg,  text = VnEntryInk)
-    TagKind.Exit    -> TagColors(bg = VnExitBg,   text = VnExitInk)
-    TagKind.Neutral -> TagColors(bg = VnLineSoft, text = VnInkMute)
+@Composable
+private fun colorsFor(kind: TagKind): TagColors {
+    val colorScheme = MaterialTheme.colorScheme
+    return when (kind) {
+        TagKind.Entry   -> TagColors(bg = VnEntryBg, text = VnEntryInk)
+        TagKind.Exit    -> TagColors(bg = VnExitBg, text = VnExitInk)
+        TagKind.Neutral -> TagColors(bg = colorScheme.surfaceVariant, text = colorScheme.onSurfaceVariant)
+    }
 }
 
 /** RecordType → TagKind 변환 헬퍼 */

@@ -8,10 +8,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -67,8 +63,6 @@ import com.sangyoon.vehiclenote.ui.entryexit.components.CameraReticle
 import com.sangyoon.vehiclenote.ui.entryexit.components.CameraStatusBar
 import com.sangyoon.vehiclenote.ui.entryexit.components.ManualInputDialog
 import com.sangyoon.vehiclenote.ui.entryexit.components.PlateConfirmDialog
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
-import com.sangyoon.vehiclenote.ui.theme.VnLineSoft
 import com.sangyoon.vehiclenote.ui.theme.VnTypeMonoTime
 import dagger.hilt.android.EntryPointAccessors
 import java.text.SimpleDateFormat
@@ -217,7 +211,7 @@ fun EntryExitScreen(
                             )
                         }
                         HorizontalDivider(
-                            color = VnLineSoft,
+                            color = MaterialTheme.colorScheme.outlineVariant,
                             modifier = Modifier.padding(top = 4.dp),
                         )
                     }
@@ -267,7 +261,7 @@ private fun RecentRecordRow(
         Text(
             text = formatTimestamp(record.timestamp),
             style = VnTypeMonoTime,
-            color = VnInkMute,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,9 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.sangyoon.vehiclenote.domain.model.Vehicle
 import com.sangyoon.vehiclenote.ui.components.Plate
 import com.sangyoon.vehiclenote.ui.components.PlateSize
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
-import com.sangyoon.vehiclenote.ui.theme.VnLine
-import com.sangyoon.vehiclenote.ui.theme.VnSurface
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBodySm
 import com.sangyoon.vehiclenote.ui.theme.VnTypeMonoTime
 import java.text.SimpleDateFormat
@@ -33,12 +31,14 @@ fun RecentVehicleCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     Card(
         onClick = onClick,
         modifier = modifier.width(140.dp),
-        colors = CardDefaults.cardColors(containerColor = VnSurface),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
         shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, VnLine),
+        border = BorderStroke(1.dp, colorScheme.outline),
     ) {
         Column(
             modifier = Modifier
@@ -52,13 +52,13 @@ fun RecentVehicleCard(
             Text(
                 text = vehicle.ownerName,
                 style = VnTypeBodySm,
-                color = VnInkMute,
+                color = colorScheme.onSurfaceVariant,
                 maxLines = 1,
             )
             Text(
                 text = formatRelativeTime(vehicle.createdAt),
                 style = VnTypeMonoTime,
-                color = VnInkMute,
+                color = colorScheme.onSurfaceVariant,
             )
         }
     }

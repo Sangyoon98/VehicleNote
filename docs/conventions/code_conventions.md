@@ -149,6 +149,11 @@ private fun XxxContent(state: XxxState, onAction: (XxxAction) -> Unit) { ... }
 - Dialog 가시성은 `State`에 `showXxxDialog: Boolean`으로 포함
 - `SideEffect`로 Dialog를 열지 않음
 
+### 3.6 색상 및 다크모드
+- 화면·공통 컴포넌트에서는 라이트 전용 토큰(`VnPaper`, `VnSurface`, `VnInk`, `VnLine` 등)을 직접 배경/텍스트/테두리 색으로 사용하지 않는다.
+- 일반 배경·표면·텍스트·테두리는 `MaterialTheme.colorScheme`의 `background`, `surface`, `surfaceVariant`, `onSurface`, `onSurfaceVariant`, `outline` 계열을 우선 사용한다.
+- 브랜드 버튼, 번호판, 상태 태그처럼 명확한 의미가 있는 컴포넌트는 내부에서 다크모드 대응을 처리해 호출부가 라이트 색상에 고정되지 않게 한다.
+
 ---
 
 ## 4. DI (Hilt) 컨벤션
@@ -209,3 +214,4 @@ fun `loadVehicles 호출 시 Flow로 목록을 반환한다`() { ... }
 |------|------|-----------|
 | 2026-04-11 | 초기 문서 작성 | 기존 코드베이스 분석 기반 |
 | 2026-04-19 | 섹션 2 KDoc 주석 컨벤션 추가 | 전체 코드베이스 KDoc 작성 후 규칙 문서화 |
+| 2026-05-05 | Compose 색상 및 다크모드 사용 규칙 추가 | 다크모드에서 라이트 전용 토큰 직접 사용 방지 |

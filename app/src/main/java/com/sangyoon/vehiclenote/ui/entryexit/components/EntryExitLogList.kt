@@ -22,7 +22,6 @@ import com.sangyoon.vehiclenote.ui.components.Plate
 import com.sangyoon.vehiclenote.ui.components.PlateSize
 import com.sangyoon.vehiclenote.ui.components.VnStatusTag
 import com.sangyoon.vehiclenote.ui.components.toTagKind
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
 import com.sangyoon.vehiclenote.ui.theme.VnTypeMonoTime
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -94,7 +93,7 @@ private fun EntryExitLogItem(
                 Text(
                     text = formatTimestamp(record.timestamp),
                     style = VnTypeMonoTime,
-                    color = VnInkMute,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 

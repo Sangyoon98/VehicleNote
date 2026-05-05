@@ -60,8 +60,6 @@ import com.sangyoon.vehiclenote.ui.home.components.StatisticsSection
 import com.sangyoon.vehiclenote.ui.home.components.VehicleListItem
 import com.sangyoon.vehiclenote.ui.theme.AppTheme
 import com.sangyoon.vehiclenote.ui.theme.VnDanger
-import com.sangyoon.vehiclenote.ui.theme.VnInk
-import com.sangyoon.vehiclenote.ui.theme.VnSurface
 import kotlinx.coroutines.launch
 
 private val SearchBarHeight = 56.dp
@@ -116,8 +114,8 @@ fun HomeScreen(
                 FloatingActionButton(
                     onClick = { viewModel.onAction(HomeAction.AddVehicleClicked) },
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
-                    containerColor = VnInk,
-                    contentColor = VnSurface,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.padding(bottom = bottomNavBarHeight),
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "차량 등록")

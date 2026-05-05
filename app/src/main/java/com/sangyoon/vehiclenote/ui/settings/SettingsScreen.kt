@@ -28,8 +28,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import com.sangyoon.vehiclenote.ui.components.VnLogoMark
-import com.sangyoon.vehiclenote.ui.theme.VnInk
-import com.sangyoon.vehiclenote.ui.theme.VnInkMute
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBody
 import com.sangyoon.vehiclenote.ui.theme.VnTypeBodySm
 import com.sangyoon.vehiclenote.ui.theme.VnTypeCaption
@@ -95,7 +93,7 @@ fun SettingsScreen(
             Text(
                 text = "설정",
                 style = VnTypeTitle,
-                color = VnInk,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),
             )
             // ── 기록 관리 섹션 ─────────────────────────────────────────────────
@@ -137,12 +135,15 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                VnLogoMark(modifier = Modifier.size(20.dp))
+                VnLogoMark(
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "VehicleNote · 차량 출입 관리",
                     style = VnTypeCaption,
-                    color = VnInkMute,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -189,7 +190,7 @@ private fun SectionHeader(title: String) {
     Text(
         text = title,
         style = VnTypeCaption,
-        color = VnInkMute,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
     )
 }
@@ -210,9 +211,9 @@ private fun SettingsItem(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = VnTypeBody, color = VnInk)
+            Text(text = title, style = VnTypeBody, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(2.dp))
-            Text(text = subtitle, style = VnTypeBodySm, color = VnInkMute)
+            Text(text = subtitle, style = VnTypeBodySm, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         trailingContent?.let {
             Spacer(modifier = Modifier.width(8.dp))
