@@ -1,9 +1,13 @@
 package com.sangyoon.ocr
 
 import android.util.Size
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedVisibility
@@ -34,28 +38,39 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * CameraX PreviewView + ML Kit 번호판 인식 Composable.
  * 번호판이 인식되면 해당 위치에 바운딩 박스를 오버레이로 표시하고 2초 후 자동으로 사라진다.
  *
+ * 인식률 개선을 위해:
+ * - 분석 해상도 1280x720 (원거리·움직이는 번호판의 글자 픽셀 확보)
+ * - 리티클 영역에 주기적 AF/AE 측광 (저조도·역광에서 번호판 초점·노출 우선)
+ * - [analysisEnabled]가 false면 프레임 분석을 중단 (확인 다이얼로그 표시 중
+ *   다음 차량 인식 결과가 버려지는 문제 방지 + 배터리 절약)
+ *
  * @param plateRecognizer 번호판 인식기 (PlateRecognizer 구현체)
  * @param onPlateDetected 번호판 인식 시 콜백 (debounce 충족 후에만 호출)
  * @param modifier Modifier
+ * @param analysisEnabled false면 카메라 프리뷰는 유지하되 OCR 분석을 일시 중지
  */
 @Composable
 fun CameraPreviewWithRecognition(
     plateRecognizer: PlateRecognizer,
     onPlateDetected: (String) -> Unit,
     modifier: Modifier = Modifier,
+    analysisEnabled: Boolean = true,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
 
-    // 콜백을 rememberUpdatedState로 감싸 recomposition 시 재설정 방지
+    // 콜백/플래그를 rememberUpdatedState로 감싸 recomposition 시 재설정 방지
     val currentOnPlateDetected by rememberUpdatedState(onPlateDetected)
+    val currentAnalysisEnabled = rememberUpdatedState(analysisEnabled)
 
     // 이미지 정보: 분석 스레드에서 쓰고 메인 스레드에서 읽음 (@Volatile로 가시성 보장)
     val imageInfo = remember {
@@ -74,6 +89,10 @@ fun CameraPreviewWithRecognition(
     var lastDetectedBounds by remember { mutableStateOf<android.graphics.Rect?>(null) }
     var showBounds by remember { mutableStateOf(false) }
 
+    // 바인딩된 카메라 — 주기적 측광에 사용
+    var boundCamera by remember { mutableStateOf<Camera?>(null) }
+    var previewViewRef by remember { mutableStateOf<PreviewView?>(null) }
+
     // 인식 후 2초 표시, fadeOut 후 null 처리
     LaunchedEffect(showBounds) {
         if (showBounds) {
@@ -81,6 +100,29 @@ fun CameraPreviewWithRecognition(
             showBounds = false
             delay(500L) // fadeOut 애니메이션 완료 대기
             lastDetectedBounds = null
+        }
+    }
+
+    // 리티클 영역(중앙 약간 위)에 주기적 AF/AE 측광 — 번호판에 초점·노출을 맞춰
+    // 저조도/역광 환경에서 번호판 영역이 적정 노출로 잡히게 한다.
+    LaunchedEffect(boundCamera) {
+        val camera = boundCamera ?: return@LaunchedEffect
+        while (isActive) {
+            val previewView = previewViewRef
+            if (previewView != null && previewView.width > 0 && previewView.height > 0) {
+                val point = previewView.meteringPointFactory.createPoint(
+                    previewView.width * 0.5f,
+                    previewView.height * RETICLE_CENTER_Y_RATIO,
+                )
+                val action = FocusMeteringAction.Builder(
+                    point,
+                    FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE,
+                )
+                    .setAutoCancelDuration(METERING_INTERVAL_MS, TimeUnit.MILLISECONDS)
+                    .build()
+                runCatching { camera.cameraControl.startFocusAndMetering(action) }
+            }
+            delay(METERING_INTERVAL_MS)
         }
     }
 
@@ -102,6 +144,7 @@ fun CameraPreviewWithRecognition(
                     implementationMode = PreviewView.ImplementationMode.PERFORMANCE
                     scaleType = PreviewView.ScaleType.FILL_CENTER
                 }
+                previewViewRef = previewView
 
                 val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
                 cameraProviderFuture.addListener({
@@ -112,12 +155,25 @@ fun CameraPreviewWithRecognition(
                     }
 
                     val imageAnalysis = ImageAnalysis.Builder()
-                        .setTargetResolution(Size(960, 720))
+                        .setResolutionSelector(
+                            ResolutionSelector.Builder()
+                                .setResolutionStrategy(
+                                    ResolutionStrategy(
+                                        Size(1280, 720),
+                                        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
+                                    )
+                                )
+                                .build()
+                        )
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .setOutputImageRotationEnabled(true)
                         .build()
                         .also { analysis ->
                             analysis.setAnalyzer(analysisExecutor) { imageProxy ->
+                                if (!currentAnalysisEnabled.value) {
+                                    imageProxy.close()
+                                    return@setAnalyzer
+                                }
                                 imageInfo.width = imageProxy.width
                                 imageInfo.height = imageProxy.height
                                 imageInfo.rotation = imageProxy.imageInfo.rotationDegrees
@@ -133,7 +189,7 @@ fun CameraPreviewWithRecognition(
 
                     try {
                         cameraProvider.unbindAll()
-                        cameraProvider.bindToLifecycle(
+                        boundCamera = cameraProvider.bindToLifecycle(
                             lifecycleOwner,
                             CameraSelector.DEFAULT_BACK_CAMERA,
                             preview,
@@ -188,3 +244,9 @@ fun CameraPreviewWithRecognition(
         }
     }
 }
+
+/** 리티클 중심의 세로 위치 비율 — EntryExitScreen의 리티클이 중앙보다 약간 위에 있다 */
+private const val RETICLE_CENTER_Y_RATIO = 0.45f
+
+/** AF/AE 측광 반복 주기 */
+private const val METERING_INTERVAL_MS = 3000L

@@ -88,4 +88,22 @@ class KoreanPlateFilterTest {
     fun `줄바꿈으로 분리된 번호판을 추출한다`() {
         assertEquals("123가4567", KoreanPlateFilter.extractPlate("123가\n4567"))
     }
+
+    @Test
+    fun `일련번호가 0으로 시작하면 번호판이 아니다`() {
+        // 일련번호는 1000~9999만 발급됨 — 전화번호·잘못된 오프셋 매칭 오탐 차단
+        assertNull(KoreanPlateFilter.extractPlate("12가0345"))
+    }
+
+    @Test
+    fun `오인식 보정이 주변 문자를 번호판에 오염시키지 않는다`() {
+        // 'A'를 무조건 4로 바꾸면 "412가3456"이라는 잘못된 번호판이 만들어진다.
+        // 원본 매칭("12가3456")이 보정 매칭보다 우선해야 한다.
+        assertEquals("12가3456", KoreanPlateFilter.extractPlate("A12가3456"))
+    }
+
+    @Test
+    fun `보정 없이 매칭되지 않을 때만 오인식 보정을 적용한다`() {
+        assertEquals("58도2810", KoreanPlateFilter.extractPlate("5B도2810"))
+    }
 }

@@ -11,9 +11,11 @@ import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
 /**
  * Google ML Kit Korean OCR 기반 번호판 인식기.
  *
- * Debounce 전략:
- * - 동일(또는 유사) 번호판이 [REQUIRED_CONSECUTIVE]프레임 연속 인식되어야 결과 전달
- * - 마지막 인식 성공 후 동일 번호판은 [COOLDOWN_MS]동안 재인식 억제 (다른 번호판은 즉시 인식 가능)
+ * 인식 파이프라인:
+ * 1. [LumaFrameEnhancer]가 저조도·저대비 프레임을 대비 보정 (야간·유색 번호판 대응)
+ * 2. [KoreanPlateFilter]가 프레임의 모든 번호판 후보를 신뢰도 순으로 추출
+ * 3. [PlateTracker]가 번호판별 독립 추적으로 확정 (프레임 누락 허용, 다중 번호판 동시 추적)
+ *    — 확정된 번호판은 화면에서 사라질 때까지 쿨다운이 연장되어 반복 확정되지 않는다.
  */
 class PlateRecognizerImpl : PlateRecognizer {
 
@@ -21,15 +23,8 @@ class PlateRecognizerImpl : PlateRecognizer {
         KoreanTextRecognizerOptions.Builder().build()
     )
 
-    private var lastRecognizedPlate: String? = null
-    private var consecutiveCount = 0
-
-    /** 번호판별 마지막 인식 시각 (동일 번호판만 쿨다운 적용) */
-    private val cooldownMap = mutableMapOf<String, Long>()
-
-    private val REQUIRED_CONSECUTIVE = 2
-    private val COOLDOWN_MS = 2000L
-    private val COOLDOWN_MAP_MAX_SIZE = 20
+    private val tracker = PlateTracker()
+    private val frameEnhancer = LumaFrameEnhancer()
 
     @OptIn(ExperimentalGetImage::class)
     override fun recognize(imageProxy: ImageProxy, onResult: (plate: String?, boundingBox: Rect?) -> Unit) {
@@ -40,51 +35,39 @@ class PlateRecognizerImpl : PlateRecognizer {
             return
         }
 
-        val inputImage = InputImage.fromMediaImage(
-            mediaImage,
-            imageProxy.imageInfo.rotationDegrees
-        )
+        val rotation = imageProxy.imageInfo.rotationDegrees
+        val inputImage = frameEnhancer.enhanceIfNeeded(mediaImage, rotation)
+            ?: InputImage.fromMediaImage(mediaImage, rotation)
+
+        // ML Kit 바운딩 박스는 회전 보정된 좌표계 기준 — 중앙 근접도 계산용 프레임 크기도 맞춘다
+        val rotated = rotation == 90 || rotation == 270
+        val frameWidth = if (rotated) mediaImage.height else mediaImage.width
+        val frameHeight = if (rotated) mediaImage.width else mediaImage.height
 
         recognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
                 val now = System.currentTimeMillis()
-                val detection = KoreanPlateFilter.findPlateBounds(
+                val result = KoreanPlateFilter.findPlateCandidates(
                     visionText = visionText,
-                    preferredPlate = lastRecognizedPlate,
-                    ignoredPlates = activeCooldownPlates(now),
+                    ignoredPlates = tracker.activeCooldownPlates(now),
+                    imageWidth = frameWidth,
+                    imageHeight = frameHeight,
                 )
-                val plate = detection?.first
-                val boundingBox = detection?.second
+                // 쿨다운 중인 번호판이 아직 화면에 있으면 쿨다운 연장 (같은 차량 반복 확정 방지)
+                tracker.refreshCooldowns(result.matchedIgnored, now)
 
-                when {
-                    plate == null -> {
-                        lastRecognizedPlate = null
-                        consecutiveCount = 0
-                        onResult(null, null)
-                    }
-
-                    isSameAsLast(plate) -> {
-                        consecutiveCount++
-                        if (consecutiveCount >= REQUIRED_CONSECUTIVE) {
-                            lastRecognizedPlate = null
-                            consecutiveCount = 0
-                            addCooldown(plate, now)
-                            onResult(plate, boundingBox)
-                        } else {
-                            onResult(null, null)
-                        }
-                    }
-
-                    else -> {
-                        lastRecognizedPlate = plate
-                        consecutiveCount = 1
-                        onResult(null, null)
-                    }
+                val tracked = result.candidates.take(MAX_TRACKED_PER_FRAME)
+                val confirmed = tracker.onFrame(tracked.map { it.plate }, now)
+                if (confirmed != null) {
+                    val boundingBox = tracked.firstOrNull {
+                        KoreanPlateFilter.isSimilarPlate(it.plate, confirmed)
+                    }?.boundingBox
+                    onResult(confirmed, boundingBox)
+                } else {
+                    onResult(null, null)
                 }
             }
             .addOnFailureListener {
-                lastRecognizedPlate = null
-                consecutiveCount = 0
                 onResult(null, null)
             }
             .addOnCompleteListener {
@@ -93,29 +76,12 @@ class PlateRecognizerImpl : PlateRecognizer {
     }
 
     override fun close() {
+        tracker.reset()
         recognizer.close()
     }
 
-    /**
-     * 현재 프레임의 번호판이 직전 프레임과 동일(또는 유사)한지 판별.
-     * OCR 1글자 오차를 허용하여 인식률을 높인다.
-     */
-    private fun isSameAsLast(plate: String): Boolean {
-        val last = lastRecognizedPlate ?: return false
-        return KoreanPlateFilter.isSimilarPlate(last, plate)
-    }
-
-    private fun activeCooldownPlates(now: Long): Set<String> {
-        return cooldownMap
-            .filterValues { time -> now - time < COOLDOWN_MS }
-            .keys
-    }
-
-    private fun addCooldown(plate: String, now: Long) {
-        cooldownMap[plate] = now
-        if (cooldownMap.size > COOLDOWN_MAP_MAX_SIZE) {
-            val cutoff = now - COOLDOWN_MS
-            cooldownMap.entries.removeAll { it.value < cutoff }
-        }
+    private companion object {
+        /** 프레임당 추적할 최대 후보 수 — 다중 번호판 프레임 대응 */
+        const val MAX_TRACKED_PER_FRAME = 3
     }
 }

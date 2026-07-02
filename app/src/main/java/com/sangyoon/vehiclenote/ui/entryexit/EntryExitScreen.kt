@@ -148,6 +148,8 @@ fun EntryExitScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {},
+                    // 다이얼로그 처리 중 다음 차량 인식 결과가 버려지지 않도록 분석 일시 중지
+                    analysisEnabled = !state.showPlateConfirmDialog && !state.showManualInputDialog,
                 )
 
                 // 상단 상태바 오버레이
