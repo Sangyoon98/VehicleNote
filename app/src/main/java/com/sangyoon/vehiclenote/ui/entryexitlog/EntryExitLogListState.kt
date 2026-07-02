@@ -20,3 +20,19 @@ data class EntryExitLogListState(
     val isFilteredToday: Boolean = false,
     val isExporting: Boolean = false,
 )
+
+/** 액션에 따른 동기 상태 전이. 비동기 작업 결과 반영은 ViewModel에서 수행한다. */
+fun EntryExitLogListState.reduce(action: EntryExitLogListAction): EntryExitLogListState =
+    when (action) {
+        is EntryExitLogListAction.SearchQueryChanged -> copy(searchQuery = action.query)
+
+        is EntryExitLogListAction.SearchActiveChanged ->
+            copy(
+                isSearchActive = action.active,
+                searchQuery = if (!action.active) "" else searchQuery
+            )
+
+        EntryExitLogListAction.OnExportClicked -> copy(isExporting = true)
+
+        else -> this
+    }

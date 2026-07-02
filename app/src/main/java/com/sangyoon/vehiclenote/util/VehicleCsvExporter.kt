@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import com.sangyoon.vehiclenote.domain.model.Vehicle
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -34,7 +36,7 @@ class VehicleCsvExporter @Inject constructor(
         val HEADERS = listOf("번호판", "차주명", "부서", "전화번호", "차종", "메모", "커스텀필드")
     }
 
-    fun export(vehicles: List<Vehicle>): Uri {
+    suspend fun export(vehicles: List<Vehicle>): Uri = withContext(Dispatchers.IO) {
         val exportsDir = File(context.cacheDir, "exports").also { it.mkdirs() }
         val fileName = "vehicles_${fileTimestamp()}.csv"
         val file = File(exportsDir, fileName)
@@ -49,7 +51,7 @@ class VehicleCsvExporter @Inject constructor(
             }
         }
 
-        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 
     private fun toRow(vehicle: Vehicle): String {

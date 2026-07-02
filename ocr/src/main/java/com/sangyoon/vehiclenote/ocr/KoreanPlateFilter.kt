@@ -1,4 +1,4 @@
-package com.sangyoon.ocr
+package com.sangyoon.vehiclenote.ocr
 
 import android.graphics.Rect
 import com.google.mlkit.vision.text.Text
@@ -12,7 +12,7 @@ import com.google.mlkit.vision.text.Text
  *    — 보정이 주변 잡음 문자를 숫자로 바꿔 번호판을 오염시키는 것을 방지
  * 3. 여러 번호판이 보이면 품질(독립 매칭 여부)과 화면 중앙 근접도로 순위를 매겨 모두 반환
  */
-object KoreanPlateFilter {
+internal object KoreanPlateFilter {
 
     // ML Kit 한국어 OCR에서 흔한 오인식 문자 보정
     private val OCR_CHAR_REPLACEMENTS = mapOf(

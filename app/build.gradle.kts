@@ -80,12 +80,6 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":ocr"))
 
-    // CameraX (EntryPoint 접근용)
-    implementation(libs.camerax.core)
-    implementation(libs.camerax.camera2)
-    implementation(libs.camerax.lifecycle)
-    implementation(libs.camerax.view)
-
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.compose.foundation.layout)

@@ -48,6 +48,28 @@ class AddVehicleUseCaseTest {
     }
 
     @Test
+    fun `차량번호가 비어있으면 실패한다`() = runTest {
+        val vehicle = Vehicle(id = 0, licensePlate = " ", ownerName = "홍길동")
+
+        val result = addVehicleUseCase(vehicle)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
+        assertEquals(0, getAllVehiclesUseCase().first().size)
+    }
+
+    @Test
+    fun `차주명이 비어있으면 실패한다`() = runTest {
+        val vehicle = Vehicle(id = 0, licensePlate = "12가1234", ownerName = "")
+
+        val result = addVehicleUseCase(vehicle)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
+        assertEquals(0, getAllVehiclesUseCase().first().size)
+    }
+
+    @Test
     fun `추가된 차량의 ID를 반환한다`() = runTest {
         // Given
         val vehicle = Vehicle(

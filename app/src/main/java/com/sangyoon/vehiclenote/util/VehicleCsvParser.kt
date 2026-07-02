@@ -5,6 +5,8 @@ import android.net.Uri
 import com.sangyoon.vehiclenote.domain.model.CustomField
 import com.sangyoon.vehiclenote.domain.model.Vehicle
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,7 +31,11 @@ class VehicleCsvParser @Inject constructor(
         val skippedRows: Int    // 필수 필드 누락으로 건너뛴 행 수
     )
 
-    fun parse(uri: Uri): ParseResult {
+    suspend fun parse(uri: Uri): ParseResult = withContext(Dispatchers.IO) {
+        parseInternal(uri)
+    }
+
+    private fun parseInternal(uri: Uri): ParseResult {
         val lines = context.contentResolver.openInputStream(uri)
             ?.bufferedReader(Charsets.UTF_8)
             ?.use { reader ->

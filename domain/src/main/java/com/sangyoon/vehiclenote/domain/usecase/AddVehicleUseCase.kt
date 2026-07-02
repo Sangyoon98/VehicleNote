@@ -7,6 +7,7 @@ import javax.inject.Inject
 /**
  * 새 차량을 등록하는 UseCase.
  *
+ * 차량번호와 차주명은 필수 — 비어 있으면 [IllegalArgumentException] 실패를 반환한다.
  * [VehicleRepository.insertVehicle]을 호출하고 결과를 [Result]로 래핑해 반환한다.
  * 성공 시 [Result.success]에 자동 생성된 id가 담긴다.
  */
@@ -18,6 +19,12 @@ class AddVehicleUseCase @Inject constructor(
      * @return 성공 시 자동 생성된 id, 실패 시 예외를 담은 [Result].
      */
     suspend operator fun invoke(vehicle: Vehicle): Result<Long> {
+        if (vehicle.licensePlate.isBlank()) {
+            return Result.failure(IllegalArgumentException("차량번호는 필수입니다"))
+        }
+        if (vehicle.ownerName.isBlank()) {
+            return Result.failure(IllegalArgumentException("차주명은 필수입니다"))
+        }
         return try {
             val id = repository.insertVehicle(vehicle)
             Result.success(id)

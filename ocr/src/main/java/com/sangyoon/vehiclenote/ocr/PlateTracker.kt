@@ -1,4 +1,4 @@
-package com.sangyoon.ocr
+package com.sangyoon.vehiclenote.ocr
 
 /**
  * 프레임 간 번호판 후보 추적기 (순수 Kotlin — JVM 단위 테스트 가능).
@@ -12,7 +12,7 @@ package com.sangyoon.ocr
  * - 확정된 번호판은 [cooldownMs] 동안 재확정이 억제되고, 화면에 계속 보이면
  *   [refreshCooldowns]로 쿨다운이 연장되어 같은 차량이 떠나기 전까지 반복 확정되지 않는다.
  */
-class PlateTracker(
+internal class PlateTracker(
     private val requiredSightings: Int = 2,
     private val trackExpiryMs: Long = 1500L,
     private val cooldownMs: Long = 3000L,

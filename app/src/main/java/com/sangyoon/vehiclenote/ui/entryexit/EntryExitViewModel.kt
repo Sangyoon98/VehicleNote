@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sangyoon.vehiclenote.domain.usecase.GetEntryExitRecordsUseCase
 import com.sangyoon.vehiclenote.domain.usecase.RecordEntryExitUseCase
+import com.sangyoon.vehiclenote.ocr.PlateRecognizer
 import com.sangyoon.vehiclenote.util.AnalyticsLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -23,13 +24,17 @@ import javax.inject.Inject
  * 저장 시 [RecordEntryExitUseCase]가 마지막 상태를 보고 입차/출차를 자동 토글한다.
  * 전체 기록 목록을 실시간 Flow로 구독해 UI를 자동 갱신한다.
  *
+ * [plateRecognizer]는 close() 후 재사용할 수 없는 리소스이므로 ViewModel이 소유하고
+ * [onCleared]에서 해제한다. (Composable에서 해제하면 화면 재진입 시 닫힌 인스턴스를 쓰게 됨)
+ *
  * 상태: [EntryExitState], 사이드이펙트: [EntryExitSideEffect]
  */
 @HiltViewModel
 class EntryExitViewModel @Inject constructor(
     private val getRecordsUseCase: GetEntryExitRecordsUseCase,
     private val recordEntryExitUseCase: RecordEntryExitUseCase,
-    private val analyticsLogger: AnalyticsLogger
+    private val analyticsLogger: AnalyticsLogger,
+    val plateRecognizer: PlateRecognizer
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EntryExitState())
@@ -88,5 +93,10 @@ class EntryExitViewModel @Inject constructor(
 
     private fun sendSideEffect(effect: EntryExitSideEffect) {
         viewModelScope.launch { _sideEffect.send(effect) }
+    }
+
+    override fun onCleared() {
+        plateRecognizer.close()
+        super.onCleared()
     }
 }

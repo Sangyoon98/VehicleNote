@@ -74,7 +74,7 @@ class VehicleRepositoryImplTest {
     }
 
     @Test
-    fun `searchByLicensePlate는 검색 결과를 Domain으로 변환한다`() = runTest {
+    fun `search는 검색 결과를 Domain으로 변환한다`() = runTest {
         // Given
         val query = "12가"
         val entities = listOf(
@@ -93,10 +93,10 @@ class VehicleRepositoryImplTest {
             )
         )
 
-        coEvery { vehicleDao.searchByLicensePlate(query) } returns flowOf(entities)
+        coEvery { vehicleDao.search(query) } returns flowOf(entities)
 
         // When & Then
-        repository.searchByLicensePlate(query).test {
+        repository.search(query).test {
             val vehicles = awaitItem()
 
             assertEquals(1, vehicles.size)

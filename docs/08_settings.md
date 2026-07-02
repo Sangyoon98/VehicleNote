@@ -140,8 +140,10 @@ settings
 
 ### 가져오기 중복 처리
 
-- `GetVehicleByLicensePlateUseCase`로 번호판 존재 여부 확인
-- **이미 존재하면 skip** (update 아님) → 기존 데이터 보호
+- `ImportVehiclesUseCase(vehicles): ImportResult` — 중복 skip 규칙은 domain에 위치
+  - 번호판 존재 여부 확인 후 **이미 존재하면 skip** (update 아님) → 기존 데이터 보호
+  - 반환: `ImportResult(addedCount, skippedByDuplicate)`
+- ViewModel은 파싱(`VehicleCsvParser`, 내부에서 IO 디스패처 처리) → 확인 다이얼로그 → UseCase 호출만 담당
 - 결과 다이얼로그: "N개 추가됨, M개 건너뜀"
 
 ---

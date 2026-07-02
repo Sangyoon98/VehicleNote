@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.sangyoon.ocr"
+    namespace = "com.sangyoon.vehiclenote.ocr"
     compileSdk = 36
 
     defaultConfig {
@@ -35,8 +35,8 @@ dependencies {
     // Core
     implementation(libs.androidx.core.ktx)
 
-    // CameraX
-    implementation(libs.camerax.core)
+    // CameraX — camera-core는 공개 API(PlateRecognizer.recognize의 ImageProxy)에 노출되므로 api로 전이
+    api(libs.camerax.core)
     implementation(libs.camerax.camera2)
     implementation(libs.camerax.lifecycle)
     implementation(libs.camerax.view)

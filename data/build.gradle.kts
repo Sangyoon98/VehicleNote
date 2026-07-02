@@ -48,8 +48,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
 
     // 테스트 의존성
     androidTestImplementation(libs.androidx.junit)

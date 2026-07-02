@@ -45,22 +45,17 @@ class VehicleDetailViewModel @Inject constructor(
     }
 
     fun onAction(action: VehicleDetailAction) {
+        _state.update { it.reduce(action) }
+
         when (action) {
-            VehicleDetailAction.ShowDeleteDialog -> _state.update { it.copy(showDeleteDialog = true) }
-            VehicleDetailAction.DismissDeleteDialog -> _state.update { it.copy(showDeleteDialog = false) }
-            VehicleDetailAction.DeleteConfirmed -> {
-                _state.update { it.copy(showDeleteDialog = false) }
-                deleteVehicle()
-            }
+            VehicleDetailAction.DeleteConfirmed -> deleteVehicle()
 
             VehicleDetailAction.EditClicked ->
                 viewModelScope.launch {
-                    _sideEffect.send(
-                        VehicleDetailSideEffect.NavigateToEdit(
-                            vehicleId
-                        )
-                    )
+                    _sideEffect.send(VehicleDetailSideEffect.NavigateToEdit(vehicleId))
                 }
+
+            else -> Unit
         }
     }
 

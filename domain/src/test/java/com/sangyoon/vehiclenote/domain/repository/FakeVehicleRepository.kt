@@ -12,8 +12,15 @@ class FakeVehicleRepository : VehicleRepository {
         emit(vehicles.toList())
     }
 
-    override fun searchByLicensePlate(query: String): Flow<List<Vehicle>> = flow {
-        emit(vehicles.filter { it.licensePlate.contains(query, ignoreCase = true) })
+    override fun search(query: String): Flow<List<Vehicle>> = flow {
+        emit(
+            vehicles.filter { vehicle ->
+                vehicle.licensePlate.contains(query, ignoreCase = true) ||
+                    vehicle.ownerName.contains(query, ignoreCase = true) ||
+                    vehicle.department?.contains(query, ignoreCase = true) == true ||
+                    vehicle.phoneNumber?.contains(query, ignoreCase = true) == true
+            }
+        )
     }
 
     override suspend fun getVehicleById(id: Long): Vehicle? {

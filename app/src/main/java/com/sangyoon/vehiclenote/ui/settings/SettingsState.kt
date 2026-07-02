@@ -45,3 +45,45 @@ data class VehicleImportResult(
     val addedCount: Int,
     val skippedByDuplicate: Int
 )
+
+/** 액션에 따른 동기 상태 전이. 비동기 작업 결과 반영은 ViewModel에서 수행한다. */
+fun SettingsState.reduce(action: SettingsAction): SettingsState = when (action) {
+    SettingsAction.OnRetentionPeriodClicked -> copy(showRetentionDialog = true)
+
+    is SettingsAction.OnPeriodSelected ->
+        if (action.period == DataRetentionPeriod.UNLIMITED) {
+            copy(
+                showRetentionDialog = false,
+                showUnlimitedWarningDialog = true,
+                pendingPeriod = DataRetentionPeriod.UNLIMITED
+            )
+        } else {
+            copy(showRetentionDialog = false)
+        }
+
+    SettingsAction.OnRetentionDialogDismissed -> copy(showRetentionDialog = false)
+
+    SettingsAction.OnUnlimitedWarningConfirmed ->
+        copy(showUnlimitedWarningDialog = false, pendingPeriod = null)
+
+    SettingsAction.OnUnlimitedWarningDismissed ->
+        copy(showUnlimitedWarningDialog = false, pendingPeriod = null)
+
+    SettingsAction.OnExportVehiclesClicked -> copy(isExportingVehicles = true)
+
+    is SettingsAction.OnImportFilePicked -> copy(isImportingVehicles = true)
+
+    SettingsAction.OnImportConfirmed ->
+        copy(showImportConfirmDialog = false, isImportingVehicles = true)
+
+    SettingsAction.OnImportDialogDismissed ->
+        copy(
+            showImportConfirmDialog = false,
+            pendingImportVehicles = null,
+            pendingSkippedRows = 0
+        )
+
+    SettingsAction.OnImportResultDismissed -> copy(importResult = null)
+
+    else -> this
+}

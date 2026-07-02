@@ -32,7 +32,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,8 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.sangyoon.ocr.CameraPreviewWithRecognition
-import com.sangyoon.vehiclenote.di.OcrEntryPoint
+import com.sangyoon.vehiclenote.ocr.CameraPreviewWithRecognition
 import com.sangyoon.vehiclenote.domain.model.EntryExitRecord
 import com.sangyoon.vehiclenote.domain.model.RecordType
 import com.sangyoon.vehiclenote.ui.components.Plate
@@ -64,7 +62,6 @@ import com.sangyoon.vehiclenote.ui.entryexit.components.CameraStatusBar
 import com.sangyoon.vehiclenote.ui.entryexit.components.ManualInputDialog
 import com.sangyoon.vehiclenote.ui.entryexit.components.PlateConfirmDialog
 import com.sangyoon.vehiclenote.ui.theme.VnTypeMonoTime
-import dagger.hilt.android.EntryPointAccessors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -90,17 +87,6 @@ fun EntryExitScreen(
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted -> hasCameraPermission = isGranted }
-
-    val plateRecognizer = remember {
-        EntryPointAccessors.fromApplication(
-            context.applicationContext,
-            OcrEntryPoint::class.java
-        ).plateRecognizer()
-    }
-
-    DisposableEffect(plateRecognizer) {
-        onDispose { plateRecognizer.close() }
-    }
 
     LaunchedEffect(Unit) {
         if (!hasCameraPermission) cameraPermissionLauncher.launch(cameraPermission)
@@ -141,7 +127,7 @@ fun EntryExitScreen(
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (hasCameraPermission) {
                 CameraPreviewWithRecognition(
-                    plateRecognizer = plateRecognizer,
+                    plateRecognizer = viewModel.plateRecognizer,
                     onPlateDetected = { plate ->
                         viewModel.onAction(EntryExitAction.PlateDetected(plate))
                     },

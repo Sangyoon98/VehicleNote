@@ -16,3 +16,11 @@ data class VehicleDetailState(
     val error: String? = null,
     val showDeleteDialog: Boolean = false
 )
+
+/** 액션에 따른 동기 상태 전이. 비동기 작업 결과 반영은 ViewModel에서 수행한다. */
+fun VehicleDetailState.reduce(action: VehicleDetailAction): VehicleDetailState = when (action) {
+    VehicleDetailAction.ShowDeleteDialog -> copy(showDeleteDialog = true)
+    VehicleDetailAction.DismissDeleteDialog -> copy(showDeleteDialog = false)
+    VehicleDetailAction.DeleteConfirmed -> copy(showDeleteDialog = false)
+    else -> this
+}

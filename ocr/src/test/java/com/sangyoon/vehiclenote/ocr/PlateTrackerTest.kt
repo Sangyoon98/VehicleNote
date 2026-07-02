@@ -1,4 +1,4 @@
-package com.sangyoon.ocr
+package com.sangyoon.vehiclenote.ocr
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

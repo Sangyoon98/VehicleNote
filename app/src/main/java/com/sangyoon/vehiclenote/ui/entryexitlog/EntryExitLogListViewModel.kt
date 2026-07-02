@@ -7,7 +7,6 @@ import com.sangyoon.vehiclenote.domain.usecase.GetEntryExitRecordsUseCase
 import com.sangyoon.vehiclenote.domain.usecase.SearchEntryExitRecordsUseCase
 import com.sangyoon.vehiclenote.util.CsvExporter
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +16,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -56,19 +54,13 @@ class EntryExitLogListViewModel @Inject constructor(
     }
 
     fun onAction(action: EntryExitLogListAction) {
-        when (action) {
-            is EntryExitLogListAction.SearchQueryChanged -> {
-                _state.update { it.copy(searchQuery = action.query) }
-                loadRecords(action.query)
-            }
+        _state.update { it.reduce(action) }
 
-            is EntryExitLogListAction.SearchActiveChanged -> {
-                _state.update { it.copy(isSearchActive = action.active) }
-                if (!action.active) {
-                    _state.update { it.copy(searchQuery = "") }
-                    loadRecords("")
-                }
-            }
+        when (action) {
+            is EntryExitLogListAction.SearchQueryChanged -> loadRecords(action.query)
+
+            is EntryExitLogListAction.SearchActiveChanged ->
+                if (!action.active) loadRecords("")
 
             is EntryExitLogListAction.RecordClicked -> {
                 viewModelScope.launch {
@@ -76,20 +68,19 @@ class EntryExitLogListViewModel @Inject constructor(
                 }
             }
 
-            EntryExitLogListAction.OnExportClicked -> {
-                viewModelScope.launch {
-                    _state.update { it.copy(isExporting = true) }
-                    runCatching {
-                        withContext(Dispatchers.IO) {
-                            csvExporter.export(_state.value.records)
-                        }
-                    }.onSuccess { uri ->
-                        val fileName = "entry_exit_${fileTimestamp()}.csv"
-                        _sideEffect.send(EntryExitLogListSideEffect.ShareFile(uri, fileName))
-                    }.also {
-                        _state.update { it.copy(isExporting = false) }
-                    }
-                }
+            EntryExitLogListAction.OnExportClicked -> exportRecords()
+        }
+    }
+
+    private fun exportRecords() {
+        viewModelScope.launch {
+            runCatching {
+                csvExporter.export(_state.value.records)
+            }.onSuccess { uri ->
+                val fileName = "entry_exit_${fileTimestamp()}.csv"
+                _sideEffect.send(EntryExitLogListSideEffect.ShareFile(uri, fileName))
+            }.also {
+                _state.update { it.copy(isExporting = false) }
             }
         }
     }

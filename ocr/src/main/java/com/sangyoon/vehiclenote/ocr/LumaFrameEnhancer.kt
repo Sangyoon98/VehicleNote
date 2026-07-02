@@ -1,4 +1,4 @@
-package com.sangyoon.ocr
+package com.sangyoon.vehiclenote.ocr
 
 import android.graphics.Bitmap
 import android.graphics.ImageFormat

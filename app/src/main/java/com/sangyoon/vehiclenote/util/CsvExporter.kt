@@ -6,6 +6,8 @@ import androidx.core.content.FileProvider
 import com.sangyoon.vehiclenote.domain.model.EntryExitRecord
 import com.sangyoon.vehiclenote.domain.model.RecordType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -35,7 +37,7 @@ class CsvExporter @Inject constructor(
      * @param records 내보낼 입출차 기록 목록.
      * @return FileProvider가 발급한 공유용 콘텐츠 Uri.
      */
-    fun export(records: List<EntryExitRecord>): Uri {
+    suspend fun export(records: List<EntryExitRecord>): Uri = withContext(Dispatchers.IO) {
         val exportsDir = File(context.cacheDir, "exports").also { it.mkdirs() }
         val fileName = "entry_exit_${fileTimestamp()}.csv"
         val file = File(exportsDir, fileName)
@@ -53,7 +55,7 @@ class CsvExporter @Inject constructor(
             }
         }
 
-        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 
     /**

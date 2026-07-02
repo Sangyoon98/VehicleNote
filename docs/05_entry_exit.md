@@ -106,11 +106,13 @@
 ```
 
 ### OCR 연동
-- `PlateRecognizer`는 `OcrEntryPoint` (Hilt EntryPoint)로 접근 → `ocr` 모듈의 `PlateRecognizerImpl`
+- `PlateRecognizer`는 `EntryExitViewModel`이 생성자 주입으로 소유하고 `onCleared()`에서 해제
+  - Hilt 비스코프 제공(`OcrModule`) — close() 후 재사용 불가한 ML Kit 리소스이므로 싱글톤 금지
+  - Screen은 `viewModel.plateRecognizer`를 `CameraPreviewWithRecognition`에 전달만 한다
 - `CameraPreviewWithRecognition`에서 프레임마다 `onPlateDetected` 콜백 발화
 - `PlateDetected` Action은 다이얼로그가 이미 표시 중이면 무시 (중복 방지)
 - 다이얼로그(확인/수동입력) 표시 중에는 `analysisEnabled=false`로 프레임 분석 자체를 일시 중지 — 다음 차량 인식 결과가 버려지며 쿨다운만 소모되는 문제 방지
-- `DisposableEffect`로 화면 이탈 시 `plateRecognizer.close()` 호출
+- `ocr` 모듈 공개 API는 `PlateRecognizer`/`PlateRecognizerImpl`/`CameraPreviewWithRecognition`뿐이며, 나머지(`KoreanPlateFilter`, `PlateTracker`, `LumaFrameEnhancer`)는 internal
 
 **인식 파이프라인 (`ocr` 모듈)**
 
