@@ -1,6 +1,6 @@
 # 차량 상세 화면 (VehicleDetail)
 
-> 관련 파일: `app/.../ui/detail/`
+> 관련 파일: `feature/vehicle/.../feature/vehicle/detail/`
 
 ---
 
@@ -95,7 +95,7 @@ vehicle_detail/{vehicleId}  (vehicleId: Long)
 - `DeleteConfirmed` → `DeleteVehicleUseCase` 호출 → 성공 시 `NavigateBack`
 
 ### 컴포넌트
-- `VehicleDetailContent` (`app/.../ui/detail/components/`)
+- `VehicleDetailContent` (`feature/vehicle/.../detail/components/`)
 - `ImageViewerDialog`: `telephoto` 라이브러리의 `ZoomableAsyncImage` 사용 (핀치줌 지원)
 - `PhotoSection`: Coil `AsyncImage`로 썸네일, 탭 시 `ImageViewerDialog` 표시
 

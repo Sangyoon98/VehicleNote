@@ -1,6 +1,6 @@
 # 설정 화면 (Settings)
 
-> 관련 파일: `app/.../ui/settings/`, `app/.../util/VehicleCsvExporter.kt`, `app/.../util/VehicleCsvParser.kt`
+> 관련 파일: `feature/settings/` (화면 + VehicleCsvExporter/Parser)
 
 ---
 
@@ -140,8 +140,10 @@ settings
 
 ### 가져오기 중복 처리
 
-- `GetVehicleByLicensePlateUseCase`로 번호판 존재 여부 확인
-- **이미 존재하면 skip** (update 아님) → 기존 데이터 보호
+- `ImportVehiclesUseCase(vehicles): ImportResult` — 중복 skip 규칙은 domain에 위치
+  - 번호판 존재 여부 확인 후 **이미 존재하면 skip** (update 아님) → 기존 데이터 보호
+  - 반환: `ImportResult(addedCount, skippedByDuplicate)`
+- ViewModel은 파싱(`VehicleCsvParser`, 내부에서 IO 디스패처 처리) → 확인 다이얼로그 → UseCase 호출만 담당
 - 결과 다이얼로그: "N개 추가됨, M개 건너뜀"
 
 ---
@@ -153,8 +155,7 @@ settings
 
 ### UseCase (차량 CSV)
 - `GetAllVehiclesUseCase(): Flow<List<Vehicle>>` — 내보내기용 스냅샷
-- `AddVehicleUseCase(vehicle): Result<Long>` — 가져오기 시 1건씩 삽입
-- `GetVehicleByLicensePlateUseCase(plate): Vehicle?` — 중복 체크
+- `ImportVehiclesUseCase(vehicles): ImportResult` — 중복 skip + 일괄 등록
 
 ### DAO 추가 쿼리
 ```sql

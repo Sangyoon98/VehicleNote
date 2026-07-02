@@ -1,6 +1,6 @@
 # 입출차 관리 화면 (EntryExit)
 
-> 관련 파일: `app/.../ui/entryexit/`, `ocr/`
+> 관련 파일: `feature/entryexit/`, `core/ocr/`
 
 ---
 
@@ -106,14 +106,34 @@
 ```
 
 ### OCR 연동
-- `PlateRecognizer`는 `OcrEntryPoint` (Hilt EntryPoint)로 접근 → `ocr` 모듈의 `PlateRecognizerImpl`
+- `PlateRecognizer`는 `EntryExitViewModel`이 생성자 주입으로 소유하고 `onCleared()`에서 해제
+  - Hilt 비스코프 제공(`OcrModule`) — close() 후 재사용 불가한 ML Kit 리소스이므로 싱글톤 금지
+  - Screen은 `viewModel.plateRecognizer`를 `CameraPreviewWithRecognition`에 전달만 한다
 - `CameraPreviewWithRecognition`에서 프레임마다 `onPlateDetected` 콜백 발화
 - `PlateDetected` Action은 다이얼로그가 이미 표시 중이면 무시 (중복 방지)
-- `DisposableEffect`로 화면 이탈 시 `plateRecognizer.close()` 호출
-- `KoreanPlateFilter`는 `12가1234`, `123가1234`, `서울12가1234` 등 한국 번호판 규격 후보만 추출
-- 다른 문구와 붙어 있는 후보는 `차량번호`, `번호판`, `차번` 라벨이 있는 경우만 허용하고, 일반 문장 속 혼합 텍스트는 오탐으로 제외
-- 여러 번호판 후보가 동시에 보이면 직전 프레임에서 추적 중인 후보를 유지하고, 신규 후보는 화면 중앙에 가까운 번호판을 우선 선택
-- 인식 성공 후 동일 번호판은 쿨다운에서 제외하지만, 다른 번호판 후보는 즉시 다음 인식 대상으로 선택 가능
+- 다이얼로그(확인/수동입력) 표시 중에는 `analysisEnabled=false`로 프레임 분석 자체를 일시 중지 — 다음 차량 인식 결과가 버려지며 쿨다운만 소모되는 문제 방지
+- `ocr` 모듈 공개 API는 `PlateRecognizer`/`PlateRecognizerImpl`/`CameraPreviewWithRecognition`뿐이며, 나머지(`KoreanPlateFilter`, `PlateTracker`, `LumaFrameEnhancer`)는 internal
+
+**인식 파이프라인 (`ocr` 모듈)**
+
+1. **카메라 입력** (`CameraPreviewWithRecognition`)
+   - 분석 해상도 1280x720 (`ResolutionSelector`) — 원거리·움직이는 번호판의 글자 픽셀 확보
+   - 리티클 영역(중앙 약간 위)에 3초 주기 AF/AE 측광 — 저조도·역광에서 번호판 초점·노출 우선
+2. **저조도 보정** (`LumaFrameEnhancer`)
+   - 프레임 휘도 히스토그램(서브샘플링)으로 저조도/저대비 프레임만 선별
+   - Y 플레인을 p5~p95 선형 스트레치한 그레이스케일로 변환해 ML Kit에 전달
+   - 색상 정보를 버리므로 전기차(파랑)·영업용(노랑) 등 유색 번호판도 배경색과 무관
+3. **후보 추출** (`KoreanPlateFilter.findPlateCandidates`)
+   - `12가1234`, `123가1234`, `서울12가1234`, `임1816` 등 한국 번호판 규격 후보만 추출 (일련번호는 1000~9999만 발급되므로 첫 자리 0 제외)
+   - 원본 텍스트 매칭 우선, OCR 오인식 문자 보정(O→0 등)은 폴백으로만 적용 — 보정이 주변 문자를 오염시키는 오탐 방지
+   - 두 줄 번호판 대응: 인접 블록 텍스트를 정방향·역방향으로 병합해 매칭
+   - 다른 문구와 붙어 있는 후보는 `차량번호`, `번호판`, `차번` 라벨이 있는 경우만 허용
+   - 품질(독립 매칭) → 화면 중앙 근접도 순으로 정렬된 후보 목록 반환
+4. **프레임 간 추적** (`PlateTracker`)
+   - 번호판별 독립 추적: 1.5초 이내 2회 관측 시 확정 (프레임 누락 허용 — 움직이는 번호판 대응)
+   - 한 프레임에 여러 번호판이 보이면 최대 3개를 동시 추적, 순차 확정
+   - 1글자 오차 변형은 같은 번호판으로 묶고 확정 시 다수 관측 변형을 반환
+   - 확정된 번호판은 3초 쿨다운, 화면에 계속 보이면 쿨다운 연장 (같은 차량 반복 확정 방지 — 다른 번호판은 즉시 인식 가능)
 
 ### 도메인 모델
 ```kotlin

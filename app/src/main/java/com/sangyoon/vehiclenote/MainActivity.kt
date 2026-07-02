@@ -13,29 +13,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.sangyoon.vehiclenote.domain.usecase.PurgeOldRecordsUseCase
 import com.sangyoon.vehiclenote.navigation.NavGraph
 import com.sangyoon.vehiclenote.navigation.Screen
-import com.sangyoon.vehiclenote.ui.components.VnBottomTabs
-import com.sangyoon.vehiclenote.ui.theme.AppTheme
+import com.sangyoon.vehiclenote.ui.VnBottomTabs
+import com.sangyoon.vehiclenote.core.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var purgeOldRecordsUseCase: PurgeOldRecordsUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        lifecycleScope.launch { purgeOldRecordsUseCase() }
         setContent {
             AppTheme {
                 val navController = rememberNavController()

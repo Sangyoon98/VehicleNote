@@ -21,6 +21,11 @@ dependencyResolutionManagement {
 
 rootProject.name = "VehicleNote"
 include(":app")
-include(":domain")
-include(":data")
-include(":ocr")
+include(":core:domain")
+include(":core:data")
+include(":core:ocr")
+include(":core:ui")
+include(":core:analytics")
+include(":feature:vehicle")
+include(":feature:entryexit")
+include(":feature:settings")

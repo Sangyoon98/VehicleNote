@@ -1,6 +1,6 @@
 # 차량 등록 화면 (AddVehicle)
 
-> 관련 파일: `app/.../ui/add/`
+> 관련 파일: `feature/vehicle/.../feature/vehicle/add/`
 
 ---
 
@@ -104,6 +104,8 @@ licensePlate.isBlank() → licensePlateError = "차량번호를 입력해주세�
 ownerName.isBlank() → ownerNameError = "차주명을 입력해주세요"
 둘 다 통과 시 → AddVehicleUseCase 호출
 ```
+- 필수 필드 규칙은 domain에도 존재: `AddVehicleUseCase`/`UpdateVehicleUseCase`가
+  차량번호·차주명이 비어 있으면 `IllegalArgumentException` 실패를 반환 (UI 검사는 UX용, domain 검사가 최종 방어선)
 
 ### 사진 흐름
 1. `PhotoClicked` → `showPhotoSourceDialog = true`
@@ -122,4 +124,4 @@ ownerName.isBlank() → ownerNameError = "차주명을 입력해주세요"
 - 갤러리: API 33+ `PickVisualMedia`, 구버전 `GetContent("image/*")`
 
 ### UseCase
-- `AddVehicleUseCase(vehicle: Vehicle): Result<Unit>`
+- `AddVehicleUseCase(vehicle: Vehicle): Result<Long>` — 필수 필드 검증 포함, 성공 시 생성된 id 반환

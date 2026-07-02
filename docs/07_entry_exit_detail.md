@@ -1,6 +1,6 @@
 # 입출차 상세 화면 (EntryExitDetail)
 
-> 관련 파일: `app/.../ui/entryexitdetail/`
+> 관련 파일: `feature/entryexit/.../feature/entryexit/detail/`
 
 ---
 

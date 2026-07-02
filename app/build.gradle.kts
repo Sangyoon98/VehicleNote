@@ -75,16 +75,14 @@ android {
 }
 
 dependencies {
-    // 모듈 의존성
-    implementation(project(":domain"))
-    implementation(project(":data"))
-    implementation(project(":ocr"))
-
-    // CameraX (EntryPoint 접근용)
-    implementation(libs.camerax.core)
-    implementation(libs.camerax.camera2)
-    implementation(libs.camerax.lifecycle)
-    implementation(libs.camerax.view)
+    // 모듈 의존성 — app은 조립(composition root)만 담당
+    implementation(project(":core:domain"))
+    implementation(project(":core:data"))   // DI 모듈(Database/Repository) 조립용
+    implementation(project(":core:ocr"))    // OcrModule 바인딩용
+    implementation(project(":core:ui"))     // AppTheme
+    implementation(project(":feature:vehicle"))
+    implementation(project(":feature:entryexit"))
+    implementation(project(":feature:settings"))
 
     // Hilt
     implementation(libs.hilt.android)
@@ -92,24 +90,19 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
-    // Room
+    // Room (DatabaseModule 조립)
     implementation(libs.androidx.room.ktx)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
 
-    // Icons
+    // Icons (VnBottomTabs)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.coil.compose)
-    implementation(libs.telephoto.zoomable.image.coil)
 
-    // DataStore
+    // DataStore (DataStoreModule 조립)
     implementation(libs.androidx.datastore.preferences)
 
-    // Google Fonts (Inter + JetBrains Mono)
-    implementation(libs.androidx.compose.ui.text.google.fonts)
-
-    // Firebase
+    // Firebase (google-services 플러그인은 app에만 적용 가능)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
 
