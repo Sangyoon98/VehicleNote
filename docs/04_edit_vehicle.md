@@ -1,6 +1,6 @@
 # 차량 수정 화면 (EditVehicle)
 
-> 관련 파일: `app/.../ui/edit/`
+> 관련 파일: `feature/vehicle/.../feature/vehicle/edit/`
 
 ---
 

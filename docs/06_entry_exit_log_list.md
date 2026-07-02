@@ -1,6 +1,6 @@
 # 입출차 기록 목록 화면 (EntryExitLogList)
 
-> 관련 파일: `app/.../ui/entryexitlog/`
+> 관련 파일: `feature/entryexit/.../feature/entryexit/log/`
 
 ---
 

@@ -17,8 +17,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sangyoon.vehiclenote.navigation.NavGraph
 import com.sangyoon.vehiclenote.navigation.Screen
-import com.sangyoon.vehiclenote.ui.components.VnBottomTabs
-import com.sangyoon.vehiclenote.ui.theme.AppTheme
+import com.sangyoon.vehiclenote.ui.VnBottomTabs
+import com.sangyoon.vehiclenote.core.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

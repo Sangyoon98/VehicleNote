@@ -1,6 +1,6 @@
 # 홈 화면 (Home)
 
-> 관련 파일: `app/.../ui/home/`
+> 관련 파일: `feature/vehicle/.../feature/vehicle/home/`
 
 ---
 

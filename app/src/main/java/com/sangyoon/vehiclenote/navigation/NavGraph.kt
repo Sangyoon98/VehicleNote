@@ -11,14 +11,14 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.sangyoon.vehiclenote.ui.add.AddVehicleScreen
-import com.sangyoon.vehiclenote.ui.detail.VehicleDetailScreen
-import com.sangyoon.vehiclenote.ui.edit.EditVehicleScreen
-import com.sangyoon.vehiclenote.ui.entryexit.EntryExitScreen
-import com.sangyoon.vehiclenote.ui.entryexitdetail.EntryExitDetailScreen
-import com.sangyoon.vehiclenote.ui.entryexitlog.EntryExitLogListScreen
-import com.sangyoon.vehiclenote.ui.home.HomeScreen
-import com.sangyoon.vehiclenote.ui.settings.SettingsScreen
+import com.sangyoon.vehiclenote.feature.vehicle.add.AddVehicleScreen
+import com.sangyoon.vehiclenote.feature.vehicle.detail.VehicleDetailScreen
+import com.sangyoon.vehiclenote.feature.vehicle.edit.EditVehicleScreen
+import com.sangyoon.vehiclenote.feature.entryexit.EntryExitScreen
+import com.sangyoon.vehiclenote.feature.entryexit.detail.EntryExitDetailScreen
+import com.sangyoon.vehiclenote.feature.entryexit.log.EntryExitLogListScreen
+import com.sangyoon.vehiclenote.feature.vehicle.home.HomeScreen
+import com.sangyoon.vehiclenote.feature.settings.SettingsScreen
 
 private const val TRANSITION_DURATION = 300
 

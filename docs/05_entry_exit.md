@@ -1,6 +1,6 @@
 # 입출차 관리 화면 (EntryExit)
 
-> 관련 파일: `app/.../ui/entryexit/`, `ocr/`
+> 관련 파일: `feature/entryexit/`, `core/ocr/`
 
 ---
 

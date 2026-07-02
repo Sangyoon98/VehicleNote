@@ -1,6 +1,6 @@
 # 차량 등록 화면 (AddVehicle)
 
-> 관련 파일: `app/.../ui/add/`
+> 관련 파일: `feature/vehicle/.../feature/vehicle/add/`
 
 ---
 

@@ -1,6 +1,6 @@
 # 설정 화면 (Settings)
 
-> 관련 파일: `app/.../ui/settings/`, `app/.../util/VehicleCsvExporter.kt`, `app/.../util/VehicleCsvParser.kt`
+> 관련 파일: `feature/settings/` (화면 + VehicleCsvExporter/Parser)
 
 ---
 
@@ -155,8 +155,7 @@ settings
 
 ### UseCase (차량 CSV)
 - `GetAllVehiclesUseCase(): Flow<List<Vehicle>>` — 내보내기용 스냅샷
-- `AddVehicleUseCase(vehicle): Result<Long>` — 가져오기 시 1건씩 삽입
-- `GetVehicleByLicensePlateUseCase(plate): Vehicle?` — 중복 체크
+- `ImportVehiclesUseCase(vehicles): ImportResult` — 중복 skip + 일괄 등록
 
 ### DAO 추가 쿼리
 ```sql
